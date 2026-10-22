@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>과일 느낌 추천</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-beige: #F7F4EB;
+            --card-beige: #FFFDF9;
+            --soft-brown: #7A6855;
+            --text-dark: #4A3E3D;
+            --accent-green: #7CB342;
+            --accent-red: #E53935;
+            --border-color: #E2DBCB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #D9D2C5;
+            font-family: 'Gowun Batang', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        /* 핸드폰 프레임 */
+        .phone-container {
+            width: 100%;
+            max-width: 390px;
+            height: 800px;
+            background-color: var(--bg-beige);
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 12px #333;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 핸드폰 상단 노치 바 */
+        .phone-header {
+            height: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 12px;
+            font-family: 'Nanum Gothic', sans-serif;
+            color: #888;
+            z-index: 10;
+        }
+
+        /* 화면 컨테이너 */
+        .screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* 1. 시작 화면 */
+        #start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+            padding: 20px 10px 30px 10px;
+        }
+
+        .main-title-box {
+            background-color: var(--card-beige);
+            border: 2px dashed var(--soft-brown);
+            border-radius: 25px;
+            padding: 20px 30px;
+            text-align: center;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.03);
+            margin: 10px 0 20px 0;
+        }
+
+        .main-title-box h1 {
+            font-size: 26px;
+            color: var(--soft-brown);
+            line-height: 1.4;
+            font-weight: 700;
+        }
+
+        .fruit-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .fruit-card {
+            background: var(--card-beige);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.03);
+        }
+
+        .fruit-card:active {
+            transform: scale(0.95);
+            background-color: #F0EAE1;
+        }
+
+        .fruit-card .icon {
+            font-size: 38px;
+            margin-bottom: 8px;
+        }
+
+        .fruit-card span {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .hint-text {
+            font-size: 13px;
+            color: #8C7B6B;
+            text-align: center;
+            margin-top: 10px;
+            font-family: 'Nanum Gothic', sans-serif;
+        }
+
+        /* 2. 결과 추천 화면 */
+        #result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-btn {
+            align-self: flex-start;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: var(--soft-brown);
+            cursor: pointer;
+            padding: 5px 0;
+            margin-bottom: 10px;
+            font-family: 'Gowun Batang', serif;
+        }
+
+        .mood-badge {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin: 10px 0 5px 0;
+            border-bottom: 2px solid var(--soft-brown);
+            padding-bottom: 5px;
+        }
+
+        .fruit-sub-title {
+            font-size: 16px;
+            color: var(--soft-brown);
+            margin-bottom: 20px;
+        }
+
+        .clothes-container {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .clothes-card {
+            flex: 1;
+            background-color: var(--card-beige);
+            border: 2px solid var(--soft-brown);
+            border-radius: 18px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .clothes-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .clothes-card img {
+            width: 100%;
+            height: 165px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .clothes-card .item-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 4px;
+            word-break: keep-all;
+            line-height: 1.3;
+        }
+
+        .clothes-card .item-tag {
+            font-size: 11px;
+            color: #8C7B6B;
+            font-family: 'Nanum Gothic', sans-serif;
+            text-align: center;
+            background-color: #F0EAE1;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-top: auto;
+        }
+
+        .warm-message {
+            font-size: 15px;
+            text-align: center;
+            color: var(--text-dark);
+            line-height: 1.5;
+            margin: 5px 0 15px 0;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 12px 18px;
+            border-radius: 18px;
+            width: 100%;
+            box-shadow: inset 0 0 0 1px rgba(122, 104, 85, 0.15);
+        }
+
+        .link-btn {
+            width: 100%;
+            background-color: #03CF5D; /* 네이버 대표 초록색 */
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Nanum Gothic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(3, 207, 93, 0.3);
+            text-decoration: none;
+            margin-top: auto;
+        }
+
+        .link-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <!-- 상단 바 -->
+        <div class="phone-header">
+            <span>9:41</span>
+            <div>
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi" style="margin: 0 4px;"></i>
+                <i class="fa-solid fa-battery-full"></i>
+            </div>
+        </div>
+
+        <!-- 1. 시작 화면 -->
+        <div class="screen" id="start-screen">
+            <div style="width: 100%; text-align: center;">
+                <div class="main-title-box">
+                    <h1>오늘의 느낌<br>선택 하기</h1>
+                </div>
+            </div>
+
+            <div class="fruit-grid">
+                <!-- 수박 -->
+                <div class="fruit-card" onclick="showResult('watermelon')">
+                    <span class="icon">🍉</span>
+                    <span>수박</span>
+                </div>
+                <!-- 샤인머스캣 -->
+                <div class="fruit-card" onclick="showResult('shinemuscat')">
+                    <span class="icon">🍇</span>
+                    <span>샤인머스캣</span>
+                </div>
+                <!-- 귤 -->
+                <div class="fruit-card" onclick="showResult('tangerine')">
+                    <span class="icon">🍊</span>
+                    <span>귤</span>
+                </div>
+                <!-- 사과 -->
+                <div class="fruit-card" onclick="showResult('apple')">
+                    <span class="icon">🍎</span>
+                    <span>사과</span>
+                </div>
+                <!-- 복숭아 -->
+                <div class="fruit-card" onclick="showResult('peach')">
+                    <span class="icon">🍑</span>
+                    <span>복숭아</span>
+                </div>
+                <!-- 딸기 -->
+                <div class="fruit-card" onclick="showResult('strawberry')">
+                    <span class="icon">🍓</span>
+                    <span>딸기</span>
+                </div>
+                <!-- 키위 -->
+                <div class="fruit-card" onclick="showResult('kiwi')" style="grid-column: span 3; width: 60%; justify-self: center;">
+                    <span class="icon">🥝</span>
+                    <span>키위</span>
+                </div>
+            </div>
+
+            <p class="hint-text">오늘 내 기분과 가장 닮은 과일을 눌러보세요!</p>
+        </div>
+
+        <!-- 2. 결과 추천 화면 -->
+        <div class="screen" id="result-screen">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fa-solid fa-chevron-left"></i> 다시 선택하기
+            </button>
+
+            <!-- 편안함 / 수박, 샤인머스캣 -->
+            <div class="mood-badge" id="res-mood">편 안 함</div>
+            <div class="fruit-sub-title" id="res-fruits">복숭아 · 키위</div>
+
+            <!-- 옷 카드 목록 -->
+            <div class="clothes-container">
+                <div class="clothes-card">
+                    <img id="img-1" src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400" alt="옷 추천 1">
+                    <div class="item-title" id="title-1">편안한 오버핏 후드티</div>
+                    <div class="item-tag" id="tag-1">원마일 이지 룩</div>
+                </div>
+                <div class="clothes-card">
+                    <img id="img-2" src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=400" alt="옷 추천 2">
+                    <div class="item-title" id="title-2">소프트 밴딩 조거팬츠</div>
+                    <div class="item-tag" id="tag-2">칠(Chill) 데일리 핏</div>
+                </div>
+            </div>
+
+            <!-- 따뜻한 추천 문구 -->
+            <div class="warm-message" id="res-message">
+                "부담 없이 편안하고 릴렉스한 하루를 보내세요."
+            </div>
+
+            <!-- 네이버 쇼핑 연결 버튼 -->
+            <a href="#" target="_blank" class="link-btn" id="naver-link">
+                <i class="fa-bold fa-N" style="font-family: sans-serif; font-weight: 900;">N</i> 옷 링크 (네이버 쇼핑)
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 편안하고 유연한 이지웨어/원마일웨어 중심 스타일 데이터베이스
+        const fruitData = {
+            peach: {
+                mood: "편 안 함",
+                fruits: "복숭아 · 키위",
+                message: "부담 없이 편안하고 릴렉스한 하루를 보내세요.",
+                item1: { title: "오버핏 맨투맨 & 후드", tag: "이지 원마일웨어", img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=400", query: "오버핏 핑크 맨투맨" },
+                item2: { title: "소프트 코튼 조거 팬츠", tag: "편안한 트레이닝", img: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=400", query: "크림 코튼 조거팬츠" }
+            },
+            watermelon: {
+                mood: "시 원 함",
+                fruits: "수박 · 샤인머스캣",
+                message: "가볍고 시원하게 바람 통하는 편안한 룩!",
+                item1: { title: "루즈핏 오버 반팔티", tag: "시원한 박스타입", img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400", query: "오버핏 반팔티" },
+                item2: { title: "쿨링 밴딩 숏 팬츠", tag: "가벼운 워크 룩", img: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400", query: "밴딩 숏팬츠" }
+            },
+            shinemuscat: {
+                mood: "청 량 함",
+                fruits: "샤인머스캣 · 키위",
+                message: "산뜻하게 툭 걸쳐 입기 좋은 룩이에요.",
+                item1: { title: "루즈 오버 체크 셔츠", tag: "가벼운 아우터 레이어드", img: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400", query: "루즈핏 체크 셔츠" },
+                item2: { title: "와이드 밴딩 치노 팬츠", tag: "편안한 여유 핏", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400", query: "밴딩 와이드 팬츠" }
+            },
+            tangerine: {
+                mood: "에 너 지 넘 춤",
+                fruits: "귤 · 레몬",
+                message: "활동하기 좋고 산뜻한 데일리 룩!",
+                item1: { title: "크루넥 트레이닝 집업", tag: "캐주얼 비타민", img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400", query: "오렌지 집업 맨투맨" },
+                item2: { title: "스포티 밴딩 쇼츠", tag: "액티브 칠 룩", img: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400", query: "스포티 쇼츠" }
+            },
+            apple: {
+                mood: "자 신 감 넘 춤",
+                fruits: "사과 · 딸기",
+                message: "꾸민 듯 안 꾸민 듯 세련된 편안함!",
+                item1: { title: "레드 포인트 볼캡 & 후드", tag: "원마일 스파크", img: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400", query: "레드 볼캡 후드티" },
+                item2: { title: "이지 슬랙스 팬츠", tag: "스타일리시 라인", img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400", query: "이지 와이드 슬랙스" }
+            },
+            strawberry: {
+                mood: "달 콤 함",
+                fruits: "딸기 · 복숭아",
+                message: "포근하고 기분 좋은 부드러움을 느껴보세요.",
+                item1: { title: "파스텔 집업 가디건", tag: "포근 루즈 핏", img: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400", query: "핑크 집업 가디건" },
+                item2: { title: "밴딩 니트 스커트", tag: "소프트 캐주얼", img: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400", query: "밴딩 니트 스커트" }
+            },
+            kiwi: {
+                mood: "자 연 스 러 움",
+                fruits: "키위 · 아보카도",
+                message: "아무 생각 없이 편안하게 쉬고 싶은 날.",
+                item1: { title: "카키 오버사이즈 티", tag: "내추럴 홈웨어 룩", img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400", query: "카키 오버핏 티셔츠" },
+                item2: { title: "이지 스트링 팬츠", tag: "편안한 스트링 핏", img: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400", query: "카키 밴딩 팬츠" }
+            }
+        };
+
+        // 결과 화면 표시 함수
+        function showResult(fruitKey) {
+            const data = fruitData[fruitKey] || fruitData.peach;
+
+            document.getElementById('res-mood').innerText = data.mood;
+            document.getElementById('res-fruits').innerText = data.fruits;
+            document.getElementById('res-message').innerText = `"${data.message}"`;
+
+            document.getElementById('title-1').innerText = data.item1.title;
+            document.getElementById('tag-1').innerText = data.item1.tag;
+            document.getElementById('img-1').src = data.item1.img;
+
+            document.getElementById('title-2').innerText = data.item2.title;
+            document.getElementById('tag-2').innerText = data.item2.tag;
+            document.getElementById('img-2').src = data.item2.img;
+
+            // 네이버 쇼핑 검색 링크 생성
+            const searchQuery = encodeURIComponent(data.item1.query);
+            document.getElementById('naver-link').href = `https://msearch.shopping.naver.com/search/all?query=${searchQuery}`;
+
+            // 화면 전환
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'flex';
+        }
+
+        // 뒤로가기 함수
+        function goBack() {
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+        }
+    </script>
+<div id="expo-credit" role="note" aria-label="개발자 조혜원" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 조혜원</div>
+</body>
+</html>

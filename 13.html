@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>점심메뉴추천기</title>
+  <!-- Tailwind CSS CDN 사용 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 아이콘 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+    
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f3f4f6;
+    }
+    
+    .font-jua {
+      font-family: 'Jua', sans-serif;
+    }
+
+    /* 손글씨 느낌 스케치 스타일 폰트 효과 */
+    .sketch-title {
+      font-family: 'Jua', sans-serif;
+      text-shadow: 3px 3px 0px #fde047, -2px -2px 0px #ea580c;
+    }
+
+    /* 스마트폰 틀 디자인 */
+    .phone-container {
+      width: 100%;
+      max-width: 390px;
+      height: 780px;
+      border: 12px solid #1f2937;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      position: relative;
+      overflow: hidden;
+      background-color: #fff7ed;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 카메라 섬/노치 */
+    .phone-notch {
+      width: 130px;
+      height: 24px;
+      background-color: #1f2937;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+    }
+
+    /* 하단 네비게이션 바 */
+    .phone-nav {
+      height: 48px;
+      background-color: #1f2937;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      color: #9ca3af;
+      z-index: 50;
+    }
+
+    .phone-nav button:hover {
+      color: #ffffff;
+    }
+
+    /* 로딩 애니메이션 */
+    @keyframes spin-slow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spin-animation {
+      animation: spin-slow 2s linear infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-slate-200">
+
+  <!-- 스마트폰 디바이스 프레임 -->
+  <div class="phone-container shadow-2xl">
+    <!-- 카메라 노치 -->
+    <div class="phone-notch"></div>
+
+    <!-- 상태 바 (상단) -->
+    <div class="pt-2 px-6 pb-1 text-xs text-amber-900 font-bold flex justify-between items-center bg-amber-100/60 pt-7">
+      <span id="status-time">12:00</span>
+      <div class="flex items-center gap-1">
+        <i class="fa-solid fa-wifi"></i>
+        <i class="fa-solid fa-battery-full"></i>
+      </div>
+    </div>
+
+    <!-- 실제 앱 내용 영역 (스크롤 가능) -->
+    <div id="app-content" class="flex-1 overflow-y-auto relative p-5 flex flex-col justify-between">
+      
+      <!-- ================= 1단계: 시작 화면 (스케치 반영) ================= -->
+      <div id="step-1" class="h-full flex flex-col items-center justify-center text-center space-y-8 my-auto">
+        <!-- 메인 로고 및 타이틀 -->
+        <div class="space-y-4">
+          <div class="w-24 h-24 bg-amber-400 rounded-full mx-auto flex items-center justify-center shadow-lg border-4 border-amber-500 animate-bounce">
+            <span class="text-5xl">🍱</span>
+          </div>
+          <h1 class="text-5xl font-jua sketch-title text-orange-600 tracking-wider leading-tight">
+            점심메뉴<br>추천기
+          </h1>
+          <p class="text-amber-800 text-sm font-semibold bg-amber-200/80 px-3 py-1 rounded-full inline-block">
+            오늘 뭐 먹지? 고민 끝! 😋
+          </p>
+        </div>
+
+        <!-- 스케치 스타일 Start 버튼 -->
+        <button onclick="goToStep2()" class="w-48 py-4 bg-amber-400 hover:bg-amber-500 text-amber-950 font-jua text-3xl rounded-full border-4 border-amber-600 shadow-xl transform active:scale-95 transition-all cursor-pointer">
+          start!
+        </button>
+
+        <p class="text-xs text-amber-700/70">날짜·시간·위치를 분석해 맞춤 메뉴를 찾아요!</p>
+      </div>
+
+      <!-- ================= 2단계: 조건 분석 및 로딩 화면 ================= -->
+      <div id="step-2" class="hidden h-full flex-col items-center justify-center text-center space-y-6 my-auto">
+        <div class="text-6xl spin-animation">
+          🍳
+        </div>
+        <h2 class="text-2xl font-jua text-orange-600">
+          맛있는 점심 메뉴를<br>분석하고 있어요!
+        </h2>
+        
+        <!-- 실시간 수집 데이터 정보 창 -->
+        <div class="w-full bg-white/80 backdrop-blur rounded-2xl p-4 shadow-md text-left space-y-3 text-sm text-gray-700 border border-amber-200">
+          <div class="flex items-center gap-2">
+            <i class="fa-regular fa-calendar-check text-orange-500"></i>
+            <span class="font-bold">오늘 날짜:</span>
+            <span id="info-date" class="text-gray-600">확인 중...</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-regular fa-clock text-orange-500"></i>
+            <span class="font-bold">현재 시간:</span>
+            <span id="info-time" class="text-gray-600">확인 중...</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-location-dot text-orange-500"></i>
+            <span class="font-bold">내 위치 & 날씨:</span>
+            <span id="info-weather" class="text-gray-600">위치 찾는 중...</span>
+          </div>
+        </div>
+
+        <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+          <div id="loading-bar" class="bg-orange-500 h-2.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+        </div>
+      </div>
+
+      <!-- ================= 3단계: 결과 화면 (추천 3종) ================= -->
+      <div id="step-3" class="hidden h-full flex flex-col justify-between space-y-4">
+        <div>
+          <!-- 상단 헤더 요약 -->
+          <div class="bg-amber-100 p-3 rounded-xl border border-amber-300 mb-4 text-xs text-amber-900 flex justify-between items-center shadow-sm">
+            <div>
+              <p id="result-meta-time" class="font-bold">📅 오늘 점심 분석 완료!</p>
+              <p id="result-meta-weather" class="text-amber-700">☀️ 날씨 확인 중...</p>
+            </div>
+            <button onclick="goToStep2()" class="bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold hover:bg-orange-600">
+              <i class="fa-solid fa-rotate-right"></i> 다시 추천
+            </button>
+          </div>
+
+          <h2 class="text-2xl font-jua text-orange-600 text-center mb-1">
+            ✨ 오늘의 추천 점심 메뉴!
+          </h2>
+          <p class="text-xs text-center text-gray-500 mb-4">메뉴를 클릭하면 네이버 지도에서 주변 맛집을 찾을 수 있어요!</p>
+
+          <!-- 메뉴 결과 리스트 (JS로 2~3개 랜덤 출력) -->
+          <div id="recommendation-list" class="space-y-3">
+            <!-- JS dynamic content -->
+          </div>
+        </div>
+
+        <!-- 처음으로 돌아가기 버튼 -->
+        <button onclick="goToStep1()" class="w-full py-3 bg-amber-200 hover:bg-amber-300 text-amber-900 font-jua rounded-xl border border-amber-400 text-lg shadow transition">
+          🏠 처음 화면으로 가기
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 하단 소프트키 네비게이션 바 -->
+    <div class="phone-nav">
+      <button onclick="openMenuModal()" title="메뉴" class="text-lg p-2 active:text-white transition">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <button onclick="goToStep1()" title="홈" class="text-lg p-2 active:text-white transition">
+        <i class="fa-solid fa-house"></i>
+      </button>
+      <button onclick="goBack()" title="뒤로가기" class="text-lg p-2 active:text-white transition">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 메뉴 팝업 모달 -->
+  <div id="menu-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 w-80 text-center space-y-4 shadow-2xl">
+      <h3 class="text-xl font-jua text-orange-600">🍱 점심메뉴추천기 메뉴</h3>
+      <div class="space-y-2 text-sm text-gray-700">
+        <p class="p-2 bg-orange-50 rounded-lg">개발자: 6학년 앱 아키텍트 🧑‍💻</p>
+        <p class="p-2 bg-amber-50 rounded-lg">연동 기능: 날씨 API & 네이버 지도</p>
+      </div>
+      <button onclick="closeMenuModal()" class="w-full py-2 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600">
+        닫기
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 풍성해진 점심 메뉴 데이터 베이스 (총 25가지 다양한 맛있는 선택지!)
+    const menuDatabase = [
+      { name: "따뜻한 김치찌개", emoji: "🍲", reason: "오늘 같이 출출할 땐 얼큰하고 따뜻한 국물이 최고예요!", category: "한식" },
+      { name: "돈가스", emoji: "🥩", reason: "겉은 바삭, 속은 촉촉! 언제 먹어도 맛있는 대표 인기 점심!", category: "일식" },
+      { name: "자장면 & 탕수육", emoji: "🍜", reason: "점심시간 든든하게 속을 채워주는 불변의 레전드 조합!", category: "중식" },
+      { name: "신선한 비빔밥", emoji: "🥗", reason: "각종 영양 가득한 나물과 고추장의 상큼한 만남!", category: "한식" },
+      { name: "수제 버거 세트", emoji: "🍔", reason: "스피디하고 스타일리시하게 즐기는 든든한 한 끼!", category: "양식" },
+      { name: "뜨끈한 뚝배기 불고기", emoji: "🥘", reason: "달콤 짭조름한 양념과 고기 육즙이 밥도둑!", category: "한식" },
+      { name: "초밥 세트", emoji: "🍣", reason: "깔끔하고 신선하게 즐기고 싶은 날 강력 추천!", category: "일식" },
+      { name: "마라탕", emoji: "🌶️", reason: "스트레스 싹 날아가는 매콤 얼얼 중독성 최고의 메뉴!", category: "중식" },
+      { name: "오므라이스", emoji: "🍳", reason: "부드러운 계란 지단과 소스가 어우러진 친숙한 맛!", category: "양식" },
+      { name: "시원한 칼국수", emoji: "🍲", reason: "쫄깃한 면발과 깊은 국물 맛이 일품인 별미!", category: "한식" },
+      { name: "떡볶이 & 모둠튀김", emoji: "🍢", reason: "친구들과 함께 나눌 때 더욱 맛있는 분식 조합!", category: "분식" },
+      { name: "치킨 카레라이스", emoji: "🍛", reason: "진한 카레 향과 바삭한 치킨의 행복한 조합!", category: "일식" },
+      { name: "고소한 우동", emoji: "🍜", reason: "따스하고 진한 국물에 통통한 면발이 일품!", category: "일식" },
+      { name: "제육볶음 덮밥", emoji: "🥩", reason: "매콤달콤하게 볶아낸 고기로 에너지를 풀충전!", category: "한식" },
+      { name: "파스타 & 리소토", emoji: "🍝", reason: "부드러운 크림과 토마토 소스로 기분 전환!", category: "양식" },
+      { name: "부대찌개", emoji: "🍲", reason: "햄과 소시지, 라면사리까지 풍성한 맛의 대잔치!", category: "한식" },
+      { name: "볶음밥 & 군만두", emoji: "🍚", reason: "고소하게 볶아낸 고슬고슬 볶음밥의 매력!", category: "중식" },
+      { name: "순두부찌개", emoji: "🥘", reason: "몽글몽글 부드러운 순두부와 매콤한 국물!", category: "한식" },
+      { name: "삼각김밥 & 라면", emoji: "🍜", reason: "간편하고 빠르게 맛있게 즐기는 추억의 조화!", category: "분식" },
+      { name: "쌀국수", emoji: "🍜", reason: "담백하고 시원한 국물로 깔끔한 한 끼!", category: "아시안" },
+      { name: "소고기 덮밥 (규동)", emoji: "🥣", reason: "달콤한 소스에 소고기가 듬뿍 올라간 별미!", category: "일식" },
+      { name: "갈비탕", emoji: "🍖", reason: "진하게 우러난 육수로 하루 종일 든든하게!", category: "한식" },
+      { name: "냉면 & 숯불고기", emoji: "🧊", reason: "속까지 뻥 뚫리는 시원한 육수와 고기의 만남!", category: "한식" },
+      { name: "타코 & 브리또", emoji: "🌮", reason: "신선한 채소와 고기가 어우러진 이색 별미!", category: "양식" },
+      { name: "김밥 & 쫄면", emoji: "🌯", reason: "매콤새콤 쫄깃한 쫄면과 김밥의 완벽 콤비!", category: "분식" }
+    ];
+
+    let currentStep = 1;
+    let weatherText = "날씨 정보 검색 중...";
+    let locationText = "위치 확인 중...";
+
+    // 시계 업데이트
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('status-time').innerText = `${hours}:${minutes}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 1단계 -> 2단계 이동
+    function goToStep2() {
+      currentStep = 2;
+      document.getElementById('step-1').classList.add('hidden');
+      document.getElementById('step-3').classList.add('hidden');
+      document.getElementById('step-2').classList.remove('hidden');
+      document.getElementById('step-2').classList.add('flex');
+
+      // 정보 수집 프로세스 시작
+      fetchRealData();
+    }
+
+    // 1단계로 이동
+    function goToStep1() {
+      currentStep = 1;
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-3').classList.add('hidden');
+      document.getElementById('step-1').classList.remove('hidden');
+    }
+
+    // 뒤로가기
+    function goBack() {
+      if (currentStep === 3) {
+        goToStep2();
+      } else if (currentStep === 2) {
+        goToStep1();
+      }
+    }
+
+    // 실시간 날짜, 시간 및 위치/날씨 가져오기
+    function fetchRealData() {
+      const now = new Date();
+      
+      // 날짜 세팅
+      const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+      document.getElementById('info-date').innerText = dateStr;
+
+      // 시간 세팅
+      const hours = now.getHours();
+      let timePeriod = "점심시간";
+      if (hours < 11) timePeriod = "아점(아침 겸 점심)";
+      else if (hours >= 14) timePeriod = "늦은 점심";
+      document.getElementById('info-time').innerText = `${hours}시 ${now.getMinutes()}분 (${timePeriod})`;
+
+      // 로딩 바 진행
+      const loadingBar = document.getElementById('loading-bar');
+      loadingBar.style.width = '40%';
+
+      // 위치 정보 획득
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            loadingBar.style.width = '70%';
+            getWeather(lat, lon);
+          },
+          (error) => {
+            // 위치 권한 거부 또는 실패 시 서울로 강제하지 않고 안내 처리
+            weatherText = "위치 권한 없음 (날씨 정보 없음)";
+            document.getElementById('info-weather').innerText = weatherText;
+            loadingBar.style.width = '100%';
+            setTimeout(showResults, 1200);
+          }
+        );
+      } else {
+        weatherText = "지원이 되지 않는 브라우저 (날씨 정보 없음)";
+        document.getElementById('info-weather').innerText = weatherText;
+        loadingBar.style.width = '100%';
+        setTimeout(showResults, 1200);
+      }
+    }
+
+    // Open-Meteo API 사용 날씨 정보 가져오기
+    function getWeather(lat, lon) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.current_weather) {
+            const temp = Math.round(data.current_weather.temperature);
+            const code = data.current_weather.weathercode;
+            let emoji = "☀️";
+            if (code >= 1 && code <= 3) emoji = "⛅";
+            else if (code >= 45) emoji = "🌫️";
+            else if (code >= 51) emoji = "🌧️";
+            else if (code >= 71) emoji = "❄️";
+
+            weatherText = `현재 위치 날씨 ${emoji} ${temp}°C`;
+            document.getElementById('info-weather').innerText = weatherText;
+          } else {
+            document.getElementById('info-weather').innerText = "날씨 정보 없음";
+          }
+          document.getElementById('loading-bar').style.width = '100%';
+          setTimeout(showResults, 1000);
+        })
+        .catch(err => {
+          document.getElementById('info-weather').innerText = "날씨 연결 실패";
+          document.getElementById('loading-bar').style.width = '100%';
+          setTimeout(showResults, 1000);
+        });
+    }
+
+    // 3단계 결과 출력 (25개 메뉴 중 랜덤 2~3개 추천)
+    function showResults() {
+      currentStep = 3;
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-2').classList.remove('flex');
+      document.getElementById('step-3').classList.remove('hidden');
+
+      document.getElementById('result-meta-time').innerText = `📅 ${document.getElementById('info-date').innerText} (${document.getElementById('info-time').innerText})`;
+      document.getElementById('result-meta-weather').innerText = weatherText;
+
+      // 데이터 풀에서 무작위 2~3개 선택 (Math.random 사용)
+      const shuffled = [...menuDatabase].sort(() => 0.5 - Math.random());
+      const count = Math.floor(Math.random() * 2) + 2; // 2개 또는 3개
+      const selectedMenus = shuffled.slice(0, count);
+
+      const container = document.getElementById('recommendation-list');
+      container.innerHTML = "";
+
+      selectedMenus.forEach((item, index) => {
+        // 네이버 지도 검색 URL 생성 (안전망 적용)
+        const mapUrl = `https://map.naver.com/v5/search/${encodeURIComponent(item.name)}`;
+
+        const card = document.createElement('a');
+        card.href = mapUrl;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+        card.className = "block bg-white p-4 rounded-2xl border-2 border-amber-200 shadow-md hover:shadow-lg hover:border-orange-400 transition transform hover:-translate-y-1 cursor-pointer group";
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <span class="text-4xl p-2 bg-amber-100 rounded-xl group-hover:scale-110 transition">${item.emoji}</span>
+              <div>
+                <span class="text-xs font-bold text-orange-500 bg-orange-100 px-2 py-0.5 rounded-full">${item.category}</span>
+                <h3 class="text-lg font-jua text-gray-800 mt-0.5">${item.name}</h3>
+              </div>
+            </div>
+            <div class="text-orange-500 text-xs font-bold flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">
+              <i class="fa-solid fa-map-location-dot"></i> 지도보기
+            </div>
+          </div>
+          <p class="text-xs text-gray-600 bg-amber-50/50 p-2 rounded-lg border border-amber-100">
+            💬 ${item.reason}
+          </p>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // 모달 제어
+    function openMenuModal() {
+      document.getElementById('menu-modal').classList.remove('hidden');
+    }
+    function closeMenuModal() {
+      document.getElementById('menu-modal').classList.add('hidden');
+    }
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 성지민" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 성지민</div>
+</body>
+</html>

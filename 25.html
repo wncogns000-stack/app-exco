@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>기분따라 얌얌 😋</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Gowun Dodum', sans-serif;
+      background-color: #fce7f3;
+    }
+    .font-title {
+      font-family: 'Gaegu', cursive;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #fbcfe8;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-2 sm:p-4">
+
+  <div class="w-full max-w-sm h-[800px] bg-amber-50 rounded-[45px] shadow-2xl border-[10px] border-slate-800 flex flex-col relative overflow-hidden ring-4 ring-pink-200/50">
+    
+    <div class="w-full bg-slate-800 h-6 flex justify-center items-center shrink-0">
+      <div class="w-20 h-3 bg-black rounded-b-xl flex items-center justify-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-slate-700"></div>
+        <div class="w-1.5 h-1.5 rounded-full bg-blue-900"></div>
+      </div>
+    </div>
+
+    <div class="bg-pink-100 px-4 py-2 border-b-2 border-pink-200 flex justify-between items-center text-xs font-bold text-pink-700 shrink-0">
+      <span id="current-time">00:00</span>
+      <span id="weather-info" class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-full shadow-sm text-[11px] text-pink-600">
+        📍 위치 확인 중...
+      </span>
+    </div>
+
+    <div class="bg-pink-300 py-3 px-4 flex items-center justify-between border-b-4 border-pink-400 shrink-0 shadow-sm">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl animate-bounce">😋</span>
+        <h1 class="text-2xl font-bold font-title text-white tracking-wide drop-shadow">기분따라 얌얌</h1>
+      </div>
+      <button onclick="toggleMenu()" class="text-pink-800 bg-white/80 hover:bg-white p-1.5 rounded-xl font-bold text-sm transition">
+        ☰ 메뉴
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 relative" id="app-body">
+      
+      <div id="step-0" class="flex flex-col gap-4">
+        <div class="bg-yellow-100 border-2 border-yellow-300 p-4 rounded-3xl text-center shadow-sm">
+          <span class="text-3xl">👋</span>
+          <h2 class="text-xl font-bold font-title text-amber-800 mt-1">처음 왔구나! 반가워!</h2>
+          <p class="text-xs text-amber-700 mt-1">네 취향을 알려주면 더욱 똑똑하게 추천해 줄게!</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-3xl border-2 border-pink-200 shadow-sm flex flex-col gap-3">
+          <label class="font-bold text-sm text-pink-600 flex items-center gap-1">
+            ❤️ 제일 좋아하는 음식 종류는 뭐야?
+          </label>
+          <div class="grid grid-cols-2 gap-2" id="pref-fav-container">
+            <button onclick="selectFav('고기')" class="fav-btn p-2 text-xs font-bold border-2 border-pink-200 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 transition">🍖 고기 요리</button>
+            <button onclick="selectFav('밥')" class="fav-btn p-2 text-xs font-bold border-2 border-pink-200 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 transition">🍚 든든한 밥</button>
+            <button onclick="selectFav('분식')" class="fav-btn p-2 text-xs font-bold border-2 border-pink-200 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 transition">🥘 매콤 분식</button>
+            <button onclick="selectFav('면/디저트')" class="fav-btn p-2 text-xs font-bold border-2 border-pink-200 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-700 transition">🍰 면 & 디저트</button>
+          </div>
+
+          <label class="font-bold text-sm text-pink-600 flex items-center gap-1 mt-2">
+            ⭐ 평소에 제일 자주 먹는 음식 이름!
+          </label>
+          <input type="text" id="pref-often-input" placeholder="예: 떡볶이, 김치볶음밥, 치킨..." class="w-full p-2.5 text-xs rounded-2xl border-2 border-pink-200 focus:outline-none focus:border-pink-400 bg-pink-50/50">
+
+          <button onclick="finishOnboarding()" class="w-full mt-3 bg-pink-400 hover:bg-pink-500 text-white font-bold font-title text-lg py-2.5 rounded-2xl shadow-md border-b-4 border-pink-600 transition active:translate-y-1">
+            설정 완료하고 시작하기! ✨
+          </button>
+        </div>
+      </div>
+
+      <div id="step-1" class="hidden flex-col gap-4">
+        <div class="bg-gradient-to-r from-pink-200 to-amber-200 p-3.5 rounded-3xl border-2 border-pink-300 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-pink-700" id="user-greeting">안녕!</p>
+            <p class="text-base font-bold font-title text-pink-800">오늘 너의 기분은 어때? 🤔</p>
+          </div>
+          <span class="text-3xl animate-pulse">✨</span>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-3xl border-2 border-pink-200 shadow-sm">
+          <h3 class="font-bold text-xs text-pink-600 mb-2.5 flex items-center gap-1">
+            <span>1️⃣</span> 지금 내 기분을 골라줘!
+          </h3>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="setMood('행복')" class="mood-btn p-2.5 rounded-2xl border-2 border-yellow-200 bg-yellow-50 hover:bg-yellow-100 flex flex-col items-center gap-1 transition">
+              <span class="text-2xl">😊</span>
+              <span class="text-xs font-bold text-yellow-800">행복해</span>
+            </button>
+            <button onclick="setMood('화남')" class="mood-btn p-2.5 rounded-2xl border-2 border-red-200 bg-red-50 hover:bg-red-100 flex flex-col items-center gap-1 transition">
+              <span class="text-2xl">😡</span>
+              <span class="text-xs font-bold text-red-800">화나/열받아</span>
+            </button>
+            <button onclick="setMood('슬픔')" class="mood-btn p-2.5 rounded-2xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 flex flex-col items-center gap-1 transition">
+              <span class="text-2xl">😢</span>
+              <span class="text-xs font-bold text-blue-800">우울/슬퍼</span>
+            </button>
+            <button onclick="setMood('피곤')" class="mood-btn p-2.5 rounded-2xl border-2 border-purple-200 bg-purple-50 hover:bg-purple-100 flex flex-col items-center gap-1 transition">
+              <span class="text-2xl">😴</span>
+              <span class="text-xs font-bold text-purple-800">피곤해</span>
+            </button>
+            <button onclick="setMood('출출')" class="mood-btn p-2.5 rounded-2xl border-2 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 flex flex-col items-center gap-1 transition">
+              <span class="text-2xl">😋</span>
+              <span class="text-xs font-bold text-emerald-800">심심해/출출</span>
+            </button>
+            <button onclick="setMood('스트레스')" class="mood-btn p-2.5 rounded-2xl border-2 border-orange-200 bg-orange-50 hover:bg-orange-100 flex flex-col items-center gap-1 transition">
+              <span class="text-2xl">🤯</span>
+              <span class="text-xs font-bold text-orange-800">스트레스</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-3xl border-2 border-pink-200 shadow-sm">
+          <h3 class="font-bold text-xs text-pink-600 mb-2.5 flex items-center gap-1">
+            <span>2️⃣</span> 땡기는 종류가 있니?
+          </h3>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="setCategory('전체')" class="cat-btn p-2 rounded-2xl border-2 border-pink-300 bg-pink-400 text-white font-bold text-xs shadow-sm transition">
+              🌈 상관없이 다 좋아!
+            </button>
+            <button onclick="setCategory('고기')" class="cat-btn p-2 rounded-2xl border-2 border-pink-200 bg-pink-50 text-pink-700 font-bold text-xs transition">
+              🍖 고기 종류
+            </button>
+            <button onclick="setCategory('밥')" class="cat-btn p-2 rounded-2xl border-2 border-pink-200 bg-pink-50 text-pink-700 font-bold text-xs transition">
+              🍚 든든한 밥
+            </button>
+            <button onclick="setCategory('분식')" class="cat-btn p-2 rounded-2xl border-2 border-pink-200 bg-pink-50 text-pink-700 font-bold text-xs transition">
+              🥘 떡볶이 / 분식
+            </button>
+            <button onclick="setCategory('면/디저트')" class="cat-btn p-2 rounded-2xl border-2 border-pink-200 bg-pink-50 text-pink-700 font-bold text-xs transition">
+              🍰 면 / 디저트
+            </button>
+          </div>
+        </div>
+
+        <button onclick="startAnalysis()" class="w-full bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold font-title text-xl py-3 rounded-2xl shadow-md border-b-4 border-amber-600 transition active:translate-y-1">
+          기분에 딱 맞는 음식 추천받기! 🚀
+        </button>
+      </div>
+
+      <div id="step-2" class="hidden flex-col items-center justify-center h-full py-12 text-center">
+        <div class="relative w-24 h-24 mb-4 flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full border-4 border-pink-200 border-t-pink-500 animate-spin"></div>
+          <span class="text-4xl animate-bounce">🛵</span>
+        </div>
+        <h2 class="text-2xl font-bold font-title text-pink-600 mb-2">기분과 날씨를 분석하는 중...</h2>
+        <p class="text-xs text-pink-400 font-medium animate-pulse" id="loading-subtext">
+          현재 날씨와 네 기분에 어울리는 최적의 메뉴를 찾는 중이야! 🔍
+        </p>
+      </div>
+
+      <div id="step-3" class="hidden flex-col gap-4">
+        <div class="bg-amber-100 border-2 border-amber-300 p-3 rounded-2xl text-center">
+          <span class="text-xs text-amber-700 font-bold">✨ 오늘의 맞춤 얌얌 큐레이션 ✨</span>
+          <h2 class="text-xl font-bold font-title text-amber-900 mt-0.5" id="result-summary">
+            오늘 너를 위한 추천 음식!
+          </h2>
+        </div>
+
+        <div id="recommendation-list" class="flex flex-col gap-3">
+          </div>
+
+        <button onclick="goToStep(1)" class="w-full bg-pink-400 hover:bg-pink-500 text-white font-bold font-title text-lg py-2.5 rounded-2xl shadow-md border-b-4 border-pink-600 transition">
+          🔄 다른 기분으로 다시 추천받기
+        </button>
+      </div>
+
+      <div id="menu-modal" class="hidden absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-end">
+        <div class="w-3/4 bg-white h-full p-5 flex flex-col justify-between shadow-2xl border-l-4 border-pink-300">
+          <div>
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+              <h3 class="font-bold font-title text-xl text-pink-600">📌 메뉴 & 설정</h3>
+              <button onclick="toggleMenu()" class="text-gray-400 text-xl font-bold">✕</button>
+            </div>
+            
+            <div class="flex flex-col gap-3 text-xs">
+              <div class="bg-pink-50 p-3 rounded-2xl border border-pink-200">
+                <p class="font-bold text-pink-700 mb-1">👤 내 취향 정보</p>
+                <p id="menu-fav-text" class="text-gray-600">선호 장르: -</p>
+                <p id="menu-often-text" class="text-gray-600">자주 먹는 음식: -</p>
+              </div>
+
+              <button onclick="resetPreferences()" class="w-full text-left p-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 font-bold text-amber-800 flex items-center justify-between">
+                <span>🔄 처음 입맛 설정 다시하기</span>
+                <span>➔</span>
+              </button>
+
+              <button onclick="refreshWeather()" class="w-full text-left p-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 font-bold text-blue-800 flex items-center justify-between">
+                <span>🌤️ 날씨 / 위치 다시 불러오기</span>
+                <span>🔄</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-gray-100 p-3 rounded-2xl text-[10px] text-gray-500 text-center">
+            <p class="font-bold text-pink-500">기분따라 얌얌 v1.0 😋</p>
+            <p class="mt-0.5">나만의 아이디어로 탄생한 맞춤 앱!</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bg-slate-800 text-white py-2.5 px-6 flex justify-between items-center text-lg font-bold border-t border-slate-700 shrink-0">
+      <button onclick="toggleMenu()" class="hover:text-pink-300 transition active:scale-95 flex flex-col items-center text-[10px]">
+        <span class="text-base">☰</span>
+        <span>메뉴</span>
+      </button>
+      <button onclick="goHome()" class="hover:text-pink-300 transition active:scale-95 flex flex-col items-center text-[10px]">
+        <span class="text-base">⌂</span>
+        <span>홈</span>
+      </button>
+      <button onclick="goBack()" class="hover:text-pink-300 transition active:scale-95 flex flex-col items-center text-[10px]">
+        <span class="text-base">◁</span>
+        <span>뒤로</span>
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // 앱 상태 데이터
+    let currentStep = 0;
+    let historyStack = [0];
+    let selectedFav = '고기';
+    let userOftenFood = '';
+    let selectedMood = '행복';
+    let selectedCategory = '전체';
+
+    // 조건별 10개 이상 음식 데이터 풀
+    const foodDatabase = [
+      { name: "삼겹살", category: "고기", mood: ["화남", "행복", "스트레스"], icon: "🥓", reason: "지글지글 고깃소리가 모든 스트레스를 날려줄 거야!" },
+      { name: "닭갈비", category: "고기", mood: ["화남", "출출", "행복"], icon: "🥘", reason: "매콤달콤 닭갈비에 볶음밥까지 풀코스로 즐기자!" },
+      { name: "소불고기", category: "고기", mood: ["슬픔", "피곤", "행복"], icon: "🍲", reason: "달달하고 따뜻한 불고기가 마음을 편안하게 해줘." },
+      { name: "양념치킨", category: "고기", mood: ["행복", "출출", "스트레스"], icon: "🍗", reason: "바삭하고 달콤매콤한 치킨은 언제나 옳다!" },
+      { name: "족발", category: "고기", mood: ["피곤", "출출"], icon: "🍖", reason: "쫄깃한 족발 먹고 잃어버린 에너지를 보충해 봐!" },
+      { name: "제육볶음", category: "고기", mood: ["화남", "스트레스", "출출"], icon: "🥩", reason: "매콤한 제육에 밥 쓱싹 비벼 먹으면 화가 싹 사라져!" },
+      
+      { name: "김치볶음밥", category: "밥", mood: ["행복", "출출", "피곤"], icon: "🍳", reason: "계란후라이 톡 깨서 먹는 짭조름한 국민 최애 밥!" },
+      { name: "치킨마요덮밥", category: "밥", mood: ["행복", "출출"], icon: "🍱", reason: "고소한 마요네즈와 치킨의 기가 막힌 환상 조합!" },
+      { name: "카레라이스", category: "밥", mood: ["슬픔", "피곤", "행복"], icon: "🍛", reason: "따스하고 부드러운 카레가 속을 든든하게 채워줄 거야." },
+      { name: "비빔밥", category: "밥", mood: ["피곤", "행복"], icon: "🥗", reason: "신선한 재료 가득! 건강하게 기분 전환하는 맛!" },
+      { name: "초밥", category: "밥", mood: ["행복", "출출"], icon: "🍣", reason: "특별한 기분을 내고 싶을 때 딱 어울리는 깔끔한 맛!" },
+
+      { name: "로제떡볶이", category: "분식", mood: ["행복", "스트레스", "출출"], icon: "🥘", reason: "꾸덕하고 매콤고소한 로제 소스가 행복함을 2배로!" },
+      { name: "국물떡볶이", category: "분식", mood: ["화남", "스트레스"], icon: "🍢", reason: "매콤한 국물에 튀김 찍어 먹으며 스트레스 격파!" },
+      { name: "모둠튀김 & 순대", category: "분식", mood: ["출출", "행복"], icon: "🥟", reason: "바삭함과 쫄깃함이 모인 실패 없는 최강 간식 조합!" },
+      { name: "참치김밥 & 라면", category: "분식", mood: ["피곤", "슬픔", "출출"], icon: "🍜", reason: "뜨끈한 라면 국물과 참치김밥의 든든한 다독임!" },
+      { name: "떡꼬치 & 핫도그", category: "분식", mood: ["행복", "출출"], icon: "🌭", reason: "달콤새콤 소스 발라 씹는 맛이 최고인 간식!" },
+
+      { name: "마라탕", category: "면/디저트", mood: ["화남", "스트레스"], icon: "🌶️", reason: "얼얼한 알싸함으로 스트레스를 아주 날려버려!" },
+      { name: "짜장면 & 탕수육", category: "면/디저트", mood: ["행복", "출출"], icon: "🍜", reason: "달콤한 탕수육과 호로록 짜장면은 기분을 최고로 만들어!" },
+      { name: "딸기 빙수", category: "면/디저트", mood: ["행복", "화남", "스트레스"], icon: "🍧", reason: "시원하고 달달한 빙수로 머릿속까지 상쾌하게!" },
+      { name: "초코 와플", category: "면/디저트", mood: ["슬픔", "피곤", "행복"], icon: "🧇", reason: "달콤함 폭발! 당 충전 제대로 해서 기운 차리자!" },
+      { name: "탕후루 & 마카롱", category: "면/디저트", mood: ["행복", "출출"], icon: "🍓", reason: "달콤 바삭함이 전해주는 기분 좋은 한 입의 매력!" }
+    ];
+
+    // 실행 시작
+    window.onload = function() {
+      updateTime();
+      setInterval(updateTime, 1000);
+      fetchWeather();
+    };
+
+    // 실시간 시계
+    function updateTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('current-time').innerText = `${hours}:${mins}`;
+    }
+
+    // 위치 기반 실시간 날씨 연동
+    function fetchWeather() {
+      const weatherEl = document.getElementById('weather-info');
+      if (!navigator.geolocation) {
+        weatherEl.innerText = '📍 날씨 정보 없음';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+            const weatherData = await weatherRes.json();
+            const temp = Math.round(weatherData.current_weather.temperature);
+            const code = weatherData.current_weather.weathercode;
+            const emoji = getWeatherEmoji(code);
+
+            let locality = '우리 동네';
+            try {
+              const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`);
+              const geoData = await geoRes.json();
+              locality = geoData.locality || geoData.city || '우리 동네';
+            } catch(e) {
+              locality = '우리 동네';
+            }
+
+            weatherEl.innerHTML = `📍 ${locality} | ${emoji} ${temp}°C`;
+          } catch(e) {
+            weatherEl.innerText = '📍 날씨 정보 없음';
+          }
+        },
+        () => {
+          weatherEl.innerText = '📍 날씨 정보 없음';
+        }
+      );
+    }
+
+    function getWeatherEmoji(code) {
+      if (code === 0) return '☀️';
+      if (code >= 1 && code <= 3) return '⛅';
+      if (code >= 45 && code <= 48) return '🌫️';
+      if (code >= 51 && code <= 67) return '🌧️';
+      if (code >= 71 && code <= 77) return '❄️';
+      if (code >= 80 && code <= 82) return '🌦️';
+      if (code >= 95) return '⛈️';
+      return '☀️';
+    }
+
+    // 화면 이동
+    function goToStep(step) {
+      document.getElementById(`step-${currentStep}`).classList.add('hidden');
+      document.getElementById(`step-${currentStep}`).classList.remove('flex');
+
+      currentStep = step;
+      document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+      document.getElementById(`step-${currentStep}`).classList.add('flex');
+
+      if (historyStack[historyStack.length - 1] !== step) {
+        historyStack.push(step);
+      }
+    }
+
+    // 온보딩 기능
+    function selectFav(fav) {
+      selectedFav = fav;
+      const btns = document.querySelectorAll('#pref-fav-container .fav-btn');
+      btns.forEach(btn => {
+        if (btn.innerText.includes(fav)) {
+          btn.classList.add('bg-pink-400', 'text-white', 'border-pink-500');
+          btn.classList.remove('bg-pink-50', 'text-pink-700');
+        } else {
+          btn.classList.remove('bg-pink-400', 'text-white', 'border-pink-500');
+          btn.classList.add('bg-pink-50', 'text-pink-700');
+        }
+      });
+    }
+
+    function finishOnboarding() {
+      const inputVal = document.getElementById('pref-often-input').value.trim();
+      userOftenFood = inputVal || '떡볶이';
+      
+      document.getElementById('user-greeting').innerText = `선호 장르 [${selectedFav}] 취향 반영 완료! 😉`;
+      document.getElementById('menu-fav-text').innerText = `선호 장르: ${selectedFav}`;
+      document.getElementById('menu-often-text').innerText = `자주 먹는 음식: ${userOftenFood}`;
+      
+      goToStep(1);
+    }
+
+    // 기분 선택
+    function setMood(mood) {
+      selectedMood = mood;
+      const btns = document.querySelectorAll('.mood-btn');
+      btns.forEach(btn => {
+        if (btn.innerText.includes(mood)) {
+          btn.classList.add('ring-4', 'ring-pink-400', 'scale-105');
+        } else {
+          btn.classList.remove('ring-4', 'ring-pink-400', 'scale-105');
+        }
+      });
+    }
+
+    // 카테고리 선택
+    function setCategory(cat) {
+      selectedCategory = cat;
+      const btns = document.querySelectorAll('.cat-btn');
+      btns.forEach(btn => {
+        if (btn.innerText.includes(cat) || (cat === '전체' && btn.innerText.includes('상관없이'))) {
+          btn.classList.add('bg-pink-400', 'text-white');
+          btn.classList.remove('bg-pink-50', 'text-pink-700');
+        } else {
+          btn.classList.remove('bg-pink-400', 'text-white');
+          btn.classList.add('bg-pink-50', 'text-pink-700');
+        }
+      });
+    }
+
+    // 분석 로딩
+    function startAnalysis() {
+      goToStep(2);
+      
+      const subtexts = [
+        "너의 기분을 도닥여줄 맞춤 음식을 고르는 중...",
+        "네이버 지도에서 주변 맛집을 탐색하는 중!",
+        "짠! 완벽한 음식 조합이 찾아지고 있어! 🎉"
+      ];
+      let subIdx = 0;
+      const interval = setInterval(() => {
+        subIdx = (subIdx + 1) % subtexts.length;
+        document.getElementById('loading-subtext').innerText = subtexts[subIdx];
+      }, 700);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        renderRecommendations();
+        goToStep(3);
+      }, 2000);
+    }
+
+    // 랜덤 2~3개 추천 렌더링
+    function renderRecommendations() {
+      let filtered = foodDatabase.filter(item => {
+        const matchesCategory = (selectedCategory === '전체') || (item.category === selectedCategory);
+        const matchesMood = item.mood.includes(selectedMood);
+        return matchesCategory && matchesMood;
+      });
+
+      if (filtered.length < 2) {
+        filtered = foodDatabase.filter(item => item.mood.includes(selectedMood));
+      }
+
+      // Math.random() 기반 랜덤 셔플
+      const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 3);
+
+      document.getElementById('result-summary').innerText = `'${selectedMood}' 기분에 딱맞는 추천!`;
+
+      const container = document.getElementById('recommendation-list');
+      container.innerHTML = '';
+
+      selected.forEach(food => {
+        const mapUrl = `https://map.naver.com/v5/search/${encodeURIComponent(food.name)}`;
+        
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-3xl border-2 border-pink-200 shadow-sm flex flex-col gap-2 hover:shadow-md transition";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-3xl bg-pink-100 p-2 rounded-2xl">${food.icon}</span>
+              <div>
+                <h4 class="font-bold text-base text-gray-800">${food.name}</h4>
+                <span class="text-[10px] bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full font-bold">#${food.category}</span>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-600 bg-amber-50 p-2.5 rounded-xl border border-amber-100 mt-1">
+            💬 ${food.reason}
+          </p>
+          <a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="w-full mt-1 bg-green-500 hover:bg-green-600 text-white font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition">
+            <span>📍 네이버 지도에서 ${food.name} 맛집 찾기</span>
+            <span>➔</span>
+          </a>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 메뉴 네비게이션 동작
+    function toggleMenu() {
+      const modal = document.getElementById('menu-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    function goHome() {
+      document.getElementById('menu-modal').classList.add('hidden');
+      goToStep(1);
+    }
+
+    function goBack() {
+      document.getElementById('menu-modal').classList.add('hidden');
+      if (historyStack.length > 1) {
+        historyStack.pop();
+        const prevStep = historyStack[historyStack.length - 1];
+        
+        document.getElementById(`step-${currentStep}`).classList.add('hidden');
+        document.getElementById(`step-${currentStep}`).classList.remove('flex');
+        
+        currentStep = prevStep;
+        document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+        document.getElementById(`step-${currentStep}`).classList.add('flex');
+      }
+    }
+
+    function resetPreferences() {
+      toggleMenu();
+      goToStep(0);
+    }
+
+    function refreshWeather() {
+      toggleMenu();
+      fetchWeather();
+    }
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 홍서영" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 홍서영</div>
+</body>
+</html>

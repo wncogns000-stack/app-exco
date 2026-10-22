@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘의 픽 (Today's Pick)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: 깨끗하고 세련된 본고딕(Noto Sans) 계열 적용 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #fefeff;
+    }
+    /* 깔끔한 화면 전환 페이드 인 효과 */
+    .fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 overflow-x-hidden">
+
+  <!-- 스마트폰 프레임 외관 (산뜻한 화이트 골드 폰 느낌) -->
+  <div class="relative w-full max-w-[412px] h-[820px] bg-slate-100 rounded-[52px] p-3 shadow-[0_30px_70px_-15px_rgba(148,163,184,0.5)] border-[6px] border-slate-200 flex flex-col overflow-hidden">
+    
+    <!-- 폰 스피커 및 카메라 홀 -->
+    <div class="absolute top-5 left-1/2 transform -translate-x-1/2 w-32 h-5 bg-slate-300 rounded-full z-50 flex items-center justify-center">
+      <div class="w-12 h-1 bg-slate-400 rounded-full mr-4"></div>
+      <div class="w-2.5 h-2.5 bg-slate-500 rounded-full"></div>
+    </div>
+
+    <!-- 폰 화면 내부 (상큼하고 다채로운 컬러 파스텔 그라데이션) -->
+    <div id="phone-screen" class="w-full h-full bg-gradient-to-tr from-[#fffbeb] via-[#f0fdf4] to-[#fdf2f8] rounded-[42px] pt-8 pb-12 px-5 flex flex-col justify-between relative overflow-hidden select-none">
+      
+      <!-- 상단 인포바 (깨끗한 실시간 날씨 요약) -->
+      <div class="flex justify-between items-center text-xs text-slate-500 font-medium px-2 z-10">
+        <div id="status-time" class="font-bold text-slate-700">12:00</div>
+        <div id="status-weather" class="bg-white/80 text-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1 text-[11px] font-semibold border border-emerald-100 shadow-sm">
+          <span>대구광역시 조회 중...</span>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- [화면 1] 시작 화면 (다채롭고 화사한 스타일) -->
+      <!-- ========================================== -->
+      <div id="screen-start" class="flex-1 flex flex-col justify-between pt-5 pb-2 z-10 fade-in">
+        
+        <!-- 타이틀 로고 영역 (레몬 옐로우 테두리로 상큼하게) -->
+        <div class="text-center mt-3">
+          <div class="inline-block bg-amber-100 border border-amber-200 px-3 py-1 rounded-full text-[10px] text-amber-800 font-bold mb-2 tracking-tight">
+            🌈 내 손안의 스마트 코디 가이드
+          </div>
+          <h1 class="text-3xl text-slate-800 font-black tracking-tight flex justify-center items-center gap-1">
+            오늘의 픽 <span class="text-amber-500">✨</span>
+          </h1>
+          <p class="text-[11px] text-slate-500 mt-1 font-semibold">대구 실시간 기온 맞춤 알록달록 추천!</p>
+        </div>
+
+        <!-- 컬러풀 미니멀 일러스트 카드 (피치, 민트, 라벤더, 레몬) -->
+        <div class="my-auto flex flex-col items-center justify-center gap-4 py-2">
+          <div class="relative w-full max-w-[280px]">
+            <!-- 화사하고 화려한 그리드 배열 -->
+            <div class="grid grid-cols-2 gap-3 text-center">
+              <div class="bg-rose-50/90 p-3.5 rounded-2xl border-2 border-rose-100 shadow-sm hover:scale-105 transition duration-200">
+                <span class="text-3xl block">👕</span>
+                <span class="text-[11px] text-rose-700 font-bold mt-1 block">추천 상의</span>
+              </div>
+              <div class="bg-emerald-50/90 p-3.5 rounded-2xl border-2 border-emerald-100 shadow-sm hover:scale-105 transition duration-200">
+                <span class="text-3xl block">👖</span>
+                <span class="text-[11px] text-emerald-700 font-bold mt-1 block">추천 하의</span>
+              </div>
+              <div class="bg-amber-50/90 p-3.5 rounded-2xl border-2 border-amber-100 shadow-sm hover:scale-105 transition duration-200">
+                <span class="text-3xl block">🧥</span>
+                <span class="text-[11px] text-amber-800 font-bold mt-1 block">아우터</span>
+              </div>
+              <div class="bg-indigo-50/90 p-3.5 rounded-2xl border-2 border-indigo-100 shadow-sm hover:scale-105 transition duration-200">
+                <span class="text-3xl block">💇‍♀️</span>
+                <span class="text-[11px] text-indigo-700 font-bold mt-1 block">헤어스타일</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 실시간 정보 확인 패널 (대구광역시 중심) -->
+          <div class="w-full bg-white/90 rounded-2xl p-3.5 shadow-sm border border-amber-100 text-xs text-slate-700 space-y-1.5">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+              <span class="font-bold text-amber-600">📅 오늘 날짜</span>
+              <span id="live-date" class="font-mono text-slate-800">2026-00-00</span>
+            </div>
+            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+              <span class="font-bold text-emerald-600">📍 현재 위치</span>
+              <span id="live-location" class="font-semibold text-slate-800">대구광역시</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-rose-500">🌡️ 대구 날씨</span>
+              <span id="live-weather" class="font-bold text-slate-800">기온 분석 중..</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 조건 입력 폼 (화사하고 맑은 파스텔 테두리) -->
+        <div class="space-y-3 bg-white/95 rounded-2xl p-4 shadow-md border border-slate-100">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">📍 어디로 가볼까요?</label>
+            <select id="input-destination" class="w-full text-sm bg-amber-50/50 border border-amber-200 text-slate-800 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-amber-300">
+              <option value="school">🏫 대구 학교 / 학원 갈 때</option>
+              <option value="park">🎡 수성못 / 이월드 소풍 갈 때</option>
+              <option value="cafe">☕ 동성로 예쁜 카페 갈 때</option>
+              <option value="walk">🌳 신천 둔치 산책 갈 때</option>
+              <option value="formal">✨ 단정하고 단아한 자리</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1.5">⚡ 마음에 쏙 드는 오늘의 스타일</label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <button onclick="selectStyle('casual', this)" class="style-btn py-2.5 px-3 rounded-xl bg-slate-900 border border-slate-900 text-white font-bold transition">😎 내추럴 캐주얼</button>
+              <button onclick="selectStyle('lovely', this)" class="style-btn py-2.5 px-3 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 transition">💖 심플 러블리</button>
+              <button onclick="selectStyle('dandy', this)" class="style-btn py-2.5 px-3 rounded-xl bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition">👔 모던 클래식</button>
+              <button onclick="selectStyle('hip', this)" class="style-btn py-2.5 px-3 rounded-xl bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition">🔥 어반 스트릿</button>
+            </div>
+          </div>
+
+          <!-- 알록달록 무지개 빛깔 그라데이션 매칭 버튼 -->
+          <button onclick="startAnalysis()" class="w-full bg-gradient-to-r from-rose-400 via-amber-400 to-emerald-400 hover:opacity-90 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md transition transform active:scale-98 flex items-center justify-center gap-1.5 mt-1.5 text-sm">
+            <span>오늘의 코디 추천받기! ➔</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- [화면 2] 분석 로딩 화면 (알록달록 회전 스피너) -->
+      <!-- ========================================== -->
+      <div id="screen-loading" class="hidden flex-1 flex flex-col items-center justify-center z-10 fade-in">
+        <div class="relative w-24 h-24 flex items-center justify-center">
+          <!-- 알록달록 화사하게 회전하는 스피너 -->
+          <div class="w-16 h-16 border-4 border-amber-200 border-t-rose-500 border-r-emerald-500 rounded-full animate-spin"></div>
+        </div>
+        
+        <h2 class="text-lg font-bold text-slate-800 mt-6 text-center">대구 기상 데이터 매칭 중..</h2>
+        <p class="text-xs text-slate-500 mt-2 text-center leading-relaxed font-medium">
+          실시간 대구 기온을 분석해서<br>가장 잘 어울리는 화사한 코디 세트를 만들고 있어요! 🎨
+        </p>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- [화면 3] 결과 추천 화면 (알록달록 컬러풀 매치 카드) -->
+      <!-- ========================================== -->
+      <div id="screen-result" class="hidden flex-1 flex flex-col justify-between pt-4 pb-2 z-10 overflow-y-auto fade-in">
+        
+        <!-- 분석 요약 헤더 (화사한 파스텔 레몬빛) -->
+        <div class="bg-amber-50/90 rounded-2xl p-4 border border-amber-200 shadow-sm text-center">
+          <span class="text-[9px] bg-gradient-to-r from-rose-400 to-amber-500 text-white px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Today's Best Match</span>
+          <div class="text-sm font-black text-slate-800 mt-2" id="result-summary">
+            오늘 대구광역시는 화창해요!
+          </div>
+          <p class="text-[11px] text-slate-600 mt-0.5 font-medium" id="result-desc">선택하신 나들이 목적지에 잘 어울리는 추천 룩입니다.</p>
+        </div>
+
+        <!-- 추천 결과 카드 리스트 -->
+        <div class="my-3 space-y-2.5 overflow-y-auto max-h-[360px] pr-1">
+          
+          <!-- 추천 상의 (로즈 핑크 테두리) -->
+          <div class="bg-white rounded-2xl p-3 shadow-sm border-2 border-rose-100 flex items-center gap-3 relative overflow-hidden">
+            <div class="text-3xl p-2 bg-rose-50 border border-rose-100 rounded-xl flex-shrink-0" id="rec-icon-1">👕</div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[9px] text-rose-500 font-extrabold bg-rose-50 px-2 py-0.5 rounded-md">RECOMMENDED TOP</span>
+              <h4 class="font-bold text-slate-900 text-sm mt-1 truncate" id="rec-name-1">베이지 옥스포드 셔츠</h4>
+              <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-tight" id="rec-reason-1">날씨가 선선하니 깔끔하고 단정한 연한 베이지색 셔츠로 연출해 보세요!</p>
+            </div>
+            <!-- 쇼핑 연결 버튼 (상큼 피치로 변경) -->
+            <a href="#" id="rec-link-1" target="_blank" rel="noopener noreferrer" class="bg-rose-400 hover:bg-rose-500 text-white p-2.5 rounded-xl text-xs font-bold text-center flex flex-col items-center justify-center shrink-0 w-12 h-12 transition active:scale-95 shadow-sm">
+              <span class="text-[16px]">🛒</span>
+            </a>
+          </div>
+
+          <!-- 추천 하의 (민트 에메랄드 테두리) -->
+          <div class="bg-white rounded-2xl p-3 shadow-sm border-2 border-emerald-100 flex items-center gap-3 relative overflow-hidden">
+            <div class="text-3xl p-2 bg-emerald-50 border border-emerald-100 rounded-xl flex-shrink-0" id="rec-icon-2">👖</div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[9px] text-emerald-600 font-extrabold bg-emerald-50 px-2 py-0.5 rounded-md">RECOMMENDED BOTTOM</span>
+              <h4 class="font-bold text-slate-900 text-sm mt-1 truncate" id="rec-name-2">크림 와이드 면바지</h4>
+              <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-tight" id="rec-reason-2">활동성이 높으면서 상의 셔츠와 완벽한 조화를 이루는 깨끗한 톤의 하의입니다.</p>
+            </div>
+            <!-- 쇼핑 연결 버튼 -->
+            <a href="#" id="rec-link-2" target="_blank" rel="noopener noreferrer" class="bg-emerald-400 hover:bg-emerald-500 text-white p-2.5 rounded-xl text-xs font-bold text-center flex flex-col items-center justify-center shrink-0 w-12 h-12 transition active:scale-95 shadow-sm">
+              <span class="text-[16px]">🛒</span>
+            </a>
+          </div>
+
+          <!-- 추천 헤어스타일 (퍼플 라벤더 테두리) -->
+          <div class="bg-white rounded-2xl p-3 shadow-sm border-2 border-indigo-100 flex items-center gap-3 relative overflow-hidden">
+            <div class="text-3xl p-2 bg-indigo-50 border border-indigo-100 rounded-xl flex-shrink-0" id="rec-icon-3">💇‍♀️</div>
+            <div class="flex-1 min-w-0">
+              <span class="text-[9px] text-indigo-600 font-extrabold bg-indigo-50 px-2 py-0.5 rounded-md">RECOMMENDED HAIR</span>
+              <h4 class="font-bold text-slate-900 text-sm mt-1 truncate" id="rec-name-3">단정한 볼륨 세팅 헤어</h4>
+              <p class="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-tight" id="rec-reason-3">오늘 대구 바람 수치에 맞추어 흐트러짐 없는 볼륨감 있는 헤어를 매칭해보세요!</p>
+            </div>
+            <!-- 쇼핑 연결 버튼 -->
+            <a href="#" id="rec-link-3" target="_blank" rel="noopener noreferrer" class="bg-indigo-400 hover:bg-indigo-500 text-white p-2.5 rounded-xl text-xs font-bold text-center flex flex-col items-center justify-center shrink-0 w-12 h-12 transition active:scale-95 shadow-sm">
+              <span class="text-[16px]">🛒</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 하단 액션 버튼 (화이트 / 차콜 조화) -->
+        <div class="flex gap-2">
+          <button onclick="goToScreen('start')" class="flex-1 bg-white hover:bg-slate-50 text-slate-800 font-bold py-3 rounded-xl border border-slate-200 transition text-sm flex items-center justify-center gap-1.5">
+            <span>🔄 다시 선택</span>
+          </button>
+          <button onclick="shareOutfit()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl shadow-sm transition text-sm flex items-center justify-center gap-1.5">
+            <span>💾 코디 보관</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- 사이드 메뉴 모달 (단정하고 깔끔한 디자인) -->
+      <!-- ========================================== -->
+      <div id="side-menu" class="absolute inset-0 bg-slate-950/40 z-40 hidden transition-all duration-300">
+        <div class="absolute left-0 top-0 bottom-0 w-2/3 bg-white p-5 shadow-2xl flex flex-col justify-between rounded-r-3xl border-r border-slate-200">
+          <div class="space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+              <h3 class="text-base font-bold text-slate-800">📋 오늘의 픽 정보</h3>
+              <button onclick="toggleMenu(false)" class="text-slate-400 hover:text-slate-800 font-bold text-base">✕</button>
+            </div>
+            <div class="space-y-2">
+              <button onclick="alertMessage('오늘의 픽 스타일러\n대구 기상 데이터와 방문 목적지에 어울리는 실용적인 데일리 룩을 단정하게 선정해 줍니다.')" class="w-full text-left bg-slate-50 hover:bg-slate-100 text-slate-700 p-3 rounded-lg border border-slate-200/50 text-xs font-medium transition flex items-center gap-2">
+                <span>📖</span> 어플리케이션 가이드
+              </button>
+              <button onclick="alertMessage('개발팀 정보\n대구의 맑은 날씨 에너지를 담은 알록달록 맞춤 코디 시뮬레이터입니다.')" class="w-full text-left bg-slate-50 hover:bg-slate-100 text-slate-700 p-3 rounded-lg border border-slate-200/50 text-xs font-medium transition flex items-center gap-2">
+                <span>👨‍💻</span> 개발진 소개
+              </button>
+              <button onclick="resetApp()" class="w-full text-left bg-rose-50 hover:bg-rose-100 text-rose-700 p-3 rounded-lg border border-rose-100 text-xs font-bold transition flex items-center gap-2">
+                <span>🗑️</span> 설정 초기화
+              </button>
+            </div>
+          </div>
+          <div class="text-[10px] text-slate-400 text-center">
+            오늘의 픽 v1.2.0<br>© 2026 Today's Pick Daegu.
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- 커스텀 모달 알림창 -->
+      <!-- ========================================== -->
+      <div id="custom-modal" class="absolute inset-0 bg-slate-950/40 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-5 shadow-2xl border border-slate-200 max-w-[280px] text-center space-y-4">
+          <p id="modal-text" class="text-xs text-slate-800 font-semibold whitespace-pre-line leading-relaxed"></p>
+          <button onclick="closeModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-lg text-xs transition active:scale-95">확인</button>
+        </div>
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- [하단 바] 스마트폰 네비게이션 바 -->
+      <!-- ========================================== -->
+      <div class="absolute bottom-1.5 left-1/2 transform -translate-x-1/2 w-[90%] h-10 bg-white/95 border border-slate-200 rounded-full shadow-md flex items-center justify-around text-slate-700 text-base font-medium z-30">
+        <button onclick="toggleMenu(true)" class="hover:text-slate-950 active:scale-90 transition p-2 flex items-center justify-center" title="메뉴">
+          ☰
+        </button>
+        <button onclick="goToScreen('start')" class="hover:text-slate-950 active:scale-90 transition p-2 flex items-center justify-center" title="홈">
+          ⌂
+        </button>
+        <button onclick="goBack()" class="hover:text-slate-950 active:scale-90 transition p-2 flex items-center justify-center" title="뒤로가기">
+          ◁
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // --- 글로벌 상태 관리 ---
+    let currentScreen = 'start';
+    let prevScreen = 'start';
+    let selectedStyle = 'casual'; // 기본 스타일
+    
+    // 실시간 날씨 & 위치 상태 데이터 (기본값: 대구광역시 중심지)
+    let weatherState = {
+      temp: null,
+      code: null,
+      locationName: "대구광역시",
+      emoji: "🌤️"
+    };
+
+    // --- 건강하고 실용적인 추천 아이템 데이터 풀 (날씨, 스타일에 매칭) ---
+    const outfitPool = {
+      tops: [
+        { name: "파스텔 면 반팔티", icon: "👕", style: "casual", temp: "hot", reason: "대구의 더운 날씨에도 쾌적함을 살릴 수 있는 단정하고 시원한 면 반팔티야!" },
+        { name: "루즈핏 옥스포드 셔츠", icon: "👔", style: "dandy", temp: "warm", reason: "바람이 딱 좋을 때 가장 세련되고 단정해 보이는 깔끔한 화이트 셔츠란다." },
+        { name: "내추럴 워셔블 맨투맨", icon: "🧥", style: "casual", temp: "warm", reason: "기온이 약간 선선할 땐 캐주얼한 느낌을 한껏 살려주는 포근한 맨투맨이 제격이지!" },
+        { name: "세미 린넨 블라우스", icon: "👚", style: "lovely", temp: "hot", reason: "화창한 대구 햇살 아래서 사랑스러운 멋을 가득 돋워 주는 이쁜 블라우스야." },
+        { name: "미니멀 하프 슬리브 티", icon: "👕", style: "hip", temp: "hot", reason: "어반 스트릿 느낌의 핏감이 살아있는 세련되고 시원한 박시핏 반팔티란다." },
+        { name: "카라 하프 피케 셔츠", icon: "👕", style: "dandy", temp: "hot", reason: "정갈한 단정함을 원할 때 이보다 더 깔끔할 수는 없는 피케 셔츠야." },
+        { name: "헤비코튼 클래식 후드티", icon: "🧥", style: "casual", temp: "cold", reason: "쌀쌀하고 찬 바람이 불어올 땐 튼튼한 헤비코튼 후드로 체온을 지켜봐!" },
+        { name: "스탠다드 자켓", icon: "🧥", style: "lovely", temp: "cold", reason: "단아하면서 정갈한 라인을 딱 잡아주는 심플 자켓을 걸쳐보렴." },
+        { name: "단정 버튼 가디건", icon: "🧥", style: "hip", temp: "warm", reason: "이너웨어와 함께 레이어드하여 세련되고도 모던한 느낌을 주는 가디건이야." },
+        { name: "실용 윈드브레이커 바람막이", icon: "🧥", style: "hip", temp: "cold", reason: "활동적인 움직임과 쌀쌀한 환절기 날씨를 모두 대비해 주는 스트릿 아우터!" }
+      ],
+      bottoms: [
+        { name: "스트레이트 데님 팬츠", icon: "👖", style: "casual", temp: "warm", reason: "클래식하고 군더더기 없는 완벽한 데일리핏 청바지야." },
+        { name: "베이지 밴딩 테이퍼드 하프팬츠", icon: "👖", style: "dandy", temp: "hot", reason: "대구 무더위도 날려줄 무릎 위 단정한 기장의 쾌적한 슬랙스 반바지야." },
+        { name: "코튼 플리츠 스커트", icon: "👗", style: "lovely", temp: "hot", reason: "밝고 활기찬 날씨와 조화를 이루는 단정하고 발랄한 치마란다." },
+        { name: "세미 와이드 조거팬츠", icon: "👖", style: "hip", temp: "warm", reason: "스트릿 무드를 담고 있어 스타일링하기 정말 이쁜 조거팬츠야." },
+        { name: "슬림 핏 코튼 치노팬츠", icon: "👖", style: "dandy", temp: "warm", reason: "바른 실루엣으로 부드럽고 젠틀한 코디를 만들어주는 깔끔한 바지란다." },
+        { name: "기모 멜란지 트레이닝 팬츠", icon: "👖", style: "casual", temp: "cold", reason: "쌀쌀할 때 몸을 포근하게 가꿔주는 무늬 없는 깔끔한 트레이닝 바지야." },
+        { name: "코듀로이 에이라인 롱스커트", icon: "👗", style: "lovely", temp: "cold", reason: "차가운 바람을 꼭 막아주는 부드러운 재질의 롱 치마야." },
+        { name: "다크데님 와이드 롱팬츠", icon: "👖", style: "hip", temp: "cold", reason: "튼튼한 원단감으로 하체 보온과 묵직한 힙스타 무드를 책임지는 바지!" }
+      ],
+      hairs: [
+        { name: "내추럴 볼륨 세팅 웨이브", icon: "💇‍♀️", style: "lovely", temp: "any", reason: "과하지 않고 단정하게 똑 떨어지는 웨이브 헤어스타일로 연출해봐!" },
+        { name: "산뜻한 로우 포니테일", icon: "💇‍♀️", style: "lovely", temp: "any", reason: "뒷머리를 정갈하고 야무지게 묶어 발랄한 매력을 전해주는 묶음 머리야." },
+        { name: "내추럴 댄디 가르마 컷", icon: "💇‍♂️", style: "dandy", temp: "any", reason: "이마를 살짝 드러내 단정한 느낌을 살려주는 멋진 연출법이지." },
+        { name: "소프트 가르망 헤어", icon: "💇‍♂️", style: "dandy", temp: "any", reason: "어떤 각도에서도 이목구비가 한눈에 잘 보이는 지적인 단정 헤어야." },
+        { name: "슬릭 일자 태슬컷", icon: "💇‍♀️", style: "hip", temp: "any", reason: "정갈함과 모던 시크한 트렌디함을 물씬 담은 일자 단발컷이야." },
+        { name: "스트레이트 롱 생머리", icon: "💇‍♀️", style: "hip", temp: "any", reason: "깔끔하고 시원시원한 매력이 돋보이는 모던 롱 헤어스타일이야." },
+        { name: "소프트 댄디 볼륨컷", icon: "💇‍♂️", style: "casual", temp: "any", reason: "누구나 어울리는 깔끔하고 손질하기 완전 편안한 기본 디자인 컷이야." },
+        { name: "포니테일 & 실크 리본타이", icon: "💇‍♀️", style: "casual", temp: "any", reason: "귀엽고 깔끔한 헤어타이로 간결하게 묶어 얼굴형이 이뻐 보이는 헤어스타일!" }
+      ]
+    };
+
+    // --- 시간 업데이트 및 날짜 세팅 ---
+    function updateDateTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('status-time').innerText = `${hours}:${minutes}`;
+
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const date = String(now.getDate()).padStart(2, '0');
+      const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+      const day = dayNames[now.getDay()];
+      document.getElementById('live-date').innerText = `${year}-${month}-${date} (${day})`;
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // --- 위치 및 날씨 정보 API 연동 (대구광역시 중심좌표 세팅) ---
+    async function getLiveWeather() {
+      // 대구광역시청 기준 대표 좌표
+      const defaultLat = 35.8714;
+      const defaultLon = 128.6014;
+      
+      // 먼저 대구의 실시간 날씨 데이터 로드
+      await fetchWeatherAndAddress(defaultLat, defaultLon, "대구광역시");
+
+      // 사용자 브라우저 GPS 확인 시 현재 실제 정밀 주소로 교체 가능
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            await fetchWeatherAndAddress(lat, lon, null);
+          },
+          (error) => {
+            console.log("위치 수집을 승인하지 않아 기본 지정된 '대구광역시' 날씨 정보로 고정 작동합니다.");
+          }
+        );
+      }
+    }
+
+    async function fetchWeatherAndAddress(lat, lon, customName) {
+      try {
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`);
+        const weatherData = await weatherRes.json();
+        
+        if (weatherData && weatherData.current) {
+          const temp = Math.round(weatherData.current.temperature_2m);
+          const code = weatherData.current.weather_code;
+          
+          weatherState.temp = temp;
+          weatherState.code = code;
+          weatherState.emoji = getWeatherEmoji(code);
+        }
+
+        if (customName) {
+          weatherState.locationName = customName;
+        } else {
+          const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`, {
+            headers: { 'Accept-Language': 'ko' }
+          });
+          const geoData = await geoRes.json();
+          if (geoData && geoData.address) {
+            const city = geoData.address.city || geoData.address.town || "대구광역시";
+            const road = geoData.address.suburb || geoData.address.neighborhood || "";
+            weatherState.locationName = road ? `${city} ${road}` : city;
+          } else {
+            weatherState.locationName = "대구광역시";
+          }
+        }
+
+        updateWeatherUI();
+      } catch (err) {
+        console.error(err);
+        if (customName) {
+          weatherState.locationName = customName;
+          updateWeatherUI();
+        }
+      }
+    }
+
+    function getWeatherEmoji(code) {
+      if (code === 0) return "☀️"; 
+      if (code >= 1 && code <= 3) return "🌤️"; 
+      if (code >= 45 && code <= 48) return "🌫️"; 
+      if (code >= 51 && code <= 67) return "🌧️"; 
+      if (code >= 71 && code <= 77) return "❄️"; 
+      if (code >= 80 && code <= 82) return "🌦️"; 
+      if (code >= 95 && code <= 99) return "⚡"; 
+      return "🌤️";
+    }
+
+    function updateWeatherUI() {
+      const tempText = weatherState.temp !== null ? `${weatherState.temp}°C` : "";
+      const weatherStr = `${weatherState.emoji} ${weatherState.locationName} ${tempText}`;
+      
+      document.getElementById('status-weather').innerHTML = `<span>${weatherStr}</span>`;
+      document.getElementById('live-location').innerText = weatherState.locationName;
+      document.getElementById('live-weather').innerText = tempText ? `${weatherState.emoji} ${tempText}` : "맑음 🌤️";
+    }
+
+    getLiveWeather();
+
+    // --- 스타일 선택 버튼 처리 (미니멀 가이드라인 테두리 변화) ---
+    function selectStyle(style, btnElement) {
+      selectedStyle = style;
+      
+      const buttons = document.querySelectorAll('.style-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-slate-900', 'border-slate-900', 'text-white', 'font-bold');
+        btn.classList.add('bg-white', 'text-slate-600');
+        // 개별 테두리 원복
+        if (btn.innerText.includes("러블리")) btn.classList.add('border-rose-200', 'text-rose-600');
+        else if (btn.innerText.includes("클래식")) btn.classList.add('border-emerald-200', 'text-emerald-700');
+        else if (btn.innerText.includes("스트릿")) btn.classList.add('border-indigo-200', 'text-indigo-700');
+      });
+
+      btnElement.classList.add('bg-slate-900', 'border-slate-900', 'text-white', 'font-bold');
+      btnElement.classList.remove('bg-white', 'text-rose-600', 'text-emerald-700', 'text-indigo-700');
+    }
+
+    // --- 화면 전환 ---
+    function goToScreen(screenId) {
+      prevScreen = currentScreen;
+      currentScreen = screenId;
+      
+      document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('screen-loading').classList.add('hidden');
+      document.getElementById('screen-result').classList.add('hidden');
+      
+      const target = document.getElementById(`screen-${screenId}`);
+      target.classList.remove('hidden');
+      
+      toggleMenu(false);
+    }
+
+    // 뒤로가기
+    function goBack() {
+      if (currentScreen === 'result') {
+        goToScreen('start');
+      } else if (currentScreen === 'loading') {
+        goToScreen('start');
+      } else {
+        alertMessage("첫 페이지입니다! 마음에 드는 목적지와 스타일을 골라주세요.");
+      }
+    }
+
+    // 슬라이드 메뉴 토글
+    function toggleMenu(show) {
+      const menu = document.getElementById('side-menu');
+      if (show) {
+        menu.classList.remove('hidden');
+      } else {
+        menu.classList.add('hidden');
+      }
+    }
+
+    // 앱 초기화
+    function resetApp() {
+      selectedStyle = 'casual';
+      document.getElementById('input-destination').value = 'school';
+      
+      const firstBtn = document.querySelectorAll('.style-btn')[0];
+      selectStyle('casual', firstBtn);
+      
+      toggleMenu(false);
+      goToScreen('start');
+      alertMessage("스타일 검색 설정이 완전히 리셋되었습니다.");
+    }
+
+    // 스타일 매칭 실행
+    function startAnalysis() {
+      goToScreen('loading');
+      setTimeout(() => {
+        generateRecommendations();
+        goToScreen('result');
+      }, 2500);
+    }
+
+    // --- 최적화된 큐레이션 알고리즘 ---
+    function generateRecommendations() {
+      const destValue = document.getElementById('input-destination').value;
+      const destText = document.getElementById('input-destination').options[document.getElementById('input-destination').selectedIndex].text;
+      
+      let tempCategory = "warm";
+      if (weatherState.temp !== null) {
+        if (weatherState.temp >= 22) {
+          tempCategory = "hot";
+        } else if (weatherState.temp < 15) {
+          tempCategory = "cold";
+        } else {
+          tempCategory = "warm";
+        }
+      }
+
+      // 상의 데이터 필터링
+      let matchedTops = outfitPool.tops.filter(item => item.style === selectedStyle && item.temp === tempCategory);
+      if (matchedTops.length === 0) matchedTops = outfitPool.tops.filter(item => item.style === selectedStyle);
+      if (matchedTops.length === 0) matchedTops = outfitPool.tops.filter(item => item.temp === tempCategory);
+
+      // 하의 데이터 필터링
+      let matchedBottoms = outfitPool.bottoms.filter(item => item.style === selectedStyle && item.temp === tempCategory);
+      if (matchedBottoms.length === 0) matchedBottoms = outfitPool.bottoms.filter(item => item.style === selectedStyle);
+      if (matchedBottoms.length === 0) matchedBottoms = outfitPool.bottoms.filter(item => item.temp === tempCategory);
+
+      // 헤어스타일 필터링
+      let matchedHairs = outfitPool.hairs.filter(item => item.style === selectedStyle);
+      if (matchedHairs.length === 0) matchedHairs = outfitPool.hairs;
+
+      // 최종 선정 (랜덤 매칭 적용)
+      const finalTop = matchedTops[Math.floor(Math.random() * matchedTops.length)];
+      const finalBottom = matchedBottoms[Math.floor(Math.random() * matchedBottoms.length)];
+      const finalHair = matchedHairs[Math.floor(Math.random() * matchedHairs.length)];
+
+      const weatherMsg = weatherState.temp !== null 
+        ? `오늘 대구의 기온은 ${weatherState.temp}°C이며 날씨는 ${weatherState.emoji} 상태입니다.` 
+        : "오늘 대구광역시는 화창하고 야외활동을 하기에 기분 좋은 날씨입니다.";
+      
+      document.getElementById('result-summary').innerText = `✨ ${destText.split('갈')[0]} 나들이 코디`;
+      document.getElementById('result-desc').innerText = `${weatherMsg} 딱 알맞은 예쁜 옷을 추천해 드려요!`;
+
+      setRecCard(1, finalTop);
+      setRecCard(2, finalBottom);
+      setRecCard(3, finalHair);
+    }
+
+    function setRecCard(index, item) {
+      document.getElementById(`rec-icon-${index}`).innerText = item.icon;
+      document.getElementById(`rec-name-${index}`).innerText = item.name;
+      document.getElementById(`rec-reason-${index}`).innerText = item.reason;
+      
+      const shoppingLink = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(item.name)}`;
+      const linkElement = document.getElementById(`rec-link-${index}`);
+      linkElement.setAttribute('href', shoppingLink);
+    }
+
+    function shareOutfit() {
+      const topName = document.getElementById('rec-name-1').innerText;
+      const bottomName = document.getElementById('rec-name-2').innerText;
+      const hairName = document.getElementById('rec-name-3').innerText;
+      
+      alertMessage(`📸 코디 분석결과가 보관함에 저장되었습니다.\n\n상의: ${topName}\n하의: ${bottomName}\n헤어: ${hairName}\n\n오늘 대구에서 자신감 넘치는 완벽한 코디로 행복한 하루를 보내세요! 💖`);
+    }
+
+    function alertMessage(text) {
+      document.getElementById('modal-text').innerText = text;
+      document.getElementById('custom-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('custom-modal').classList.add('hidden');
+    }
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 권하윤" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 권하윤</div>
+</body>
+</html>

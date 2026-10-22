@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>뱅크 - 삼성 파이낸스</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Canvas 전용 스마트폰 프레임 디자인 */
+    .phone-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      width: 100%;
+      background: radial-gradient(circle, #0f172a 0%, #020617 100%);
+      padding: 12px;
+      box-sizing: border-box;
+    }
+
+    .phone-container {
+      width: 360px;
+      height: 720px;
+      max-height: 95vh;
+      border: 12px solid #1e293b;
+      border-radius: 44px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.9), 
+                  0 0 40px rgba(7, 76, 161, 0.3);
+      background-color: #074CA1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 카메라 펀치홀 */
+    .phone-camera {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background-color: #0f172a;
+      border-radius: 50%;
+      z-index: 50;
+      border: 2px solid #334155;
+    }
+
+    /* 화면 메인 내부 영역 */
+    .phone-screen {
+      height: calc(100% - 48px);
+      margin-top: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 하단 소프트키 네비게이션 바 */
+    .nav-bar {
+      height: 48px;
+      background-color: #0a192f;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 40;
+    }
+
+    /* 스크롤바 감추기 */
+    .phone-screen::-webkit-scrollbar {
+      display: none;
+    }
+    .phone-screen {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* 카드 애니메이션 효과 */
+    .credit-card {
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .credit-card:active {
+      transform: scale(0.96) rotate(-1deg);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 m-0 p-0 overflow-hidden select-none">
+
+  <div class="phone-wrapper">
+    <div class="phone-container text-white font-sans">
+      
+      <!-- 상단 전면 카메라 -->
+      <div class="phone-camera"></div>
+
+      <!-- 메인 스크린 디스플레이 -->
+      <div id="screen" class="phone-screen p-4">
+        <!-- 자바스크립트 화면 렌더링 영역 -->
+      </div>
+
+      <!-- 하단 네비게이션 소프트키 -->
+      <div class="nav-bar text-slate-300">
+        <button onclick="switchScreen('main')" class="p-2 hover:text-white transition active:scale-90 text-base"><i class="fa-solid fa-bars"></i></button>
+        <button onclick="switchScreen('start')" class="p-2 hover:text-white transition active:scale-90 text-base"><i class="fa-solid fa-house"></i></button>
+        <button onclick="goBack()" class="p-2 hover:text-white transition active:scale-90 text-base"><i class="fa-solid fa-chevron-left"></i></button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 토스트 및 모달 레이어 -->
+  <div id="custom-toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-blue-950/95 border border-blue-400 text-white text-xs px-4 py-2.5 rounded-2xl shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></span>
+    <span id="toast-message" class="font-medium">안내 메시지</span>
+  </div>
+
+  <div id="custom-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-40 flex items-center justify-center p-4">
+    <div class="bg-gradient-to-b from-blue-900 to-slate-900 border border-blue-400/30 p-5 rounded-3xl w-72 shadow-2xl text-center transform scale-90 transition-transform duration-300" id="modal-box">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script>
+    // 앱 전역 상태
+    let currentStep = 'start';
+    let historyStack = [];
+    let weatherData = "☀️ 대구 24°C";
+    let accountBalance = 1250000;
+
+    // 카드 스타일 상태
+    let cardColor = 'bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900';
+    let cardColorName = '삼성 클래식 블루';
+    let cardShape = 'rounded-2xl';
+    let cardShapeName = '동글동글형';
+    let cardPattern = 'lions';
+
+    function switchScreen(screenName) {
+      if (currentStep !== screenName) {
+        historyStack.push(currentStep);
+        currentStep = screenName;
+        renderScreen();
+      }
+    }
+
+    function goBack() {
+      if (historyStack.length > 0) {
+        currentStep = historyStack.pop();
+        renderScreen();
+      }
+    }
+
+    function triggerPush(msg) {
+      const toast = document.getElementById('custom-toast');
+      const text = document.getElementById('toast-message');
+      text.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+        toast.classList.remove('opacity-100');
+      }, 2300);
+    }
+
+    function openModal(contentHtml) {
+      const modal = document.getElementById('custom-modal');
+      const box = document.getElementById('modal-box');
+      document.getElementById('modal-content').innerHTML = contentHtml;
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100');
+      box.classList.remove('scale-90');
+      box.classList.add('scale-100');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('custom-modal');
+      const box = document.getElementById('modal-box');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100');
+      box.classList.add('scale-90');
+      box.classList.remove('scale-100');
+    }
+
+    function fetchLiveWeather() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            try {
+              const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+              const data = await res.json();
+              const temp = Math.round(data.current_weather.temperature);
+              const code = data.current_weather.weathercode;
+              let emoji = "☀️";
+              if (code >= 1 && code <= 3) emoji = "⛅";
+              else if (code >= 45) emoji = "🌫️";
+              else if (code >= 51) emoji = "🌧️";
+              
+              weatherData = `${emoji} ${temp}°C`;
+              renderScreen();
+            } catch (e) {
+              renderScreen();
+            }
+          },
+          () => { renderScreen(); }
+        );
+      }
+    }
+
+    const bankSpots = [
+      { name: "삼성라이온즈파크 지점", reason: "날씨가 맑아서 라이온즈 구장 ATM에서 입출금하기 최고예요!" },
+      { name: "삼성화재 사옥 ATM", reason: "대기시간 수수료 없이 순식간에 수수료 무료로 출금 가능합니다." },
+      { name: "삼성생명 본점 지점", reason: "현재 시간대에 대기열이 짧아 통장 친절 상담을 받기 제격이에요!" },
+      { name: "삼성카드 스마트센터", reason: "새로 만든 커스텀 카드를 현장에서 바로 확인하실 수 있습니다!" },
+      { name: "삼성 디지털프라자 지점", reason: "시원하고 쾌적하게 자판기 음료를 마시며 이용 가능해요!" },
+      { name: "삼성역 코어 금융센터", reason: "보안 시스템이 강력해 비밀번호 관리가 매우 안전해요!" },
+      { name: "삼성 서초 금융타운", reason: "내 통장 이상 유무 정밀 체크를 무료로 도와드립니다!" },
+      { name: "삼성전자 단지 지점", reason: "신속 송금 처리 기기가 넉넉하게 준비되어 있어 편리해요!" }
+    ];
+
+    function startSearching() {
+      switchScreen('analysis');
+      setTimeout(() => {
+        switchScreen('result');
+      }, 2000);
+    }
+
+    // 비밀번호 모달
+    function openTransferModal() {
+      const html = `
+        <div class="p-1">
+          <h3 class="text-sm font-extrabold text-yellow-300 flex items-center justify-center gap-1.5 mb-2">
+            <i class="fa-solid fa-key"></i> 간편 송금 비밀번호
+          </h3>
+          <p class="text-[10px] text-blue-100 mb-3">안전 이체를 위해 비밀번호 4자리를 누르세요.</p>
+          <div class="flex justify-center gap-2.5 mb-4">
+            <div id="dot-1" class="w-3 h-3 rounded-full border border-blue-400"></div>
+            <div id="dot-2" class="w-3 h-3 rounded-full border border-blue-400"></div>
+            <div id="dot-3" class="w-3 h-3 rounded-full border border-blue-400"></div>
+            <div id="dot-4" class="w-3 h-3 rounded-full border border-blue-400"></div>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-xs font-bold mb-2">
+            <button onclick="pressPinNum(1)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">1</button>
+            <button onclick="pressPinNum(2)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">2</button>
+            <button onclick="pressPinNum(3)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">3</button>
+            <button onclick="pressPinNum(4)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">4</button>
+            <button onclick="pressPinNum(5)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">5</button>
+            <button onclick="pressPinNum(6)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">6</button>
+            <button onclick="pressPinNum(7)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">7</button>
+            <button onclick="pressPinNum(8)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">8</button>
+            <button onclick="pressPinNum(9)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">9</button>
+            <button onclick="clearPin()" class="py-2 bg-red-900/40 text-red-300 rounded-xl active:bg-red-800">C</button>
+            <button onclick="pressPinNum(0)" class="py-2 bg-blue-950/80 rounded-xl active:bg-blue-800">0</button>
+            <button onclick="closeModal()" class="py-2 bg-slate-800 rounded-xl active:bg-slate-700">닫기</button>
+          </div>
+        </div>
+      `;
+      openModal(html);
+      currentPin = "";
+    }
+
+    let currentPin = "";
+    function pressPinNum(num) {
+      if (currentPin.length < 4) {
+        currentPin += num;
+        document.getElementById(`dot-${currentPin.length}`).classList.add('bg-yellow-400');
+        
+        if (currentPin.length === 4) {
+          setTimeout(() => {
+            closeModal();
+            accountBalance -= 10000;
+            triggerPush("💸 인증 완료! 10,000원이 안전하게 송금되었습니다.");
+            renderScreen();
+          }, 250);
+        }
+      }
+    }
+
+    function clearPin() {
+      currentPin = "";
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`dot-${i}`).classList.remove('bg-yellow-400');
+      }
+    }
+
+    function openStatusModal() {
+      const html = `
+        <div class="p-1">
+          <h3 class="text-sm font-extrabold text-blue-300 flex items-center justify-center gap-1.5 mb-2">
+            <i class="fa-solid fa-shield-halved"></i> 통장 안전 점검
+          </h3>
+          <div class="my-3 flex flex-col items-center justify-center">
+            <div class="w-14 h-14 rounded-full border-4 border-emerald-400 flex items-center justify-center bg-emerald-500/20 text-emerald-400 text-xl animate-pulse">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <p class="text-xs font-bold mt-2 text-emerald-300">최상급 보안 작동 중</p>
+          </div>
+          <p class="text-[10px] text-slate-300 leading-relaxed mb-3">
+            삼성생명 및 삼성카드의 24시간 도용 방지 시스템이 정상 작동 중입니다.
+          </p>
+          <button onclick="closeModal()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 rounded-full text-xs font-bold">
+            확인
+          </button>
+        </div>
+      `;
+      openModal(html);
+    }
+
+    function openAccountsModal() {
+      const html = `
+        <div class="p-1 text-left">
+          <h3 class="text-sm font-extrabold text-yellow-300 text-center mb-2">
+            <i class="fa-solid fa-wallet"></i> 내 계좌 내역
+          </h3>
+          <div class="flex flex-col gap-2 mb-3">
+            <div class="bg-blue-950/80 p-2 rounded-xl border border-blue-400/20">
+              <span class="text-[9px] text-blue-200 block">삼성 스마트 입출금 통장</span>
+              <p class="text-xs font-extrabold text-white mt-0.5">${accountBalance.toLocaleString()} 원</p>
+            </div>
+            <div class="bg-blue-950/80 p-2 rounded-xl border border-blue-400/20">
+              <span class="text-[9px] text-blue-200 block">삼성 라이온즈 적금</span>
+              <p class="text-xs font-extrabold text-white mt-0.5">3,000,000 원</p>
+            </div>
+          </div>
+          <button onclick="closeModal()" class="w-full py-2 bg-blue-600 rounded-full text-xs font-bold text-center">
+            닫기
+          </button>
+        </div>
+      `;
+      openModal(html);
+    }
+
+    function setCardColor(gradient, name) {
+      cardColor = gradient;
+      cardColorName = name;
+      renderScreen();
+      triggerPush(`카드 색상이 '${name}'(으)로 체인지! 🎨`);
+    }
+
+    function setCardShape(shapeClass, name) {
+      cardShape = shapeClass;
+      cardShapeName = name;
+      renderScreen();
+      triggerPush(`카드 모서리가 '${name}'(으)로 체인지! 📐`);
+    }
+
+    function setCardPattern(pat) {
+      cardPattern = pat;
+      renderScreen();
+      triggerPush(`카드 무늬가 스타일리시하게 체인지! ✨`);
+    }
+
+    function renderScreen() {
+      const screen = document.getElementById('screen');
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+
+      if (currentStep === 'start') {
+        screen.innerHTML = `
+          <div class="flex-1 flex flex-col items-center justify-between py-6 h-full">
+            <div class="text-center mt-2">
+              <span class="bg-blue-800 text-[9px] text-blue-200 px-2.5 py-1 rounded-full font-bold">SAMSUNG BANK</span>
+              <h1 class="text-3xl font-black mt-2 tracking-wider text-white">뱅크</h1>
+              <p class="text-[10px] text-blue-200 mt-1">상상했던 나만의 삼성 금융 파트너</p>
+            </div>
+
+            <div class="my-auto flex flex-col items-center">
+              <div class="w-32 h-32 rounded-full border-4 border-white flex items-center justify-center bg-blue-600 shadow-2xl p-2 transform hover:scale-105 active:scale-95 transition cursor-pointer" onclick="triggerPush('라이온즈 사자가 포효합니다! 🦁')">
+                <div class="w-full h-full rounded-full border-2 border-dashed border-blue-200 flex flex-col items-center justify-center text-center">
+                  <span class="text-2xl font-black text-yellow-300 tracking-tighter italic">LIONS</span>
+                  <span class="text-[9px] text-white font-bold">SAMSUNG</span>
+                </div>
+              </div>
+              <p class="text-xs mt-3 text-blue-100 font-bold">삼성 라이온즈 스마트 뱅킹</p>
+            </div>
+
+            <button onclick="switchScreen('main')" class="w-full py-3.5 bg-white text-blue-900 rounded-full font-extrabold shadow-lg hover:bg-blue-50 active:scale-95 transition text-xs">
+              앱 시작하기 <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        `;
+      } else if (currentStep === 'main') {
+        screen.innerHTML = `
+          <div class="flex flex-col gap-3 h-full">
+            <div class="bg-blue-800/50 p-2 rounded-2xl border border-blue-400/30 text-[10px] flex justify-between items-center">
+              <div>
+                <p class="font-bold text-blue-100">📅 ${dateStr}</p>
+                <p class="text-slate-300 mt-0.5">실시간 날씨: <span class="font-semibold text-yellow-300">${weatherData}</span></p>
+              </div>
+              <div class="w-6 h-6 bg-white text-blue-900 rounded-full flex items-center justify-center font-black text-[10px]">S</div>
+            </div>
+
+            <!-- 스마트 카드 영역 -->
+            <div class="credit-card ${cardColor} ${cardShape} p-3.5 shadow-2xl border border-white/20 relative overflow-hidden cursor-pointer" onclick="switchScreen('card-view')">
+              ${cardPattern === 'lions' ? `
+                <div class="absolute inset-0 opacity-15 flex items-center justify-center pointer-events-none">
+                  <span class="text-6xl font-black tracking-tighter rotate-12 text-yellow-300">LIONS</span>
+                </div>
+              ` : `
+                <div class="absolute inset-x-0 bottom-0 h-1/2 bg-blue-500/20 skew-y-6 transform origin-bottom-right pointer-events-none"></div>
+              `}
+              
+              <div class="flex justify-between items-start relative z-10">
+                <div>
+                  <p class="text-[8px] font-bold tracking-widest text-blue-200">SAMSUNG CARD</p>
+                  <p class="text-[9px] text-yellow-300 font-extrabold">Lions VIP</p>
+                </div>
+                <span class="text-[8px] font-bold bg-white/20 px-1.5 py-0.5 rounded">IC</span>
+              </div>
+              
+              <div class="my-2 flex items-center gap-1.5 relative z-10">
+                <div class="w-6 h-4 bg-gradient-to-r from-yellow-300 to-amber-500 rounded border border-yellow-200"></div>
+              </div>
+
+              <div class="flex justify-between items-end mt-1 relative z-10">
+                <div>
+                  <p class="text-xs font-bold tracking-widest text-white">**** **** 1982</p>
+                  <p class="text-[8px] text-blue-200">SAMSUNG LIONS</p>
+                </div>
+                <span class="text-xs font-black italic">samsung</span>
+              </div>
+            </div>
+
+            <!-- 계좌 요약 -->
+            <div class="bg-gradient-to-r from-blue-700 to-indigo-900 p-3 rounded-2xl shadow-lg border border-white/10">
+              <div class="flex justify-between items-center text-[9px] text-blue-200">
+                <span>삼성 주계좌</span>
+                <span class="bg-emerald-400/20 text-emerald-300 px-1.5 py-0.5 rounded-full text-[8px]">정상</span>
+              </div>
+              <div class="text-xl font-black mt-1 text-white">${accountBalance.toLocaleString()} 원</div>
+            </div>
+
+            <!-- 핵심 4대 기능 버튼 -->
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="openTransferModal()" class="bg-blue-800/80 hover:bg-blue-700 p-2.5 rounded-full flex items-center justify-center gap-1.5 border border-blue-400/30 active:scale-95">
+                <div class="w-4 h-4 rounded-full bg-white text-blue-900 flex items-center justify-center text-[8px] font-bold">S</div>
+                <span class="text-[10px] font-extrabold">비밀번호 송금</span>
+              </button>
+
+              <button onclick="switchScreen('card-view')" class="bg-gradient-to-r from-yellow-400/20 to-amber-500/20 p-2.5 rounded-full flex items-center justify-center gap-1.5 border border-yellow-400/40 active:scale-95">
+                <div class="w-4 h-4 rounded-full bg-yellow-400 text-blue-950 flex items-center justify-center text-[8px] font-bold">S</div>
+                <span class="text-[10px] font-extrabold text-yellow-300">내 카드 꾸미기</span>
+              </button>
+
+              <button onclick="openStatusModal()" class="bg-blue-800/80 hover:bg-blue-700 p-2.5 rounded-full flex items-center justify-center gap-1.5 border border-blue-400/30 active:scale-95">
+                <div class="w-4 h-4 rounded-full bg-white text-blue-900 flex items-center justify-center text-[8px] font-bold">S</div>
+                <span class="text-[10px] font-extrabold">통장 상태 확인</span>
+              </button>
+
+              <button onclick="openAccountsModal()" class="bg-blue-800/80 hover:bg-blue-700 p-2.5 rounded-full flex items-center justify-center gap-1.5 border border-blue-400/30 active:scale-95">
+                <div class="w-4 h-4 rounded-full bg-white text-blue-900 flex items-center justify-center text-[8px] font-bold">S</div>
+                <span class="text-[10px] font-extrabold">내 계좌 보기</span>
+              </button>
+            </div>
+
+            <!-- 삼성 계열사 네트워크 -->
+            <div class="bg-blue-950/70 p-2 rounded-2xl border border-blue-500/30">
+              <h2 class="text-[8px] font-bold text-blue-200 mb-1">삼성 금융 계열사 서비스</h2>
+              <div class="grid grid-cols-3 gap-1 text-center text-[9px]">
+                <div onclick="triggerPush('삼성생명 혜택 보기')" class="bg-blue-900/60 p-1 rounded-xl cursor-pointer">
+                  <p class="font-bold">삼성생명</p>
+                </div>
+                <div onclick="triggerPush('삼성카드 혜택 보기')" class="bg-blue-900/60 p-1 rounded-xl cursor-pointer">
+                  <p class="font-bold">삼성카드</p>
+                </div>
+                <div onclick="triggerPush('삼성화재 혜택 보기')" class="bg-blue-900/60 p-1 rounded-xl cursor-pointer">
+                  <p class="font-bold">삼성화재</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ATM 큐레이션 진행 -->
+            <button onclick="startSearching()" class="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-blue-950 font-black rounded-full shadow-lg hover:brightness-110 active:scale-95 transition text-[10px]">
+              📍 내 위치/날씨별 삼성 ATM 및 영업점 추천
+            </button>
+
+            <div class="text-center mt-0.5">
+              <span class="text-xs font-black tracking-widest text-blue-300 uppercase">samsung</span>
+            </div>
+          </div>
+        `;
+      } else if (currentStep === 'card-view') {
+        screen.innerHTML = `
+          <div class="flex flex-col gap-3 h-full justify-between">
+            <div class="text-center">
+              <h2 class="text-xs font-extrabold text-white">나만의 카드 디자인 캔버스</h2>
+              <p class="text-[9px] text-blue-200">버튼을 눌러 색상과 모양을 변경해 보세요!</p>
+            </div>
+
+            <div class="flex justify-center my-1">
+              <div class="w-52 h-32 ${cardColor} ${cardShape} p-3 shadow-2xl border border-white/30 relative overflow-hidden transition-all">
+                ${cardPattern === 'lions' ? `
+                  <div class="absolute inset-0 opacity-15 flex items-center justify-center pointer-events-none">
+                    <span class="text-5xl font-black rotate-12 text-yellow-300">LIONS</span>
+                  </div>
+                ` : `
+                  <div class="absolute inset-x-0 bottom-0 h-1/2 bg-blue-500/20 skew-y-6 transform origin-bottom-right pointer-events-none"></div>
+                `}
+
+                <div class="flex justify-between items-start">
+                  <span class="text-[8px] font-bold text-blue-100">SAMSUNG CARD</span>
+                  <span class="text-[8px] bg-white/20 px-1 py-0.5 rounded">IC</span>
+                </div>
+
+                <div class="my-1">
+                  <div class="w-5 h-3.5 bg-gradient-to-r from-yellow-300 to-amber-500 rounded border border-yellow-200"></div>
+                </div>
+
+                <div class="flex justify-between items-end mt-2">
+                  <p class="text-[9px] font-bold text-white">**** 1982</p>
+                  <span class="text-[10px] font-black italic">samsung</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-blue-950/70 p-2.5 rounded-2xl border border-blue-400/30 flex flex-col gap-2 text-[9px]">
+              <div>
+                <p class="font-bold text-blue-200 mb-1">🎨 카드 색상</p>
+                <div class="flex gap-2">
+                  <button onclick="setCardColor('bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900', '삼성 블루')" class="w-5 h-5 rounded-full bg-blue-600 border border-white"></button>
+                  <button onclick="setCardColor('bg-gradient-to-br from-yellow-500 via-amber-600 to-amber-800', '골든 사자')" class="w-5 h-5 rounded-full bg-yellow-500 border border-transparent hover:border-white"></button>
+                  <button onclick="setCardColor('bg-gradient-to-br from-slate-100 to-slate-400 text-blue-900', '라이온즈 화이트')" class="w-5 h-5 rounded-full bg-white border border-transparent hover:border-white"></button>
+                  <button onclick="setCardColor('bg-gradient-to-br from-zinc-800 to-black', '다크 블랙')" class="w-5 h-5 rounded-full bg-zinc-900 border border-transparent hover:border-white"></button>
+                </div>
+              </div>
+
+              <div>
+                <p class="font-bold text-blue-200 mb-1">📐 모서리 모양</p>
+                <div class="flex gap-1">
+                  <button onclick="setCardShape('rounded-2xl', '동글동글형')" class="bg-blue-900/80 px-2 py-1 rounded border border-blue-500/20">동글동글</button>
+                  <button onclick="setCardShape('rounded-none', '각진네모형')" class="bg-blue-900/80 px-2 py-1 rounded border border-blue-500/20">각진네모</button>
+                  <button onclick="setCardShape('rounded-[22px]', '타원형')" class="bg-blue-900/80 px-2 py-1 rounded border border-blue-500/20">타원형</button>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="switchScreen('main'); triggerPush('🎨 새 카드가 등록되었습니다!');" class="w-full py-2.5 bg-gradient-to-r from-yellow-400 to-amber-500 text-blue-950 font-black rounded-full text-xs">
+              이 모드로 저장 완료
+            </button>
+          </div>
+        `;
+      } else if (currentStep === 'analysis') {
+        screen.innerHTML = `
+          <div class="flex-1 flex flex-col items-center justify-center text-center p-4 h-full">
+            <div class="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <h2 class="text-sm font-extrabold text-white">맞춤 장소 분석 중...</h2>
+            <p class="text-[9px] text-blue-200 mt-2">오늘 날씨(${weatherData})에 딱 맞는<br>삼성 지점을 탐색하고 있습니다.</p>
+          </div>
+        `;
+      } else if (currentStep === 'result') {
+        const shuffled = [...bankSpots].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 3);
+
+        let listHtml = selected.map(item => `
+          <div class="bg-blue-900/60 border border-blue-400/20 p-2 rounded-xl flex justify-between items-center gap-2">
+            <div class="text-left">
+              <h3 class="font-extrabold text-[10px] text-yellow-300">${item.name}</h3>
+              <p class="text-[8px] text-blue-100 mt-0.5">${item.reason}</p>
+            </div>
+            <a href="https://map.naver.com/v5/search/${encodeURIComponent(item.name)}" target="_blank" rel="noopener noreferrer" class="bg-yellow-400 text-blue-950 px-2 py-1 rounded-full text-[8px] font-black shrink-0">
+              지도보기
+            </a>
+          </div>
+        `).join('');
+
+        screen.innerHTML = `
+          <div class="flex flex-col gap-2.5 h-full justify-between">
+            <div class="text-center">
+              <span class="bg-yellow-400 text-blue-950 text-[8px] font-black px-2 py-0.5 rounded-full">추천 완료</span>
+              <h2 class="text-xs font-extrabold mt-1">오늘 추천하는 삼성 지점</h2>
+            </div>
+
+            <div class="flex flex-col gap-1.5 my-auto">
+              ${listHtml}
+            </div>
+
+            <button onclick="switchScreen('main')" class="w-full py-2.5 bg-white text-blue-900 font-extrabold rounded-full text-[10px]">
+              메인 화면으로 돌아가기
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    fetchLiveWeather();
+    renderScreen();
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 김민승" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 김민승</div>
+</body>
+</html>

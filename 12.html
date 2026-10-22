@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>초록이 - 기분 맞춤 음료</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap');
+    
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      background-color: #dcfce7;
+    }
+    
+    .font-jua {
+      font-family: 'Jua', sans-serif;
+    }
+
+    /* 스마트폰 틀 스타일링 */
+    .phone-container {
+      width: 100%;
+      max-width: 390px;
+      height: 800px;
+      background-color: #f0fdf4;
+      border-radius: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      border: 12px solid #2d3748;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 상단 카메라 노치 바 */
+    .phone-notch {
+      width: 150px;
+      height: 24px;
+      background-color: #2d3748;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 50;
+    }
+
+    /* 움직이는 마법의 그라데이션 배경 효과 */
+    .magic-gradient-bg {
+      background: linear-gradient(135deg, #a7f3d0, #fef08a, #bae6fd, #fbcfe8, #a7f3d0);
+      background-size: 400% 400%;
+      animation: gradientMove 10s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* 동그라미 시작 버튼 커스텀 */
+    .btn-circle-start {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-circle-start:active {
+      transform: scale(0.92);
+    }
+
+    /* 스크롤바 숨기기 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+  <!-- 스마트폰 프레임 -->
+  <div class="phone-container relative border-8 border-gray-800">
+    <div class="phone-notch"></div>
+
+    <!-- 앱 헤더 (상단바) -->
+    <header class="bg-emerald-500 pt-8 pb-3 px-4 shadow-sm text-center text-white relative z-10">
+      <h1 class="text-2xl font-bold font-jua flex items-center justify-center gap-2">
+        <i class="fa-solid fa-leaf text-lime-200"></i> 초록이 <i class="fa-solid fa-glass-water text-emerald-100"></i>
+      </h1>
+      <p class="text-xs text-emerald-100 font-semibold mt-0.5">내 기분에 딱 맞는 맞춤 음료 제조소</p>
+    </header>
+
+    <!-- 실시간 데이터 바 (날짜, 시간, 날씨, 위치) -->
+    <div class="bg-emerald-100/90 px-3 py-2 border-b border-emerald-200 flex items-center justify-between text-xs text-emerald-900 font-medium z-10">
+      <div id="datetime-info" class="flex items-center gap-1">
+        <i class="fa-regular fa-clock text-emerald-700"></i>
+        <span>시간 로딩 중...</span>
+      </div>
+      <div id="weather-info" class="flex items-center gap-1 font-semibold text-emerald-800">
+        <i class="fa-solid fa-spinner animate-spin"></i>
+        <span>날씨 확인 중...</span>
+      </div>
+    </div>
+
+    <!-- 메인 컨텐츠 영역 (마법의 그라데이션 배경 적용) -->
+    <main class="flex-1 overflow-y-auto no-scrollbar p-4 magic-gradient-bg relative">
+
+      <!-- [1단계 화면] 네가 그린 스케치 시작 화면! -->
+      <section id="step1-screen" class="flex flex-col items-center justify-between h-full py-4 text-center">
+        <!-- 네가 손으로 쓴 제목 스타일 반영 -->
+        <div class="bg-white/90 backdrop-blur border-4 border-emerald-400 p-5 rounded-3xl shadow-md w-full my-2">
+          <h2 class="text-2xl font-extrabold text-emerald-900 font-jua leading-relaxed">
+            오늘의 기분에 따라<br>
+            <span class="text-emerald-600">음료수</span>를 만들어준다!
+          </h2>
+          <p class="text-xs text-gray-500 mt-2">원하는 기분을 고르고 초록이의 맞춤 음료를 만나봐!</p>
+        </div>
+
+        <!-- 그림 속에 있던 귀여운 음료수 컵 일러스트를 더 화려하게! -->
+        <div class="my-4 relative flex items-center justify-center">
+          <div class="w-36 h-48 bg-white/40 backdrop-blur-md border-[5px] border-white/80 rounded-b-[2.5rem] rounded-t-xl shadow-[0_8px_32px_rgba(0,0,0,0.1)] flex flex-col items-center justify-end relative overflow-hidden">
+            <!-- 화려한 줄무늬 빨대 -->
+            <div class="w-4 h-28 bg-[repeating-linear-gradient(45deg,#fb7185,#fb7185_10px,#ffffff_10px,#ffffff_20px)] rounded-full absolute -top-8 right-6 rotate-12 shadow-lg z-0"></div>
+            <!-- 마법의 그라데이션 음료 액체 -->
+            <div class="w-full h-[75%] bg-gradient-to-t from-emerald-400 via-teal-300 to-lime-200 absolute bottom-0 flex flex-col items-center justify-start pt-3 z-10 shadow-[inset_0_4px_10px_rgba(255,255,255,0.5)]">
+              <!-- 뽀글뽀글 기포와 얼음 효과 -->
+              <div class="w-4 h-4 bg-white/60 rounded-md absolute bottom-5 left-5 rotate-12 animate-pulse"></div>
+              <div class="w-3 h-3 bg-white/50 rounded-full absolute bottom-12 right-6 animate-bounce"></div>
+              <div class="w-5 h-5 bg-white/40 rounded-md absolute bottom-16 left-8 rotate-45 animate-pulse"></div>
+              <span class="text-4xl animate-bounce drop-shadow-xl mt-2">🍹</span>
+            </div>
+            <!-- 귀여운 이름표 -->
+            <div class="z-20 absolute bottom-3 bg-white/90 px-4 py-1 rounded-full text-emerald-800 font-extrabold text-lg font-jua shadow-md border-2 border-emerald-100">초록이 컵</div>
+          </div>
+        </div>
+
+        <!-- 기분 선택 영역 (버튼) -->
+        <div class="w-full bg-white/90 p-3 rounded-2xl border-2 border-emerald-300 space-y-2">
+          <p class="text-xs font-bold text-emerald-800 font-jua">지금 네 기분을 아래에서 골라줘!</p>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="selectMood('신남', '🥳')" class="p-2 bg-yellow-100 hover:bg-yellow-200 border border-yellow-300 rounded-xl text-xs font-bold text-yellow-900 flex flex-col items-center">
+              <span class="text-lg">🥳</span>신나요!
+            </button>
+            <button onclick="selectMood('우울', '🌧️')" class="p-2 bg-blue-100 hover:bg-blue-200 border border-blue-300 rounded-xl text-xs font-bold text-blue-900 flex flex-col items-center">
+              <span class="text-lg">🌧️</span>우울해요
+            </button>
+            <button onclick="selectMood('피곤', '😴')" class="p-2 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-xl text-xs font-bold text-purple-900 flex flex-col items-center">
+              <span class="text-lg">😴</span>피곤해요
+            </button>
+            <button onclick="selectMood('답답', '🔥')" class="p-2 bg-red-100 hover:bg-red-200 border border-red-300 rounded-xl text-xs font-bold text-red-900 flex flex-col items-center">
+              <span class="text-lg">🔥</span>답답해요
+            </button>
+            <button onclick="selectMood('평온', '🌿')" class="p-2 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-xl text-xs font-bold text-emerald-900 flex flex-col items-center">
+              <span class="text-lg">🌿</span>평온해요
+            </button>
+            <button onclick="selectMood('설렘', '💖')" class="p-2 bg-pink-100 hover:bg-pink-200 border border-pink-300 rounded-xl text-xs font-bold text-pink-900 flex flex-col items-center">
+              <span class="text-lg">💖</span>설레요!
+            </button>
+          </div>
+        </div>
+
+        <!-- 네 스케치 그림 아래쪽에 있던 동그라미 시작 버튼! -->
+        <div class="mt-2">
+          <button onclick="startCustomBlend()" class="btn-circle-start bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-4 border-white">
+            <div class="flex flex-col items-center">
+              <i class="fa-solid fa-play text-xl"></i>
+              <span class="text-xs font-bold font-jua mt-0.5">만들기</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- [2단계 화면] 분석 중 로딩 화면 -->
+      <section id="step2-screen" class="hidden flex flex-col items-center justify-center h-full text-center space-y-4 py-16">
+        <div class="relative w-28 h-28 flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full border-4 border-emerald-300 animate-ping"></div>
+          <div class="w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-full flex items-center justify-center shadow-lg text-4xl text-white">
+            <i class="fa-solid fa-blender animate-bounce"></i>
+          </div>
+        </div>
+        <div>
+          <span class="bg-emerald-200 text-emerald-900 text-xs px-3 py-1 rounded-full font-bold">2단계</span>
+          <h3 class="text-lg font-bold text-gray-800 mt-2 font-jua">초록이가 맞춤 음료를 만들고 있어요!</h3>
+          <p id="loading-desc" class="text-xs text-emerald-700 mt-1">네 기분과 날씨에 꼭 맞는 재료 조합 중...</p>
+        </div>
+        <div class="w-48 bg-gray-200 rounded-full h-3 overflow-hidden border border-emerald-300">
+          <div id="loading-bar" class="bg-emerald-500 h-3 rounded-full w-0 transition-all duration-300"></div>
+        </div>
+      </section>
+
+      <!-- [3단계 화면] 더 많아지고 화려해진 결과 화면! -->
+      <section id="step3-screen" class="hidden space-y-3">
+        <div class="text-center bg-white/80 p-2.5 rounded-2xl border-2 border-emerald-300 shadow-sm">
+          <span class="bg-emerald-500 text-white text-xs px-3 py-0.5 rounded-full font-bold">2. 결과 추천 화면</span>
+          <h2 class="text-base font-bold text-emerald-900 mt-1 font-jua">초록이의 맞춤 음료 5가지 완성! 🍹</h2>
+          <p class="text-[11px] text-gray-600">스케치 그림처럼 더 많고 예쁜 음료를 골라봤어!</p>
+        </div>
+
+        <!-- 네가 그린 그림처럼 예쁜 컵 모양과 함께 나타나는 결과 리스트 -->
+        <div id="recommend-list" class="space-y-3 pb-6">
+          <!-- JS에서 동적으로 생성됨 -->
+        </div>
+
+        <button onclick="resetApp()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-xs shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-rotate-left"></i> 시작 화면으로 돌아가기
+        </button>
+      </section>
+
+    </main>
+
+    <!-- 하단 내비게이션 바 (메뉴 | 홈 | 뒤로가기) -->
+    <footer class="bg-white border-t-2 border-emerald-200 h-14 flex items-center justify-around px-4 z-10">
+      <button onclick="showNotice('메뉴: 초록이의 음료 조리법 모음집입니다!')" class="flex flex-col items-center text-gray-600 hover:text-emerald-600">
+        <i class="fa-solid fa-bars text-lg"></i>
+        <span class="text-[10px] font-bold mt-0.5">메뉴</span>
+      </button>
+      <button onclick="resetApp()" class="flex flex-col items-center text-emerald-600">
+        <i class="fa-solid fa-house text-lg"></i>
+        <span class="text-[10px] font-bold mt-0.5">홈</span>
+      </button>
+      <button onclick="goBack()" class="flex flex-col items-center text-gray-600 hover:text-emerald-600">
+        <i class="fa-solid fa-chevron-left text-lg"></i>
+        <span class="text-[10px] font-bold mt-0.5">뒤로가기</span>
+      </button>
+    </footer>
+  </div>
+
+  <!-- 알림 팝업 모달 -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-5 rounded-3xl max-w-xs w-full text-center space-y-3 shadow-xl border-4 border-emerald-400">
+      <div class="text-3xl text-emerald-500"><i class="fa-solid fa-circle-info"></i></div>
+      <p id="modal-msg" class="text-xs font-bold text-gray-700">알림 메시지</p>
+      <button onclick="closeModal()" class="w-full py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold">확인</button>
+    </div>
+  </div>
+
+  <script>
+    // 상태 변수
+    let selectedMood = '평온';
+    let selectedMoodEmoji = '🌿';
+    let currentStep = 1;
+    let currentTempInfo = { temp: 20, isCold: false, text: "확인 불가" };
+
+    // 음료수를 훨씬 더 많이 추가하고, 각각 예쁜 그라데이션 색상을 지정했어!
+    const drinkDatabase = [
+      { name: "청포도 에이드", flavors: ["상큼함", "달콤함"], toppings: ["알로에 젤리", "애플민트"], temp: "ICE", colorFrom: "from-lime-300", colorTo: "to-green-400", desc: "톡 쏘는 탄산과 알로에 알갱이가 기분을 싹 전환해줘요!", icon: "🥤" },
+      { name: "따뜻한 녹차 라떼", flavors: ["부드러움", "고소함"], toppings: ["우유 폼", "녹차 가루"], temp: "HOT", colorFrom: "from-green-300", colorTo: "to-emerald-500", desc: "은은한 녹차 향과 따뜻함이 마음에 평온을 가져다 줍니다.", icon: "🍵" },
+      { name: "아이스 초코 라떼", flavors: ["달콤함", "진한 맛"], toppings: ["초코칩", "휘핑 크림"], temp: "ICE", colorFrom: "from-amber-600", colorTo: "to-amber-800", desc: "피곤하거나 답답할 땐 진한 당 충전이 최고예요!", icon: "🍫" },
+      { name: "자몽 허니 블랙티", flavors: ["새콤달콤", "깔끔함"], toppings: ["자몽 슬라이스", "꿀"], temp: "BOTH", colorFrom: "from-orange-400", colorTo: "to-red-400", desc: "자몽의 상큼함과 꿀의 달콤함이 어우러져 기분이 좋아져요.", icon: "🍹" },
+      { name: "따뜻한 유자차", flavors: ["상큼함", "달콤함"], toppings: ["유자 청", "잣"], temp: "HOT", colorFrom: "from-yellow-300", colorTo: "to-orange-400", desc: "몸을 따뜻하게 풀어주는 상큼달콤 대표 음료!", icon: "☕" },
+      { name: "딸기 스무디", flavors: ["달콤함", "시원함"], toppings: ["딸기 다이스", "바닐라 아이스크림"], temp: "ICE", colorFrom: "from-pink-300", colorTo: "to-rose-400", desc: "알록달록 딸기가 신나고 설레는 기분을 더 UP 시켜줘요!", icon: "🍓" },
+      { name: "밀크티 오리지널", flavors: ["부드러움", "달콤함"], toppings: ["타피오카 펄", "치즈폼"], temp: "BOTH", colorFrom: "from-orange-200", colorTo: "to-amber-500", desc: "쫀득한 펄을 씹으며 차분하게 기분을 정리해보세요.", icon: "🧋" },
+      { name: "망고 플랫치노", flavors: ["달콤함", "상큼함"], toppings: ["망고 푸딩", "코코넛 젤리"], temp: "ICE", colorFrom: "from-yellow-400", colorTo: "to-orange-500", desc: "열대과일 망고의 진한 달콤함이 답답함을 날려버려요!", icon: "🥭" },
+      { name: "레몬 에이드", flavors: ["새콤함", "시원함"], toppings: ["레몬 슬라이스", "탄산수"], temp: "ICE", colorFrom: "from-yellow-200", colorTo: "to-lime-300", desc: "정신이 번뜩 뜨이는 상큼함으로 피로를 깨워줍니다!", icon: "🍋" },
+      { name: "따뜻한 고구마 라떼", flavors: ["고소함", "달콤함"], toppings: ["시나몬 가루", "아몬드 슬라이스"], temp: "HOT", colorFrom: "from-purple-300", colorTo: "to-purple-500", desc: "따뜻하고 든든해서 우울한 마음을 온화하게 감싸줘요.", icon: "🍠" },
+      { name: "블루베리 요거트 스무디", flavors: ["상큼함", "진한 맛"], toppings: ["생 블루베리", "치즈 케이크 조각"], temp: "ICE", colorFrom: "from-indigo-300", colorTo: "to-purple-500", desc: "새콤달콤 요거트가 우울함을 순식간에 날려줍니다!", icon: "🫐" },
+      { name: "민트초코 프라페", flavors: ["시원함", "달콤함"], toppings: ["초코 크런치", "민트 잎"], temp: "ICE", colorFrom: "from-teal-300", colorTo: "to-emerald-400", desc: "입안 가득 퍼지는 상쾌함이 스트레스를 날려줘요!", icon: "🥤" },
+      { name: "복숭아 아이스티", flavors: ["달콤함", "깔끔함"], toppings: ["복숭아 과육", "레몬 조각"], temp: "ICE", colorFrom: "from-orange-200", colorTo: "to-pink-300", desc: "기분 좋은 달달함이 하루의 활력을 더해줍니다!", icon: "🍹" },
+      { name: "오곡 라떼", flavors: ["고소함", "담백함"], toppings: ["곡물 튀일", "우유 거품"], temp: "BOTH", colorFrom: "from-stone-300", colorTo: "to-stone-500", desc: "든든하고 고소한 맛이 마음까지 편안하게 해줘요.", icon: "☕" },
+      { name: "수박 주스", flavors: ["시원함", "달콤함"], toppings: ["수박 조각", "얼음"], temp: "ICE", colorFrom: "from-red-400", colorTo: "to-rose-500", desc: "가슴 속까지 뻥 뚫리는 시원함과 달콤함!", icon: "🍉" }
+    ];
+
+    window.onload = function() {
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+      fetchWeatherAndLocation();
+    };
+
+    function updateDateTime() {
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const date = now.getDate();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      document.getElementById('datetime-info').innerHTML = `<i class="fa-regular fa-clock text-emerald-700"></i> <span>${month}월 ${date}일 ${hours}:${minutes}</span>`;
+    }
+
+    function fetchWeatherAndLocation() {
+      const weatherEl = document.getElementById('weather-info');
+
+      if (!navigator.geolocation) {
+        weatherEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> <span>날씨 정보 없음</span>`;
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+            .then(res => res.json())
+            .then(data => {
+              if (data && data.current_weather) {
+                const temp = Math.round(data.current_weather.temperature);
+                const code = data.current_weather.weathercode;
+                const emoji = getWeatherEmoji(code);
+                
+                currentTempInfo.temp = temp;
+                currentTempInfo.isCold = temp < 15;
+                currentTempInfo.text = `${emoji} ${temp}°C`;
+
+                weatherEl.innerHTML = `<i class="fa-solid fa-location-dot text-emerald-700"></i> <span>${currentTempInfo.text}</span>`;
+              } else {
+                weatherEl.innerHTML = `<span>날씨 정보 없음</span>`;
+              }
+            })
+            .catch(() => {
+              weatherEl.innerHTML = `<span>날씨 정보 없음</span>`;
+            });
+        },
+        () => {
+          weatherEl.innerHTML = `<i class="fa-solid fa-eye-slash text-gray-400"></i> <span>날씨 정보 없음</span>`;
+        }
+      );
+    }
+
+    function getWeatherEmoji(code) {
+      if (code === 0) return "☀️ 화창";
+      if (code >= 1 && code <= 3) return "⛅ 구름";
+      if (code >= 45 && code <= 48) return "🌫️ 안개";
+      if (code >= 51 && code <= 67) return "🌧️ 비";
+      if (code >= 71) return "❄️ 눈";
+      return "🌤️ 맑음";
+    }
+
+    function selectMood(mood, emoji) {
+      selectedMood = mood;
+      selectedMoodEmoji = emoji;
+      showNotice(`'${mood}' 기분이 선택되었어! 하단의 동그라미 [만들기] 버튼을 눌러줘!`);
+    }
+
+    function startCustomBlend() {
+      showStep(2);
+      startBlending();
+    }
+
+    function startBlending() {
+      const bar = document.getElementById('loading-bar');
+      const desc = document.getElementById('loading-desc');
+      bar.style.width = '0%';
+
+      const steps = [
+        "스케치 그림 디자인에 맞춰 음료를 조합 중...",
+        "오늘 날씨와 기분에 딱 맞는 토핑 얹는 중...",
+        "3가지 맞춤 추천 음료 완성 직전!"
+      ];
+
+      let progress = 0;
+      let stepIdx = 0;
+
+      const interval = setInterval(() => {
+        progress += 25;
+        bar.style.width = `${progress}%`;
+
+        if (stepIdx < steps.length) {
+          desc.innerText = steps[stepIdx];
+          stepIdx++;
+        }
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            generateRecommendations();
+            showStep(3);
+          }, 400);
+        }
+      }, 400);
+    }
+
+    // 결과 추천 화면 컵 디자인 상세화 및 추천 개수 증가 (5개)
+    function generateRecommendations() {
+      const container = document.getElementById('recommend-list');
+      container.innerHTML = '';
+
+      // 랜덤 셔플을 통한 5개 음료 추출 (더 많이 추천!)
+      const shuffled = [...drinkDatabase].sort(() => 0.5 - Math.random());
+      const selectedDrinks = shuffled.slice(0, 5);
+
+      selectedDrinks.forEach((drink, index) => {
+        let finalTemp = drink.temp;
+        if (finalTemp === 'BOTH') {
+          finalTemp = currentTempInfo.isCold ? 'HOT ☕' : 'ICE 🧊';
+        } else {
+          finalTemp = finalTemp === 'ICE' ? 'ICE 🧊' : 'HOT ☕';
+        }
+
+        const card = document.createElement('div');
+        card.className = "bg-white/90 backdrop-blur-sm border-2 border-emerald-300 rounded-2xl p-3 shadow-md hover:shadow-lg transition-all flex items-center gap-3 relative overflow-hidden";
+        
+        card.innerHTML = `
+          <!-- 훨씬 더 자세하고 예쁜 그라데이션 컵 디자인 -->
+          <div class="w-16 h-20 bg-white/50 border-[3px] border-gray-200/80 rounded-b-2xl rounded-t-sm flex flex-col items-center justify-end relative flex-shrink-0 shadow-inner overflow-hidden">
+            <!-- 컵 속 줄무늬 빨대 -->
+            <div class="w-1.5 h-10 bg-[repeating-linear-gradient(45deg,#fb7185,#fb7185_4px,#ffffff_4px,#ffffff_8px)] rounded-full absolute -top-2 right-2 rotate-12 z-0"></div>
+            <!-- 마법의 그라데이션 음료 액체 (음료마다 색이 다름!) -->
+            <div class="w-full h-[70%] bg-gradient-to-t ${drink.colorFrom} ${drink.colorTo} absolute bottom-0 flex flex-col items-center justify-start pt-1 z-10 shadow-[inset_0_2px_5px_rgba(255,255,255,0.4)]">
+              <!-- 반투명 얼음/기포 -->
+              <div class="w-2 h-2 bg-white/40 rounded-sm absolute bottom-2 left-2 rotate-12"></div>
+              <div class="w-1.5 h-1.5 bg-white/50 rounded-full absolute bottom-6 right-2"></div>
+              <span class="text-xl drop-shadow-md z-20">${drink.icon}</span>
+            </div>
+            <!-- 온도 라벨 -->
+            <span class="absolute bottom-1 z-30 text-[8px] font-extrabold text-white bg-black/40 px-1.5 py-0.5 rounded-full shadow-sm">${finalTemp}</span>
+          </div>
+
+          <div class="flex-1 text-left space-y-1">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-bold text-gray-800 font-jua">${index + 1}. ${drink.name}</h4>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md font-bold border border-emerald-200">${drink.flavors[0]}</span>
+            </div>
+            <p class="text-[11px] text-gray-600"><span class="font-bold text-emerald-700">토핑:</span> ${drink.toppings.join(', ')}</p>
+            <p class="text-[10px] text-gray-500 italic bg-gray-50/50 p-1 rounded">"${selectedMoodEmoji} [${selectedMood}] 기분에 딱!"</p>
+
+            <!-- 네이버 지도 바로가기 버튼 -->
+            <a href="https://map.naver.com/v5/search/${encodeURIComponent(drink.name)}" target="_blank" rel="noopener noreferrer" 
+               class="inline-block mt-1 px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg text-[10px] font-bold shadow-sm active:scale-95 transition-transform">
+              <i class="fa-solid fa-map-location-dot"></i> 매장 찾기
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function showStep(step) {
+      currentStep = step;
+      document.getElementById('step1-screen').classList.add('hidden');
+      document.getElementById('step2-screen').classList.add('hidden');
+      document.getElementById('step3-screen').classList.add('hidden');
+
+      document.getElementById(`step${step}-screen`).classList.remove('hidden');
+    }
+
+    function resetApp() {
+      showStep(1);
+    }
+
+    function goBack() {
+      if (currentStep > 1) {
+        showStep(currentStep - 1);
+      } else {
+        showNotice("이미 첫 화면이에요!");
+      }
+    }
+
+    function showNotice(msg) {
+      document.getElementById('modal-msg').innerText = msg;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 서채현" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 서채현</div>
+</body>
+</html>

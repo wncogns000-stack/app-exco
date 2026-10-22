@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC - 내 인생 퍼스널 컬러 진단</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Cute & Modern Korean Font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            background-color: #f3f4f6;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cute-font {
+            font-family: 'Gaegu', cursive;
+        }
+        /* Rainbow Gradient for Logo Background */
+        .rainbow-bg {
+            background: linear-gradient(45deg, #ff4b4b, #ff8533, #ffeb3b, #4caf50, #2196f3, #9c27b0);
+            background-size: 400% 400%;
+            animation: rainbowShift 8s ease infinite;
+        }
+        @keyframes rainbowShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* Custom Scrollbar for Horizontal Card Row */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
+
+    <!-- 스마트폰 UI 프레임 -->
+    <div class="relative w-full max-w-md h-[844px] bg-white rounded-none sm:rounded-[40px] shadow-2xl overflow-hidden border-0 sm:border-[8px] border-gray-800 flex flex-col justify-between">
+        
+        <!-- 스마트폰 상태 바 (Status Bar) -->
+        <div class="w-full bg-white px-6 pt-3 pb-1 flex justify-between items-center text-xs font-semibold text-gray-600 z-10 border-b border-gray-100">
+            <span id="current-time">13:45</span>
+            <div class="flex items-center space-x-1">
+                <span>📶</span>
+                <span>🔋 88%</span>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 영역 (화면 전환) -->
+        <div class="flex-1 overflow-y-auto relative bg-gradient-to-b from-slate-50 to-pink-50" id="main-content">
+            
+            <!-- [1단계] 시작 화면 (Start Screen) -->
+            <div id="screen-start" class="h-full flex flex-col justify-between items-center p-6 text-center">
+                <!-- 상단 타이틀 -->
+                <div class="mt-4">
+                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500 tracking-wider">P.C</h1>
+                    <p class="text-sm text-gray-500 tracking-widest uppercase mt-1">Personal Color Finder</p>
+                </div>
+
+                <!-- 네가 요청한 무지개 배경의 앱 로고 -->
+                <div class="w-44 h-44 rounded-full rainbow-bg p-1.5 shadow-lg transform hover:scale-105 transition-transform">
+                    <div class="w-full h-full bg-white rounded-full flex flex-col justify-center items-center overflow-hidden relative">
+                        <!-- 아바타 그래픽 (사람 아이콘) -->
+                        <div class="w-16 h-16 bg-gradient-to-tr from-pink-400 to-purple-400 rounded-full mb-1 flex items-center justify-center text-white text-3xl shadow-inner">👤</div>
+                        <div class="text-xs font-bold text-gray-400 tracking-widest mt-1 uppercase cute-font">personal</div>
+                    </div>
+                </div>
+
+                <!-- 사진 찍기 / 업로드 영역 -->
+                <div class="w-full px-4">
+                    <label for="photo-upload" class="cursor-pointer block w-full bg-white border-2 border-dashed border-pink-300 hover:border-pink-500 rounded-2xl p-4 transition-all hover:bg-pink-50">
+                        <div class="flex flex-col items-center">
+                            <span class="text-3xl mb-1">📸</span>
+                            <span class="text-sm font-semibold text-gray-700">여기를 눌러 네 얼굴 사진 올리기</span>
+                            <span class="text-xs text-gray-400 mt-1">(찍은 사진이나 좋아하는 이미지를 올려줘!)</span>
+                        </div>
+                        <input type="file" id="photo-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
+                    <!-- 업로드한 이미지 미리보기 -->
+                    <div id="preview-container" class="hidden mt-3 flex justify-center">
+                        <div class="relative w-20 h-20 rounded-full border-4 border-pink-300 overflow-hidden shadow-md">
+                            <img id="image-preview" src="" alt="내 얼굴" class="w-full h-full object-cover">
+                            <button onclick="removeImage(event)" class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 웃는 얼굴의 시작 버튼 (그림 속 디자인 구현) -->
+                <div class="mb-6">
+                    <button onclick="startAnalysis()" class="group relative w-36 h-36 bg-yellow-300 hover:bg-yellow-400 active:bg-yellow-500 rounded-full shadow-lg flex flex-col justify-center items-center border-4 border-yellow-400 transform hover:scale-105 transition-all">
+                        <!-- 스마일 눈과 웃는 입 구현 -->
+                        <div class="flex space-x-5 mb-1.5">
+                            <div class="w-3.5 h-3.5 bg-gray-800 rounded-full"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-800 rounded-full"></div>
+                        </div>
+                        <div class="w-12 h-5 border-b-4 border-gray-800 rounded-b-full"></div>
+                        
+                        <!-- 텍스트 -->
+                        <span class="text-xs font-bold text-gray-800 mt-3 tracking-tighter cute-font leading-tight text-center">
+                            퍼스널 컬러<br>진단 시작하기!
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- [2단계] 데이터 분석 로딩 화면 (Analysis Loading Screen) -->
+            <div id="screen-analysis" class="hidden h-full flex flex-col justify-center items-center p-6 text-center">
+                <!-- 얼굴 스캔 애니메이션 효과 -->
+                <div class="relative w-48 h-48 rounded-2xl overflow-hidden border-4 border-purple-400 bg-slate-900 flex items-center justify-center shadow-2xl">
+                    <img id="scan-target" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400" alt="스캔 대상" class="w-full h-full object-cover opacity-60">
+                    
+                    <!-- 위아래로 움직이는 스캔 레이저 라인 -->
+                    <div class="absolute w-full h-1 bg-cyan-400 shadow-[0_0_12px_#22d3ee] top-0 animate-[bounce_2s_infinite]"></div>
+                    
+                    <span class="absolute text-5xl animate-pulse">✨</span>
+                </div>
+
+                <h2 class="text-2xl font-bold text-gray-800 mt-8 cute-font">나의 퍼스널 컬러를 분석 중...</h2>
+                <p class="text-sm text-gray-500 mt-2">오늘의 실시간 날씨와 기온도 매칭하고 있어요!</p>
+
+                <!-- 상태 메시지 박스 -->
+                <div class="w-full max-w-xs mt-6 bg-white p-3 rounded-xl border border-purple-100 shadow-sm text-xs space-y-1.5 text-gray-600">
+                    <div class="flex justify-between items-center">
+                        <span>📡 위치 및 기상 확인</span>
+                        <span id="status-weather" class="text-yellow-500 font-bold">대기 중...</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>🧬 이미지 톤 추출</span>
+                        <span id="status-tone" class="text-yellow-500 font-bold">대기 중...</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>💄 화장품 추천 큐레이션</span>
+                        <span id="status-recommend" class="text-yellow-500 font-bold">대기 중...</span>
+                    </div>
+                </div>
+
+                <!-- 진행률 표시줄 -->
+                <div class="w-full max-w-xs bg-gray-200 h-2.5 rounded-full mt-6 overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+
+            <!-- [3단계] 결과 및 추천 화면 (Result Screen) -->
+            <div id="screen-result" class="hidden h-full flex flex-col p-6 overflow-y-auto">
+                <!-- 날씨 정보 헤더 카드 -->
+                <div class="bg-white/70 backdrop-blur-md rounded-2xl p-3 flex justify-between items-center border border-white/40 shadow-sm mb-4">
+                    <span class="text-xs font-bold text-gray-500">📍 현재 위치 날씨</span>
+                    <div class="flex items-center space-x-1.5 text-xs text-gray-700 font-bold">
+                        <span id="weather-location">서울</span>
+                        <span id="weather-icon">☀️</span>
+                        <span id="weather-temp">24°C</span>
+                    </div>
+                </div>
+
+                <!-- 결과 1: 퍼스널 컬러 진단 진열대 -->
+                <div id="result-theme-card" class="rounded-3xl p-6 text-center shadow-lg border relative overflow-hidden mb-6 transform transition-all">
+                    <!-- 우측 상단 리본 -->
+                    <div class="absolute top-3 right-3 bg-white/40 backdrop-blur-sm text-[10px] font-extrabold px-2 py-0.5 rounded-full" id="result-season-eng">SPRING</div>
+                    
+                    <span class="text-sm font-semibold opacity-75 block mb-1">인공지능이 매칭한 당신의 퍼스널 컬러는</span>
+                    
+                    <!-- 동적 출력란 -->
+                    <h3 class="text-3xl font-extrabold my-2 tracking-wide text-gray-800" id="result-season-name">봄 웜톤 🌸</h3>
+                    
+                    <p class="text-xs leading-relaxed mt-2 max-w-[280px] mx-auto text-gray-700 bg-white/50 p-2.5 rounded-xl border border-white/30" id="result-description">
+                        오늘처럼 화창한 날에는 따뜻하고 화사한 립이 찰떡이에요!
+                    </p>
+
+                    <button onclick="scrollToRecommendations()" class="mt-4 bg-white hover:bg-opacity-90 text-gray-800 text-xs font-bold py-2 px-4 rounded-full shadow-sm transition-all border border-gray-100">
+                        💄 추천 화장품 바로보기 👇
+                    </button>
+                </div>
+
+                <!-- 결과 2: 추천 화장품 진열대 (그림속 네모 추천제품 슬라이더 구현) -->
+                <div class="flex-1 flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm font-extrabold text-gray-700 cute-font text-base">🧴 맞춤 추천 아이템 리스트</span>
+                        <span class="text-[10px] text-pink-500 font-bold animate-pulse">💡 아이템 터치 시 최저가 연결!</span>
+                    </div>
+
+                    <!-- 가로 스크롤 카드 레이아웃 -->
+                    <div id="cosmetics-list" class="flex space-x-4 overflow-x-auto pb-4 pt-1 no-scrollbar scroll-smooth snap-x snap-mandatory">
+                        <!-- JS에서 추천 카드를 생성하여 채워 넣음 -->
+                    </div>
+
+                    <!-- 슬라이드 인디케이터 (그림 속 우측 긴 스크롤바 느낌의 미니 바) -->
+                    <div class="w-full bg-gray-200 h-1 rounded-full mt-1 overflow-hidden">
+                        <div class="bg-pink-400 h-full w-1/3 rounded-full" id="scroll-indicator"></div>
+                    </div>
+                    
+                    <!-- 하단 격려 코멘트 -->
+                    <div class="mt-6 p-4 bg-white/60 border border-pink-100 rounded-2xl text-xs text-center text-gray-500">
+                        "오늘 추천받은 메이크업으로 더욱 생기 있고 예쁜 하루를 만들어 보세요! 💖"
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 하단 물리적인 모바일 네비게이션 바 [ ☰ (메뉴) | ⌂ (홈) | ◁ (뒤로가기) ] -->
+        <div class="w-full bg-white border-t border-gray-100 py-3.5 flex justify-around items-center text-lg font-bold text-gray-500 z-10">
+            <!-- ☰ 메뉴 버튼 -->
+            <button onclick="toggleMenu()" class="hover:text-pink-500 active:scale-90 transition-transform px-4 py-1" title="정보 메뉴">
+                ☰
+            </button>
+            <!-- ⌂ 홈 버튼 -->
+            <button onclick="goToHome()" class="hover:text-pink-500 active:scale-90 transition-transform px-4 py-1" title="홈">
+                ⌂
+            </button>
+            <!-- ◁ 뒤로가기 버튼 -->
+            <button onclick="goBack()" class="hover:text-pink-500 active:scale-90 transition-transform px-4 py-1" title="뒤로가기">
+                ◁
+            </button>
+        </div>
+
+        <!-- ☰ 메뉴 팝업 모달 -->
+        <div id="menu-modal" class="absolute inset-x-0 bottom-[60px] bg-white rounded-t-3xl shadow-2xl p-6 border-t-2 border-pink-200 transform translate-y-full transition-transform duration-300 z-20">
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="text-lg font-extrabold text-gray-800">ℹ️ 앱 정보 및 꿀팁</h4>
+                <button onclick="toggleMenu()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+            </div>
+            <div class="space-y-3 text-xs text-gray-600">
+                <p class="font-bold text-pink-500">🌟 P.C 앱 사용 방법</p>
+                <p>1. 첫 화면에서 스마트폰 카메라로 직접 사진을 찍거나 이미지를 등록해 주세요.</p>
+                <p>2. 귀여운 노란색 스마일 버튼을 누르면 AI가 실시간 날씨와 이미지를 분석하여 최고의 인생 컬러를 추천합니다.</p>
+                <p>3. 추천받은 뷰티 아이템 카드를 선택하면 네이버 쇼핑 및 올리브영으로 바로 이동해 볼 수 있습니다!</p>
+                <div class="h-[1px] bg-gray-100 my-2"></div>
+                <p class="text-gray-400 text-[10px]">v1.0.0 | 개발 파트너와 함께 만든 멋진 진단 어플리케이션</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 스크립트 로직 시작 -->
+    <script>
+        // 현재 시간 표시 자동 업데이트
+        function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('current-time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 앱 화면 상태 관리
+        let currentScreen = 'start'; // 'start', 'analysis', 'result'
+        let uploadedImageSrc = ''; // 업로드한 이미지 주소 저장
+        let userLocation = "서울";
+        let userWeather = "☀️ 맑음";
+        let userTemp = "24°C";
+        let weatherConditionCode = 0; // 날씨 코드 (0:맑음, 1-3:흐림, 45-86:비/눈/안개 등)
+
+        // 10개 이상의 현실적인 6학년 수준 화장품 데이터베이스 구성 (알코올, 성인용 제외 순수 틴트, 선크림, 블러셔 등 안전 품목)
+        const cosmeticsDatabase = {
+            spring: [
+                { name: "롬앤 글래스팅 워터 틴트 피치 허니", type: "립 틴트", price: "9,900원", desc: "봄 햇살을 머금은 싱그러운 복숭아 컬러로 생기를 가득 올려줘요!", img: "💄" },
+                { name: "페리페라 맑게 물든 선샤인 치크 요거트", type: "치크/블러셔", price: "7,000원", desc: "보송보송 봄 바람처럼 맑게 퍼지는 살구빛 블러셔예요.", img: "🌸" },
+                { name: "에뛰드 하우스 플레이 컬러 아이즈 복숭아 팜", type: "섀도우 팔레트", price: "18,000원", desc: "과즙미 터지는 상큼한 섀도우 조합으로 햇살 가득한 날 추천!", img: "🎨" },
+                { name: "이니스프리 톤업 노세범 선스크린 SPF50+", type: "선케어", price: "14,000원", desc: "자외선을 차단하면서 화사하게 톤업되어 맑은 피부를 연출해요.", img: "☀️" },
+                { name: "클리오 킬커버 매쉬 글로우 쿠션", type: "베이스", price: "26,000원", desc: "물기를 머금은 듯 맑고 촉촉한 광채를 만들어 주는 데일리 쿠션!", img: "✨" }
+            ],
+            summer: [
+                { name: "페리페라 잉크 무드 글로이 틴트 손웜수수", type: "립 틴트", price: "10,000원", desc: "청량한 여름 소나기처럼 투명하게 반짝이는 쿨한 핑크 틴트예요.", img: "💄" },
+                { name: "롬앤 베러 댄 치크 블루베리 칩", type: "치크/블러셔", price: "8,900원", desc: "차분하고 시원한 느낌의 라벤더 블루베리빛 치크!", img: "🍇" },
+                { name: "클리오 프로 아이 팔레트 에어 한남동 아뜰리에", type: "섀도우 팔레트", price: "24,000원", desc: "여름 쿨톤의 청초한 매력을 한껏 돋보이게 해주는 뮤트 컬러 구성.", img: "🎨" },
+                { name: "에스쁘아 워터 스플래쉬 선크림 세라포어", type: "선케어", price: "16,000원", desc: "끈적임 없이 촉촉하고 수분감 가득한 쿨톤 맞춤 베이스 선크림.", img: "💦" },
+                { name: "어뮤즈 듀 젤리 비건 쿠션", type: "베이스", price: "28,000원", desc: "피부 속부터 맑고 투명하게 차오르는 젤리 같은 촉촉함을 선사해요.", img: "💧" }
+            ],
+            autumn: [
+                { name: "3CE 벨벳 립 틴트 다포딜", type: "립 틴트", price: "15,000원", desc: "단풍잎을 갈아 넣은 듯 고혹적이고 차분한 벽돌빛 레드 립!", img: "💄" },
+                { name: "롬앤 베러 댄 치크 피그칩", type: "치크/블러셔", price: "8,900원", desc: "잘 익은 무화과처럼 자연스러운 가을빛 감성을 연출해요.", img: "🍂" },
+                { name: "에뛰드 하우스 무비 라이프 메이플 로드", type: "섀도우 팔레트", price: "19,000원", desc: "낙엽이 흩날리는 듯 깊고 따뜻한 음영 메이크업에 필수템!", img: "🎨" },
+                { name: "스킨푸드 토마토 톤업 선크림", type: "선케어", price: "12,000원", desc: "자연스러운 보정 효과와 풍부한 영양감으로 가을 햇살에도 안심!", img: "🍅" },
+                { name: "헤라 블랙 쿠션 SPF34", type: "베이스", price: "45,000원", desc: "우아하고 보송한 세미매트 스킨을 만들어주는 완벽한 커버 쿠션.", img: "🖤" }
+            ],
+            winter: [
+                { name: "롬앤 쥬시 래스팅 틴트 체리 밤", type: "립 틴트", price: "9,900원", desc: "쨍한 체리처럼 깊고 맑은 버건디 레드 컬러가 피부를 화사하게 살려줍니다.", img: "🍒" },
+                { name: "페리페라 맑게 물든 선샤인 치크 당도초과", type: "치크/블러셔", price: "7,000원", desc: "하얀 겨울 눈 밭 위에 핀 진달래처럼 또렷하고 예쁜 바이올렛 치크.", img: "❄️" },
+                { name: "웨이크메이크 소프트 블러링 아이팔레트 체리 블러링", type: "섀도우 팔레트", price: "22,000원", desc: "시크하고 쿨한 플럼 체리 톤으로 독보적인 매력을 완성하세요.", img: "🎨" },
+                { name: "닥터지 그린 마일드 업 선 플러스", type: "선케어", price: "18,000원", desc: "민감한 피부에도 자극 없는 완벽 무기자차 선크림으로 깨끗하게!", img: "🌿" },
+                { name: "클리오 킬커버 더 뉴 파운웨어 쿠션", type: "베이스", price: "25,000원", desc: "초밀착 보송 커버로 도자기같이 완벽하고 깔끔한 결을 지켜줘요.", img: "💎" }
+            ]
+        };
+
+        // 이미지 업로드 핸들러
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImageSrc = e.target.result;
+                    // 미리보기 화면 적용
+                    document.getElementById('image-preview').src = uploadedImageSrc;
+                    document.getElementById('preview-container').classList.remove('hidden');
+                    // 스캔 스크린 이미지에도 동시 대입
+                    document.getElementById('scan-target').src = uploadedImageSrc;
+                    document.getElementById('scan-target').classList.remove('opacity-60');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 이미지 삭제
+        function removeImage(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            uploadedImageSrc = '';
+            document.getElementById('photo-upload').value = '';
+            document.getElementById('preview-container').classList.add('hidden');
+            document.getElementById('scan-target').src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400";
+            document.getElementById('scan-target').classList.add('opacity-60');
+        }
+
+        // 실시간 날씨 호출 (Open-Meteo & 역지오코딩 시뮬레이터 이용)
+        function fetchWeatherAndLocation() {
+            return new Promise((resolve) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            try {
+                                // 1. 날씨 데이터 요청
+                                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                                const weatherData = await weatherRes.json();
+                                const temp = Math.round(weatherData.current_weather.temperature);
+                                const code = weatherData.current_weather.weathercode;
+                                weatherConditionCode = code;
+
+                                // 날씨 코드 매핑
+                                let emoji = "☀️";
+                                let desc = "맑음";
+                                if (code >= 1 && code <= 3) { emoji = "☁️"; desc = "구름 조금"; }
+                                else if (code >= 45 && code <= 48) { emoji = "🌫️"; desc = "안개"; }
+                                else if (code >= 51 && code <= 67) { emoji = "☔"; desc = "이슬비/비"; }
+                                else if (code >= 71 && code <= 86) { emoji = "❄️"; desc = "눈"; }
+                                else if (code >= 95) { emoji = "⚡"; desc = "천둥번개"; }
+
+                                userWeather = `${emoji} ${desc}`;
+                                userTemp = `${temp}°C`;
+
+                                // 2. 위경도 기반 임의 주소 간략 매칭 (외부 역지오코딩 API 차단 대비 간단 분기)
+                                // 대한민국 주요 도시에 대한 간단 경계 매핑으로 실감 나게 구현
+                                if (lat > 37.3 && lat < 37.7 && lon > 126.7 && lon < 127.2) userLocation = "서울/경기";
+                                else if (lat > 35.0 && lat < 35.3 && lon > 129.0 && lon < 129.2) userLocation = "부산";
+                                else if (lat > 35.7 && lat < 36.0 && lon > 128.5 && lon < 128.7) userLocation = "대구";
+                                else if (lat > 37.3 && lat < 37.6 && lon > 126.5 && lon < 126.8) userLocation = "인천";
+                                else if (lat > 35.1 && lat < 35.2 && lon > 126.7 && lon < 126.9) userLocation = "광주";
+                                else if (lat > 36.2 && lat < 36.5 && lon > 127.3 && lon < 127.5) userLocation = "대전";
+                                else if (lat > 35.5 && lat < 35.6 && lon > 129.2 && lon < 129.4) userLocation = "울산";
+                                else if (lat > 33.2 && lat < 33.6 && lon > 126.2 && lon < 126.9) userLocation = "제도도";
+                                else userLocation = "나의 위치";
+
+                                resolve(true);
+                            } catch (e) {
+                                // API 로드 실패 시 무난한 가을 날씨로 폴백
+                                userLocation = "내 방 안";
+                                userWeather = "☀️ 맑음";
+                                userTemp = "22°C";
+                                weatherConditionCode = 0;
+                                resolve(false);
+                            }
+                        },
+                        (error) => {
+                            // 권한 거부 시 서울 기본 세팅이 아닌 "날씨 정보 없음" 처리
+                            userLocation = "위치 미인증";
+                            userWeather = "❌ 날씨 정보 없음";
+                            userTemp = "--°C";
+                            weatherConditionCode = -1;
+                            resolve(false);
+                        }
+                    );
+                } else {
+                    userLocation = "위치 미지원";
+                    userWeather = "❌ 날씨 정보 없음";
+                    userTemp = "--°C";
+                    weatherConditionCode = -1;
+                    resolve(false);
+                }
+            });
+        }
+
+        // 진단 시작 함수 (Stage 1 -> Stage 2)
+        async function startAnalysis() {
+            // 화면 전환
+            switchScreen('analysis');
+            
+            // 로딩 세그먼트 애니메이션 세팅
+            const bar = document.getElementById('progress-bar');
+            const sWeather = document.getElementById('status-weather');
+            const sTone = document.getElementById('status-tone');
+            const sRecommend = document.getElementById('status-recommend');
+
+            bar.style.width = '0%';
+            sWeather.innerText = "⏳ 확인 중...";
+            sWeather.className = "text-yellow-500 font-bold";
+            sTone.innerText = "대기 중...";
+            sTone.className = "text-gray-400";
+            sRecommend.innerText = "대기 중...";
+            sRecommend.className = "text-gray-400";
+
+            // 1. 날씨 로드 진행
+            await fetchWeatherAndLocation();
+            bar.style.width = '35%';
+            sWeather.innerText = "✅ 완료 (" + userLocation + ")";
+            sWeather.className = "text-green-500 font-bold animate-pulse";
+            sTone.innerText = "⏳ 추출 중...";
+            sTone.className = "text-yellow-500 font-bold";
+
+            // 2. 이미지 톤 로딩 지연 (1초 시뮬레이션)
+            await new Promise(r => setTimeout(r, 1200));
+            bar.style.width = '70%';
+            sTone.innerText = "✅ 컬러 스캔 완료";
+            sTone.className = "text-green-500 font-bold animate-pulse";
+            sRecommend.innerText = "⏳ 최적 아이템 엄선 중...";
+            sRecommend.className = "text-yellow-500 font-bold";
+
+            // 3. 추천 가상 생성 로딩 지연 (1초 시뮬레이션)
+            await new Promise(r => setTimeout(r, 1000));
+            bar.style.width = '100%';
+            sRecommend.innerText = "✅ 큐레이션 완료";
+            sRecommend.className = "text-green-500 font-bold animate-pulse";
+
+            // 최종 딜레이 후 결과 화면으로 전환
+            await new Promise(r => setTimeout(r, 600));
+            buildResultScreen();
+            switchScreen('result');
+        }
+
+        // 결과 화면 구축 알고리즘
+        function buildResultScreen() {
+            // 1. 퍼스널 컬러 랜덤 배정 (봄/여름/가을/겨울 중 1개 선택)
+            // 팁: 이미지 픽셀 컬러 기반 매칭 느낌을 주거나 완전 랜덤으로 다채로운 결과를 보임
+            const seasons = ['spring', 'summer', 'autumn', 'winter'];
+            const randomSeason = seasons[Math.floor(Math.random() * seasons.length)];
+            
+            // 상단 날씨 데이터 보정 바인딩
+            document.getElementById('weather-location').innerText = userLocation;
+            document.getElementById('weather-icon').innerText = userWeather.split(' ')[0] || "☀️";
+            document.getElementById('weather-temp').innerText = userTemp;
+
+            // 테마 카드 스타일 정의
+            const themeCard = document.getElementById('result-theme-card');
+            const seasonNameText = document.getElementById('result-season-name');
+            const seasonEngText = document.getElementById('result-season-eng');
+            const descriptionText = document.getElementById('result-description');
+
+            // 테마 초기화
+            themeCard.className = "rounded-3xl p-6 text-center shadow-lg border relative overflow-hidden mb-6 transform transition-all";
+
+            // 봄, 여름, 가을, 겨울 별 디자인 테마 변경
+            let seasonKorean = "";
+            let explanation = "";
+            let selectedColorGroup = [];
+
+            // 날씨 상태에 따른 조언 추가
+            let weatherAdvice = "";
+            if (weatherConditionCode === 0) {
+                weatherAdvice = "햇살이 눈부신 오늘 같은 날에는 자외선 차단 선스크린과 함께 활기찬 컬러를!";
+            } else if (weatherConditionCode >= 51 && weatherConditionCode <= 67) {
+                weatherAdvice = "비가 와서 촉촉하고 감성적인 오늘, 번짐 없는 지속력 강한 메이크업이 어울려요.";
+            } else if (weatherConditionCode === -1) {
+                weatherAdvice = "나만의 공간에서 편안하게 예뻐지는 특별한 스타일링을 추천해 드릴게요!";
+            } else {
+                weatherAdvice = "선선하고 차분한 날씨에 어울리는 분위기 있는 데일리 톤앤매너가 완벽해요.";
+            }
+
+            switch(randomSeason) {
+                case 'spring':
+                    seasonKorean = "봄 웜톤 🌸";
+                    seasonEngText.innerText = "SPRING WARM";
+                    themeCard.classList.add("bg-gradient-to-tr", "from-amber-100", "via-orange-100", "to-rose-100", "border-orange-200");
+                    explanation = `파스텔처럼 상큼발랄한 매력을 가진 당신은 봄 웜톤! ${weatherAdvice}`;
+                    selectedColorGroup = cosmeticsDatabase.spring;
+                    break;
+                case 'summer':
+                    seasonKorean = "여름 쿨톤 🧊";
+                    seasonEngText.innerText = "SUMMER COOL";
+                    themeCard.classList.add("bg-gradient-to-tr", "from-sky-100", "via-indigo-50", "to-pink-100", "border-sky-200");
+                    explanation = `청량하고 투명하며 화사한 분위기의 여름 쿨톤! ${weatherAdvice}`;
+                    selectedColorGroup = cosmeticsDatabase.summer;
+                    break;
+                case 'autumn':
+                    seasonKorean = "가을 웜톤 🍁";
+                    seasonEngText.innerText = "AUTUMN WARM";
+                    themeCard.classList.add("bg-gradient-to-tr", "from-orange-100", "via-yellow-100", "to-amber-200", "border-amber-300");
+                    explanation = `분위기 있고 그윽하며 따뜻한 감성을 지닌 가을 웜톤! ${weatherAdvice}`;
+                    selectedColorGroup = cosmeticsDatabase.autumn;
+                    break;
+                case 'winter':
+                    seasonKorean = "겨울 쿨톤 ❄️";
+                    seasonEngText.innerText = "WINTER COOL";
+                    themeCard.classList.add("bg-gradient-to-tr", "from-purple-100", "via-slate-100", "to-pink-100", "border-purple-200");
+                    explanation = `강렬하고 또렷하며 시크하고 세련된 겨울 쿨톤! ${weatherAdvice}`;
+                    selectedColorGroup = cosmeticsDatabase.winter;
+                    break;
+            }
+
+            seasonNameText.innerText = seasonKorean;
+            descriptionText.innerText = explanation;
+
+            // 2. 추천 제품 풀에서 랜덤으로 3개 추려서 노출 (그림처럼 예쁜 카드 디자인)
+            // 자바스크립트 랜덤 믹싱 알고리즘 이용
+            const shuffled = [...selectedColorGroup].sort(() => 0.5 - Math.random());
+            const selectedItems = shuffled.slice(0, 3); // 2~3개 추출
+
+            const listContainer = document.getElementById('cosmetics-list');
+            listContainer.innerHTML = ''; // 초기화
+
+            selectedItems.forEach(item => {
+                // 네이버 쇼핑 및 올리브영 통합 검색 경로 세팅 (질문 4 피드백 적용)
+                const searchKeyword = encodeURIComponent(item.name);
+                const searchLink = `https://search.shopping.naver.com/search/all?query=${searchKeyword}`;
+
+                // 카드 HTML 구조화 (snap-align 탑재하여 넘기기 편하게)
+                const card = document.createElement('div');
+                card.className = "flex-shrink-0 w-44 bg-white rounded-2xl p-4 border border-gray-100 shadow-md snap-center flex flex-col justify-between transform active:scale-95 transition-all cursor-pointer";
+                card.onclick = () => {
+                    window.open(searchLink, '_blank', 'noopener,noreferrer');
+                };
+
+                card.innerHTML = `
+                    <div>
+                        <!-- 상단 타이틀 칩 -->
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[9px] bg-pink-100 text-pink-600 font-extrabold px-1.5 py-0.5 rounded-full">${item.type}</span>
+                            <span class="text-lg">${item.img}</span>
+                        </div>
+                        <!-- 화장품 타이틀 -->
+                        <h5 class="text-xs font-bold text-gray-800 line-clamp-2 h-8 leading-tight">${item.name}</h5>
+                        <!-- 설명 코멘트 -->
+                        <p class="text-[10px] text-gray-500 mt-1 line-clamp-3 leading-snug">${item.desc}</p>
+                    </div>
+                    <!-- 가격 및 링크 열기 버튼 -->
+                    <div class="mt-3 border-t border-gray-50 pt-2 flex flex-col items-stretch">
+                        <span class="text-xs font-black text-pink-500 text-left">${item.price}</span>
+                        <div class="mt-1 bg-gradient-to-r from-pink-400 to-purple-400 text-white text-[9px] font-bold py-1 px-2 rounded-lg text-center shadow-sm">
+                            최저가 구경 🛍️
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+
+            // 스크롤 시 인디케이터 비율 반응화 기능 탑재
+            listContainer.onscroll = () => {
+                const totalWidth = listContainer.scrollWidth - listContainer.clientWidth;
+                const scrollLeft = listContainer.scrollLeft;
+                const progress = (scrollLeft / totalWidth) * 100;
+                document.getElementById('scroll-indicator').style.width = `${Math.max(15, progress)}%`;
+            };
+        }
+
+        // 특정 영역 스크롤 이동
+        function scrollToRecommendations() {
+            const list = document.getElementById('cosmetics-list');
+            list.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // 스마트폰 화면 전환 관리기
+        function switchScreen(screenName) {
+            currentScreen = screenName;
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-analysis').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+
+            if (screenName === 'start') {
+                document.getElementById('screen-start').classList.remove('hidden');
+            } else if (screenName === 'analysis') {
+                document.getElementById('screen-analysis').classList.remove('hidden');
+            } else if (screenName === 'result') {
+                document.getElementById('screen-result').classList.remove('hidden');
+            }
+        }
+
+        // 하단 홈 가기 기능
+        function goToHome() {
+            switchScreen('start');
+        }
+
+        // 하단 뒤로 가기 기능
+        function goBack() {
+            if (currentScreen === 'result') {
+                switchScreen('start');
+            } else if (currentScreen === 'analysis') {
+                switchScreen('start');
+            } else {
+                // 첫 화면일 땐 간단 리액션 메시지
+                alert("첫 번째 홈화면입니다! 🎉");
+            }
+        }
+
+        // 메뉴 모달 여닫기 기능
+        function toggleMenu() {
+            const modal = document.getElementById('menu-modal');
+            if (modal.classList.contains('translate-y-full')) {
+                modal.classList.remove('translate-y-full');
+            } else {
+                modal.classList.add('translate-y-full');
+            }
+        }
+    </script>
+<div id="expo-credit" role="note" aria-label="개발자 장수아" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 장수아</div>
+</body>
+</html>

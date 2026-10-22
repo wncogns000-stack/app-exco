@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POSELOG - 포즈로그</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,800;1,900&family=Noto+Sans+KR:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #1a1a1a;
+        }
+
+        /* POSELOG 흰색/검은색 번갈아 바뀌는 네온/반전 효과 */
+        @keyframes altColor {
+            0%, 100% { 
+                color: #ffffff; 
+                text-shadow: 0 0 15px rgba(255,255,255,0.8);
+                background-color: transparent;
+            }
+            50% { 
+                color: #000000; 
+                text-shadow: none;
+                background-color: #ffffff;
+                box-shadow: 0 0 20px #ffffff;
+            }
+        }
+        .poselog-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            letter-spacing: 2px;
+            animation: altColor 2s infinite;
+            padding: 0 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* 천사 날개 부드럽게 움직이는 효과 */
+        @keyframes floatWing {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(3deg); }
+        }
+        .wing-icon {
+            animation: floatWing 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        /* 유튜브 모양 버튼 스타일 */
+        .youtube-btn {
+            background: linear-gradient(145deg, #ffffff, #dcdcdc);
+            color: #000000;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+        }
+        .youtube-btn:hover {
+            transform: scale(1.05);
+            background: #ffffff;
+            box-shadow: 0 6px 20px rgba(255,255,255,0.4);
+        }
+        .youtube-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 스크롤바 숨기기 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-4">
+
+    <div class="w-[360px] h-[740px] bg-black border-[4px] border-gray-800 rounded-[40px] shadow-2xl flex flex-col justify-between overflow-hidden relative text-white">
+        
+        <div class="bg-zinc-900 px-6 py-3 flex justify-between items-center text-xs border-b border-zinc-800 z-10">
+            <span id="current-time" class="font-bold tracking-wider">00:00</span>
+            <div id="weather-info" class="text-zinc-400 font-medium">날씨 정보를 불러오는 중...</div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar relative p-6 flex flex-col justify-center" id="screen-container">
+            
+            <div id="stage-1" class="flex flex-col items-center justify-center text-center my-auto">
+                <div class="text-3xl mb-1 wing-icon">ʚ🪽ɞ</div>
+                <h1 class="text-4xl my-2 poselog-title">POSELOG</h1>
+                <p class="text-xs text-zinc-400 tracking-widest mt-1 mb-8 font-semibold">오늘 무슨 포즈? 감성 포즈 내비게이터</p>
+                
+                <div class="w-full bg-zinc-900/80 p-5 rounded-2xl border border-zinc-800 mb-8 text-left">
+                    <label class="block text-xs font-bold text-zinc-300 mb-3 flex items-center gap-1">
+                        <span>👥 오늘 함께 찍을 인원은?</span>
+                    </label>
+                    <div class="grid grid-cols-3 gap-2 mb-4" id="member-select">
+                        <button onclick="selectOption('member', '2명', this)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition">2명</button>
+                        <button onclick="selectOption('member', '3명', this)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition">3명</button>
+                        <button onclick="selectOption('member', '4명 이상', this)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition">4명 이상</button>
+                    </div>
+
+                    <label class="block text-xs font-bold text-zinc-300 mb-3 flex items-center gap-1">
+                        <span>✨ 원하는 촬영 컨셉은?</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-2" id="concept-select">
+                        <button onclick="selectOption('concept', '천사/여신', this)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition">🪽 천사/여신</button>
+                        <button onclick="selectOption('concept', '시크/힙합', this)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition">🖤 시크/힙합</button>
+                        <button onclick="selectOption('concept', '아이돌/엔딩', this)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition">⭐ 아이돌/엔딩</button>
+                        <button onclick="selectOption('concept', '귀욤/발랄', this)" class="bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition">🎀 귀욤/발랄</button>
+                    </div>
+                </div>
+
+                <button onclick="startAnalysis()" class="youtube-btn w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 tracking-wider">
+                    <span class="text-red-600 text-lg">▶</span> 포즈 & 사진관 추천받기
+                </button>
+                <span class="text-[10px] text-zinc-500 mt-3">*버튼을 누르면 내 위치 주변 사진관을 찾아줘요!</span>
+            </div>
+
+            <div id="stage-2" class="hidden flex flex-col items-center justify-center text-center my-auto py-20">
+                <div class="text-6xl mb-6 wing-icon animate-bounce">🪽</div>
+                <h2 class="text-xl font-bold tracking-wider mb-2 text-white">시크한 감성 분석 중...</h2>
+                <p class="text-xs text-zinc-400">네가 선택한 조건과 현재 위치를 바탕으로<br>가장 힙한 포즈와 사진관을 고르고 있어!</p>
+                <div class="w-32 h-1 bg-zinc-800 rounded-full mt-6 overflow-hidden">
+                    <div class="w-full h-full bg-white animate-pulse"></div>
+                </div>
+            </div>
+
+            <div id="stage-3" class="hidden flex flex-col py-2">
+                <div class="text-center mb-6">
+                    <div class="text-xs text-zinc-400 font-bold mb-1 wing-icon">ʚ RECOMMENDATION ɞ</div>
+                    <h2 class="text-xl font-black tracking-wider text-white">오늘의 POSELOG</h2>
+                    <p class="text-[11px] text-zinc-400 mt-1" id="result-subtitle">너에게 딱 맞는 힙한 사진관과 포즈야!</p>
+                </div>
+
+                <div id="recommendation-list" class="space-y-4 mb-6">
+                    </div>
+
+                <button onclick="goToHome()" class="youtube-btn w-full py-3.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 mt-auto">
+                    <span>🔄</span> 다른 포즈 다시 추천받기
+                </button>
+            </div>
+
+        </div>
+
+        <div class="bg-zinc-900 h-14 border-t border-zinc-800 flex justify-around items-center text-zinc-400 text-lg z-10 px-6">
+            <button onclick="alert('메뉴: 준비된 포즈 도감과 내가 찜한 사진관 목록을 볼 수 있는 기능이에요!')" class="hover:text-white transition py-2 px-4">☰</button>
+            <button onclick="goToHome()" class="hover:text-white transition py-2 px-4 text-xl">⌂</button>
+            <button onclick="goToHome()" class="hover:text-white transition py-2 px-4">◁</button>
+        </div>
+
+    </div>
+
+    <script>
+        // 조건 선택 상태 저장
+        let selectedMember = "2명";
+        let selectedConcept = "천사/여신";
+
+        // 1. 시간 업데이트
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('current-time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 2. 위치 및 날씨 정보 획득 (Open-Meteo & BigDataCloud API)
+        function fetchLocationAndWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    try {
+                        // 지역명 가져오기 (무료 주소 변환 API)
+                        const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`);
+                        const geoData = await geoRes.json();
+                        const city = geoData.locality || geoData.city || geoData.principalSubdivision || "우리 동네";
+
+                        // 날씨 가져오기 (Open-Meteo API)
+                        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                        const weatherData = await weatherRes.json();
+                        const temp = Math.round(weatherData.current_weather.temperature);
+                        const code = weatherData.current_weather.weathercode;
+                        
+                        let emoji = "☀️";
+                        if (code >= 1 && code <= 3) emoji = "☁️";
+                        else if (code >= 45 && code <= 48) emoji = "🌫️";
+                        else if (code >= 51 && code <= 67) emoji = "🌧️";
+                        else if (code >= 71) emoji = "❄️";
+
+                        document.getElementById('weather-info').innerText = `${city} ${emoji} ${temp}°C`;
+                    } catch (error) {
+                        document.getElementById('weather-info').innerText = "날씨 정보 없음";
+                    }
+                }, () => {
+                    document.getElementById('weather-info').innerText = "날씨 정보 없음";
+                });
+            } else {
+                document.getElementById('weather-info').innerText = "날씨 정보 없음";
+            }
+        }
+        fetchLocationAndWeather();
+
+        // 3. 조건 선택 버튼 하이라이트 로직
+        function selectOption(type, value, btnElement) {
+            const parent = btnElement.parentElement;
+            const buttons = parent.getElementsByTagName('button');
+            for(let btn of buttons) {
+                btn.className = "bg-zinc-800 hover:bg-zinc-700 py-2 rounded-lg text-xs font-bold border border-zinc-700 transition text-zinc-400";
+            }
+            btnElement.className = "bg-white text-black py-2 rounded-lg text-xs font-black border border-white transition shadow-lg scale-95";
+            
+            if (type === 'member') selectedMember = value;
+            if (type === 'concept') selectedConcept = value;
+        }
+
+        // 4. 넉넉한 큐레이션 데이터 풀 (12개 이상)
+        const photoStudios = [
+            { name: "하루필름", feature: "구름 같고 화사한 파스텔 블루 배경! 천사/여신 필터 적용 ✨", pose: "천사 강림 포즈 (양손으로 머리 뒤 날개 만들기) 👼", tag: "#여신필터 #화사함 #천사컨셉" },
+            { name: "포토이즘 박스", feature: "힙하고 깔끔한 블랙&그레이 배경! 시크한 느낌 내기 최고 🖤", pose: "선글라스 끼고 시크하게 팔짱 끼고 카메라 째려보기 🕶️", tag: "#시크무드 #블랙앤화이트 #힙합" },
+            { name: "포토시그니처", feature: "매월 바뀌는 아이돌 프레임 & 귀여운 머리띠 소품 잔치 🎀", pose: "아이돌 엔딩 요정 포즈 (숨 차는 척하며 손하트 하기) ⭐", tag: "#아이돌엔딩 #소품맛집 #귀욤" },
+            { name: "돈룩업 (Don't Look Up)", feature: "천장 카메라로 내려다보는 힙한 항공샷 전용 스튜디오 ✈️", pose: "고개 힙하게 꺾고 선글라스 잡으며 위 쳐다보기 😎", tag: "#항공샷 #힙스터 #MZ포즈" },
+            { name: "셀픽스", feature: "귀여운 스마일 마스코트와 쨍한 색감! 활기찬 바이브 🤪", pose: "루피 피스 (머리 위로 V자 꺾어서 만들기) ✌️", tag: "#발랄함 #색감맛집 #루피피스" },
+            { name: "모노맨션", feature: "감성 넘치는 내추럴 톤 배경! 자연스러운 인생샷 가능 🌿", pose: "서로 마주 보고 빵 터진 찐웃음 자연스러운 포즈 😄", tag: "#내추럴 #감성 #인생샷" },
+            { name: "플랜스튜디오", feature: "넓은 다인원 전용 방 보유! 친구들과 떼샷 찍기 딱 좋아 👥", pose: "계단식으로 얼굴 내밀기 (귀여운 토템 포즈) 🪜", tag: "#다인원추천 #우정샷 #넓은방" },
+            { name: "비밀의화원 셀프스튜디오", feature: "신비로운 꽃과 조명 소품 가득! 몽환적인 요정 컨셉 🌸", pose: "꽃받침하고 아련한 눈빛 발사하는 요정 포즈 🧚", tag: "#몽환적 #요정 #꽃소품" },
+            { name: "에픽 스튜디오", feature: "강렬한 흑백 필터와 힙한 조명! 시크 & 도도 종결자 🕶️", pose: "턱 살짝 들고 거만하고 멋지게 카메라 가리키기 👆", tag: "#흑백감성 #시크도도 #강렬함" },
+            { name: "더필름", feature: "투명 필름지에 인쇄되는 독특한 감성! 햇빛에 비추면 예쁨 ☀️", pose: "손바닥을 카메라 쪽으로 쭉 뻗는 원근감 하트 포즈 🫲", tag: "#투명필름 #유니크 #원근감" },
+            { name: "포토그레이", feature: "아이돌 눈망울 만들어주는 링라이트 조명 맛집 👁️✨", pose: "체리 피스 (손가락 구부려서 귀엽게 V 만들기) 🍒", tag: "#조명맛집 #링라이트 #체리피스" },
+            { name: "인생네컷", feature: "가장 클래식하고 접근성 좋은 원조 맛집! 천사 날개 소품 보유 👼", pose: "친구랑 둘이서 큰 하트 반반씩 완성하기 🫶", tag: "#클래식 #원조맛집 #하트포즈" }
+        ];
+
+        // 5. 화면 전환 로직 (1단계 -> 2단계 -> 3단계)
+        function startAnalysis() {
+            document.getElementById('stage-1').classList.add('hidden');
+            document.getElementById('stage-2').classList.remove('hidden');
+
+            // 2초 뒤 결과 화면 출력
+            setTimeout(() => {
+                document.getElementById('stage-2').classList.add('hidden');
+                document.getElementById('stage-3').classList.remove('hidden');
+                showRecommendations();
+            }, 1800);
+        }
+
+        function goToHome() {
+            document.getElementById('stage-3').classList.add('hidden');
+            document.getElementById('stage-2').classList.add('hidden');
+            document.getElementById('stage-1').classList.remove('hidden');
+        }
+
+        // 6. 랜덤 큐레이션 및 HTML 생성 (안전망/네이버 지도 링크 적용)
+        function showRecommendations() {
+            const listContainer = document.getElementById('recommendation-list');
+            listContainer.innerHTML = "";
+
+            document.getElementById('result-subtitle').innerText = `${selectedMember}서 찍는 '${selectedConcept}' 컨셉 맞춤 추천!`;
+
+            // 배열을 랜덤하게 섞고 2~3개만 추출
+            const shuffled = [...photoStudios].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, Math.floor(Math.random() * 2) + 2); // 2개 또는 3개
+
+            selected.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl text-left relative overflow-hidden shadow-lg hover:border-zinc-500 transition";
+                
+                card.innerHTML = `
+                    <div class="absolute top-3 right-3 text-lg opacity-20">🪽</div>
+                    <div class="text-[10px] text-zinc-400 font-bold mb-1">${item.tag}</div>
+                    <h3 class="text-base font-black text-white flex items-center gap-1.5 mb-1.5">
+                        <span class="text-xs bg-white text-black px-1.5 py-0.5 rounded font-extrabold">BEST ${index + 1}</span>
+                        ${item.name}
+                    </h3>
+                    <p class="text-xs text-zinc-300 mb-2 font-medium bg-black/40 p-2 rounded-lg border border-zinc-800/80">
+                        💡 <strong class="text-white">사진관 특징:</strong> ${item.feature}
+                    </p>
+                    <div class="text-xs text-zinc-200 mb-3 pl-1 border-l-2 border-white">
+                        <span class="text-zinc-400 block text-[10px] font-bold">✨ 추천 인싸 포즈</span>
+                        <strong>${item.pose}</strong>
+                    </div>
+                    <a href="https://map.naver.com/v5/search/${encodeURIComponent(item.name)}" target="_blank" rel="noopener noreferrer" 
+                       class="block w-full text-center bg-zinc-800 hover:bg-white hover:text-black text-white text-xs font-bold py-2.5 rounded-xl border border-zinc-700 transition duration-200">
+                        🗺️ 네이버 지도에서 내 근처 [${item.name}] 찾기 ➔
+                    </a>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+    </script>
+<div id="expo-credit" role="note" aria-label="개발자 이서주" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 이서주</div>
+</body>
+</html>

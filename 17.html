@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>내 입맛대로 - 나만의 레시피 앱</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Custom Scrollbar for Smooth Mobile Feel */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .mobile-frame {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-2 sm:p-4 font-sans select-none">
+
+  <!-- Mobile Device Outer Container -->
+  <div class="mobile-frame w-full max-w-[390px] h-[780px] bg-white rounded-[40px] border-[8px] border-slate-800 flex flex-col overflow-hidden relative shadow-2xl">
+    
+    <!-- Phone Top Notch / Speaker -->
+    <div class="w-full bg-slate-800 text-white px-6 py-1.5 flex justify-between items-center text-xs shrink-0 rounded-t-[28px]">
+      <span class="font-bold text-[11px]" id="clock-display">12:00</span>
+      <div class="w-16 h-3.5 bg-black rounded-full flex items-center justify-center">
+        <div class="w-2 h-2 bg-slate-700 rounded-full"></div>
+      </div>
+      <div class="flex items-center space-x-1.5 text-[10px]">
+        <i class="fa-solid font-bold fa-wifi"></i>
+        <i class="fa-solid fa-battery-full"></i>
+      </div>
+    </div>
+
+    <!-- App Header Title Bar -->
+    <div class="bg-amber-500 text-white px-4 py-3 flex items-center justify-between shadow-md shrink-0">
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-utensils text-xl"></i>
+        <h1 class="font-bold text-lg tracking-wide">내 입맛대로</h1>
+      </div>
+      <button onclick="goHome()" class="text-xs bg-amber-600 hover:bg-amber-700 px-2.5 py-1 rounded-full font-medium transition active:scale-95">
+        <i class="fa-solid fa-house mr-1"></i>처음으로
+      </button>
+    </div>
+
+    <!-- Main Content Dynamic View Area -->
+    <div id="app-content" class="flex-1 overflow-y-auto bg-amber-50/30 p-4 relative">
+      <!-- Dynamic Views Rendered by JS -->
+    </div>
+
+    <!-- Phone Bottom Navigation Bar (스케치 반영: 저장목록 | + | 내레시피) -->
+    <div class="bg-white border-t border-slate-200 py-2 px-4 flex justify-around items-center shrink-0 z-10 shadow-lg">
+      <button onclick="switchTab('saved')" id="tab-saved" class="flex flex-col items-center text-slate-500 hover:text-amber-500 transition active:scale-90">
+        <i class="fa-solid fa-bookmark text-xl"></i>
+        <span class="text-xs mt-0.5 font-bold">저장목록</span>
+      </button>
+      
+      <button onclick="switchTab('add')" id="tab-add" class="flex flex-col items-center justify-center w-12 h-12 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition transform active:scale-90 -mt-4 border-4 border-white">
+        <i class="fa-solid fa-plus text-xl"></i>
+      </button>
+
+      <button onclick="switchTab('my')" id="tab-my" class="flex flex-col items-center text-slate-500 hover:text-amber-500 transition active:scale-90">
+        <i class="fa-solid fa-user-chef text-xl fa-utensils"></i>
+        <span class="text-xs mt-0.5 font-bold">내 레시피</span>
+      </button>
+    </div>
+
+    <!-- Virtual Phone Hardware Nav Bar -->
+    <div class="bg-slate-900 py-1.5 flex justify-around items-center text-slate-400 text-sm shrink-0 border-t border-slate-800">
+      <button onclick="alert('메뉴 목록을 엽니다.')" class="hover:text-white px-4 active:scale-95"><i class="fa-solid fa-bars"></i></button>
+      <button onclick="goHome()" class="hover:text-white px-4 active:scale-95"><i class="fa-regular fa-square rounded-sm"></i></button>
+      <button onclick="goBack()" class="hover:text-white px-4 active:scale-95"><i class="fa-solid fa-chevron-left"></i></button>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Data Curation Pool (50 Items Mega Update) ---
+    const recipeDatabase = [
+      {
+        id: 1,
+        title: "5분 초간단 피자",
+        category: "양식",
+        emoji: "🍕",
+        time: "5분",
+        desc: "식빵과 치즈, 토마토 소스만 있으면 전자레인지로 5분 만에 만드는 꿀맛 피자!",
+        ingredients: ["식빵", "피자치즈", "토마토소스", "페퍼로니"],
+        steps: ["식빵에 토마토 소스를 골고루 바릅니다.", "피자치즈와 토핑을 듬뿍 올립니다.", "전자레인지에 1분 30초간 돌려주면 완성!"],
+        saved: false,
+        my: false
+      },
+      {
+        id: 2,
+        title: "달콤 짭조름 간장 떡볶이",
+        category: "분식",
+        emoji: "🍢",
+        time: "10분",
+        desc: "맵지 않아 누구나 맛있게 먹을 수 있는 단짠단짠 간장 떡볶이 레시피!",
+        ingredients: ["떡볶이떡", "진간장", "설탕", "참기름", "어묵"],
+        steps: ["떡을 따뜻한 물에 5분간 불립니다.", "팬에 간장 2스푼, 설탕 1스푼, 물을 넣고 끓입니다.", "떡과 어묵을 넣고 국물이 자작해질 때까지 조립니다."],
+        saved: true,
+        my: false
+      },
+      {
+        id: 3,
+        title: "치즈 폭탄 김치볶음밥",
+        category: "한식",
+        emoji: "🍳",
+        time: "12분",
+        desc: "고소한 치즈가 늘어나는 유튜브 인기 폭발 매콤 달콤 볶음밥!",
+        ingredients: ["밥", "배추김치", "모짜렐라치즈", "굴소스", "계란"],
+        steps: ["김치를 송송 잘라 식용유에 달달 볶습니다.", "밥과 굴소스를 넣고 잘 섞어 볶아줍니다.", "가운데에 치즈를 넣고 뚜껑을 덮어 녹여줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 4,
+        title: "바삭 촉촉 에어프라이어 치킨",
+        category: "양식",
+        emoji: "🍗",
+        time: "20분",
+        desc: "밖에서 사는 것보다 훨씬 맛있는 바삭바삭 수제 치킨!",
+        ingredients: ["닭고기", "튀김가루", "허브솔트", "식용유"],
+        steps: ["닭고기를 밑간하여 10분간 둡니다.", "튀김가루를 살짝 묻힌 후 에어프라이어에 넣습니다.", "180도에서 10분 뒤집어서 10분 구워줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 5,
+        title: "폭신폭신 수플레 계란말이",
+        category: "한식",
+        emoji: "🥚",
+        time: "8분",
+        desc: "구름을 씹는 듯 부드러운 영양 만점 고급 계란말이!",
+        ingredients: ["계란 3개", "소금", "대파"],
+        steps: ["계란 흰자와 노른자를 분리하여 흰자를 저어 거품을 냅니다.", "노른자와 섞은 후 약불로 구워줍니다.", "돌돌 말아 완성합니다."],
+        saved: true,
+        my: false
+      },
+      {
+        id: 6,
+        title: "상큼 달콤 생과일 파르페",
+        category: "디저트",
+        emoji: "🍨",
+        time: "5분",
+        desc: "좋아하는 과일과 시리얼, 아이스크림을 쌓아 만드는 나만의 디저트!",
+        ingredients: ["딸기", "바나나", "바닐라아이스크림", "시리얼"],
+        steps: ["컵 맨 아래에 시리얼을 깝니다.", "자른 과일과 아이스크림을 층층이 올립니다.", "초코 시럽을 뿌려 완성합니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 7,
+        title: "고소한 스팸 마요 덮밥",
+        category: "한식",
+        emoji: "🍚",
+        time: "7분",
+        desc: "반찬 없을 때 최고! 실패 없는 절대 조합 스팸과 마요네즈!",
+        ingredients: ["밥", "스팸", "계란", "마요네즈", "데리야끼소스"],
+        steps: ["스팸을 깍둑썰기하여 노릇하게 볶습니다.", "계란으로 스크램블을 만듭니다.", "밥 위에 스팸, 계란을 얹고 마요네즈를 듬뿍 뿌립니다."],
+        saved: false,
+        my: true
+      },
+      {
+        id: 8,
+        title: "쫄깃한 짜장 라면 그라탕",
+        category: "분식",
+        emoji: "🍜",
+        time: "8분",
+        desc: "일반 짜장 라면에 치즈를 얹어 더 특별하게 즐기는 요리!",
+        ingredients: ["짜장라면", "슬라이스치즈", "피자치즈"],
+        steps: ["짜장라면을 평소대로 맛있게 끓입니다.", "그릇에 담고 위에 치즈를 듬뿍 올려 전자레인지에 1분 돌립니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 9,
+        title: "새콤달콤 비빔만두",
+        category: "분식",
+        emoji: "🥟",
+        time: "10분",
+        desc: "바삭하게 구운 군만두와 아삭한 야채 무침의 환상 조합!",
+        ingredients: ["냉동만두", "양배추", "초고추장", "참깨"],
+        steps: ["만두를 노릇노릇하게 튀기듯 굽습니다.", "채 썬 양배추에 초고추장을 넣고 비볍니다.", "만두와 야채를 같이 접시에 담아냅니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 10,
+        title: "원팬 또띠아 토스트",
+        category: "양식",
+        emoji: "🥪",
+        time: "6분",
+        desc: "설거지거리 딱 하나! 바쁜 아침에 뚝딱 만드는 퀘사디아 느낌 토스트!",
+        ingredients: ["또띠아", "계란", "슬라이스햄", "치즈"],
+        steps: ["팬에 계란물을 붓고 위에 또띠아를 올립니다.", "뒤집은 후 햄과 치즈를 올리고 반으로 접어 구워줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 11,
+        title: "달콤바삭 소시지 떡꼬치",
+        category: "분식",
+        emoji: "🍢",
+        time: "7분",
+        desc: "휴게소 최고 인기 간식 소떡소떡! 새콤달콤 양념소스가 일품!",
+        ingredients: ["비엔나소시지", "떡볶이떡", "케첩", "고추장", "올리고당"],
+        steps: ["꼬치에 떡과 소시지를 번갈아가며 끼웁니다.", "팬에 기름을 두르고 노릇하게 구워줍니다.", "케첩과 올리고당을 섞은 양념을 소스 솔로 발라줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 12,
+        title: "소고기 수제 치즈버거",
+        category: "양식",
+        emoji: "🍔",
+        time: "15분",
+        desc: "육즙 가득한 소고기 패티에 고소한 치즈가 사르르 녹아내리는 버거!",
+        ingredients: ["햄버거빵", "소고기 다짐육", "체다치즈", "양상추", "토마토"],
+        steps: ["다짐육을 동그랗게 뭉쳐 팬에서 노릇하게 구워줍니다.", "고기가 익으면 위에 치즈를 올려 녹입니다.", "빵 사이에 양상추, 토마토, 패티를 순서대로 쌓아 완성합니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 13,
+        title: "달콤한 호떡만두",
+        category: "디저트",
+        emoji: "🥟",
+        time: "8분",
+        desc: "만두피 속에 꿀과 견과류를 쏙! 겉은 바삭 속은 달콤 촉촉!",
+        ingredients: ["만두피", "흑설탕", "견과류", "계피가루"],
+        steps: ["흑설탕과 다진 견과류, 계피가루를 섞어 속을 만듭니다.", "만두피에 속을 넣고 노릇하게 튀기듯 구워줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 14,
+        title: "촉촉한 카레라이스",
+        category: "한식",
+        emoji: "🍛",
+        time: "15분",
+        desc: "감자와 당근이 큼직하게 들어간 진하고 따뜻한 영양 만점 카레!",
+        ingredients: ["카레가루", "감자", "당근", "돼지고기", "양파"],
+        steps: ["양파, 감자, 당근, 고기를 깍둑썰기하여 기름에 볶습니다.", "물을 넣고 재료가 익을 때까지 끓입니다.", "불을 줄이고 카레가루를 풀어 밥 위에 얹어냅니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 15,
+        title: "달콤바삭 고구마 맛탕",
+        category: "디저트",
+        emoji: "🍠",
+        time: "12분",
+        desc: "달콤한 조청 시럽이 코팅되어 겉은 바삭하고 속은 촉촉한 간식!",
+        ingredients: ["고구마", "식용유", "설탕", "올리고당", "검은깨"],
+        steps: ["고구마를 한 입 크기로 잘라 기름에 노릇하게 튀깁니다.", "팬에 설탕과 올리고당을 보글보글 끓여 시럽을 만듭니다.", "튀긴 고구마를 넣고 버무린 후 검은깨를 뿌립니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 16,
+        title: "딸기 연유 크로플",
+        category: "디저트",
+        emoji: "🧇",
+        time: "6분",
+        desc: "크루아상 생지를 와플기에 눌러 딸기와 연유를 듬뿍 올린 최고 디저트!",
+        ingredients: ["크루아상 생지", "딸기", "연유", "메이플시럽"],
+        steps: ["와플기를 예열한 후 생지를 넣어 노릇하게 굽습니다.", "슬라이스한 딸기를 얹고 연유를 취향껏 뿌려줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 17,
+        title: "베이컨 크림 파스타",
+        category: "양식",
+        emoji: "🍝",
+        time: "12분",
+        desc: "부드럽고 고소한 크림소스와 짭조름한 베이컨의 기분 좋은 만남!",
+        ingredients: ["스파게티면", "베이컨", "우유", "슬라이스치즈", "다진마늘"],
+        steps: ["면을 8분간 삶아 건져둡니다.", "팬에 다진마늘과 베이컨을 볶다가 우유와 치즈를 넣고 끓입니다.", "면을 넣고 소스가 자작해질 때까지 볶아줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 18,
+        title: "고소한 계란 볶음밥",
+        category: "한식",
+        emoji: "🍳",
+        time: "5분",
+        desc: "중화요리집 부럽지 않은 파기름 풍미 가득 포슬포슬 계란 볶음밥!",
+        ingredients: ["밥", "계란 2개", "대파", "굴소스", "참기름"],
+        steps: ["팬에 식용유와 송송 썬 대파를 넣고 파기름을 냅니다.", "계란을 넣어 스크램블을 만든 뒤 밥과 굴소스를 넣고 강불에 볶습니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 19,
+        title: "시원한 초코 바나나 스무디",
+        category: "음료",
+        emoji: "🥤",
+        time: "3분",
+        desc: "달콤한 바나나와 고소한 우유, 초코 시럽이 어우러진 든든한 음료!",
+        ingredients: ["바나나", "우유", "초코시럽", "얼음"],
+        steps: ["믹서기에 바나나, 우유, 얼음을 넣습니다.", "곱게 갈아준 뒤 컵에 담고 초코시럽을 둘러줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 20,
+        title: "단짠단짠 데리야끼 닭꼬치",
+        category: "간식",
+        emoji: "🍡",
+        time: "10분",
+        desc: "노릇하게 구운 닭고기에 감칠맛 나는 데리야끼 소스를 쏙!",
+        ingredients: ["닭정육", "대파", "진간장", "올리고당", "굴소스"],
+        steps: ["닭고기와 대파를 번갈아 꼬치에 꿥니다.", "팬에 꼬치를 구운 뒤 간장, 올리고당, 굴소스를 섞은 소스를 졸여 발라줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 21,
+        title: "바삭바삭 야채 튀김",
+        category: "분식",
+        emoji: "🥕",
+        time: "12분",
+        desc: "고구마, 당근, 양파를 얇게 채 썰어 노릇하게 튀겨낸 고소한 튀김!",
+        ingredients: ["고구마", "당근", "양파", "튀김가루", "얼음물"],
+        steps: ["야채를 가늘게 채 썹니다.", "튀김가루와 찬물을 반죽하여 야채와 섞어줍니다.", "기름에 한 숟가락씩 떼어 넣어 바삭하게 튀깁니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 22,
+        title: "얼큰 시원 해장 라면",
+        category: "분식",
+        emoji: "🍜",
+        time: "6분",
+        desc: "콩나물과 콩나물 국물로 깊고 시원한 맛을 낸 감칠맛 폭발 라면!",
+        ingredients: ["신라면", "콩나물", "대파", "고춧가루"],
+        steps: ["물에 콩나물을 먼저 넣고 끓입니다.", "물이 끓으면 면과 스프를 넣고 4분간 더 끓여줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 23,
+        title: "고소한 콘치즈 구이",
+        category: "간식",
+        emoji: "🌽",
+        time: "7분",
+        desc: "옥수수 통조림과 마요네즈, 톡톡 터지는 치즈의 환상 궁합!",
+        ingredients: ["옥수수통조림", "모짜렐라치즈", "마요네즈", "설탕"],
+        steps: ["옥수수에 물기를 빼고 마요네즈, 설탕을 섞습니다.", "팬이나 프라이팬에 얹은 후 치즈를 뿌려 치즈가 녹을 때까지 구워줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 24,
+        title: "바삭 촉촉 어니언 링",
+        category: "양식",
+        emoji: "🧅",
+        time: "10분",
+        desc: "양파의 달콤함과 바삭한 튀김 옷이 매력적인 단짠 간식!",
+        ingredients: ["양파", "튀김가루", "빵가루", "계란"],
+        steps: ["양파를 둥글게 동그란 모양으로 썹니다.", "튀김가루, 계란물, 빵가루 순으로 옷을 입혀 기름에 튀깁니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 25,
+        title: "달콤 시원 망고 빙수",
+        category: "디저트",
+        emoji: "🍧",
+        time: "5분",
+        desc: "우유 얼음 위에 올려진 노란 냉동 망고와 아이스크림!",
+        ingredients: ["우유", "냉동망고", "연유", "바닐라아이스크림"],
+        steps: ["우유를 지퍼백에 넣어 얼린 뒤 두드려 부숩니다.", "그릇에 담고 망고와 아이스크림, 연유를 얹어줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 26,
+        title: "상큼 청포도 에이드",
+        category: "음료",
+        emoji: "🍹",
+        time: "3분",
+        desc: "톡 쏘는 탄산수와 달콤 상큼한 청포도 청의 청량함!",
+        ingredients: ["청포도", "탄산수", "꿀", "얼음"],
+        steps: ["청포도를 으깨어 컵 바닥에 넣습니다.", "얼음과 탄산수를 가득 채워 섞어줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 27,
+        title: "고소한 치즈 계란빵",
+        category: "간식",
+        emoji: "🧁",
+        time: "10분",
+        desc: "종이컵과 핫케이크 가루로 전자레인지에서 뚝딱 만드는 계란빵!",
+        ingredients: ["핫케이크가루", "우유", "계란", "치즈"],
+        steps: ["종이컵에 핫케이크 반죽을 1/3 채웁니다.", "계란을 하나 깨트려 넣고 노른자를 이쑤시개로 터트린 뒤 치즈를 얹어 전자레인지에 2분 돌립니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 28,
+        title: "바삭한 꿀 가래떡 구이",
+        category: "한식",
+        emoji: "🍡",
+        time: "5분",
+        desc: "겉은 바삭하고 속은 쫄깃한 가래떡에 달콤한 꿀을 콕!",
+        ingredients: ["가래떡", "참기름", "꿀"],
+        steps: ["팬에 참기름을 두르고 가래떡을 노릇하게 구워줍니다.", "달콤한 꿀을 찍어 고소하게 즐깁니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 29,
+        title: "치즈 햄 클럽 샌드위치",
+        category: "양식",
+        emoji: "🥪",
+        time: "8분",
+        desc: "신선한 야채와 햄, 치즈가 알차게 들어간 영양 가득 샌드위치!",
+        ingredients: ["식빵", "슬라이스햄", "치즈", "양상추", "머스타드소스"],
+        steps: ["구운 식빵에 머스타드 소스를 바릅니다.", "양상추, 햄, 치즈를 차곡차곡 쌓아 반으로 잘라줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 30,
+        title: "새콤달콤 매콤 쫄면",
+        category: "분식",
+        emoji: "🍜",
+        time: "10분",
+        desc: "쫄깃한 쫄면에 아삭한 콩나물과 오이를 얹은 별미 쫄면!",
+        ingredients: ["쫄면", "콩나물", "오이", "계란", "초고추장"],
+        steps: ["쫄면과 콩나물을 데쳐 찬물에 행굽니다.", "그릇에 면과 야채, 삶은 계란을 올리고 양념장에 맛있게 비빕니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 31,
+        title: "바삭 촉촉 단호박 튀김",
+        category: "분식",
+        emoji: "🎃",
+        time: "10분",
+        desc: "달콤하고 부드러운 단호박을 바삭하게 튀겨낸 최애 간식!",
+        ingredients: ["단호박", "튀김가루", "얼음물", "식용유"],
+        steps: ["단호박을 반으로 갈라 씨를 털고 얇게 썹니다.", "튀김옷을 입혀 노릇하게 튀겨냅니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 32,
+        title: "치즈 그라탕 감자구이",
+        category: "양식",
+        emoji: "🥔",
+        time: "15분",
+        desc: "포슬포슬 감자에 베이컨과 치즈가 듬뿍 들어간 레시피!",
+        ingredients: ["감자", "베이컨", "피자치즈", "버터"],
+        steps: ["삶은 감자를 으깨어 버터를 섞습니다.", "그릇에 담고 베이컨과 치즈를 올려 에어프라이어에 5분 구워줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 33,
+        title: "블루베리 요거트 스무디",
+        category: "음료",
+        emoji: "🫐",
+        time: "3분",
+        desc: "상큼한 블루베리와 요거트가 만나 보랏빛 시원함을 팡팡!",
+        ingredients: ["냉동블루베리", "플레인요거트", "우유", "꿀"],
+        steps: ["모든 재료를 믹서기에 넣고 곱게 갈아줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 34,
+        title: "폭신폭신 팬케이크",
+        category: "디저트",
+        emoji: "🥞",
+        time: "10분",
+        desc: "노릇하게 구워 메이플 시럽을 조르르 뿌린 완벽한 브런치!",
+        ingredients: ["핫케이크가루", "우유", "계란", "메이플시럽", "버터"],
+        steps: ["반죽을 잘 섞어 팬에 동그랗게 쏩니다.", "기포가 올라오면 뒤집어 노릇하게 구운 뒤 버터와 시럽을 올려줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 35,
+        title: "시원 고소 김치말이 국수",
+        category: "한식",
+        emoji: "🍜",
+        time: "10분",
+        desc: "살얼음 동동 육수에 새콤한 김치를 얹은 시원한 국수!",
+        ingredients: ["소면", "배추김치", "냉면육수", "오이", "참기름"],
+        steps: ["소면을 삶아 찬물에 헹궈 준비합니다.", "새콤하게 볶은 김치와 오이를 고명으로 얹고 시원한 육수를 부어줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 36,
+        title: "바삭바삭 오징어 튀김",
+        category: "분식",
+        emoji: "🦑",
+        time: "12분",
+        desc: "쫄깃한 오징어 몸통에 바삭한 튀김 옷이 길게 입혀진 메뉴!",
+        ingredients: ["오징어", "튀김가루", "빵가루", "식용유"],
+        steps: ["오징어를 먹기 좋은 크기로 길쭉하게 썹니다.", "튀김옷과 빵가루를 입혀 기름에 튀겨냅니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 37,
+        title: "고소한 참치 마요 주먹밥",
+        category: "한식",
+        emoji: "🍙",
+        time: "5분",
+        desc: "참치캔과 마요네즈, 김가루로 동글동글 빚어 만드는 주먹밥!",
+        ingredients: ["밥", "참치캔", "마요네즈", "김가루", "참기름"],
+        steps: ["참치 기름을 빼고 마요네즈와 섞습니다.", "밥에 김가루와 참기름을 더해 참치를 속에 넣고 동글동글 뭉쳐줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 38,
+        title: "달콤 딸기 우유 라떼",
+        category: "음료",
+        emoji: "🍓",
+        time: "5분",
+        desc: "생딸기를 으깨어 고소한 우유를 듬뿍 넣은 수제 딸기 라떼!",
+        ingredients: ["생딸기", "설탕", "우유"],
+        steps: ["딸기 절반을 포크로 으깨고 설탕과 섞습니다.", "컵 아래에 으깬 딸기를 깔고 우유를 부은 뒤 자른 딸기를 얹어줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 39,
+        title: "콘치즈 핫도그",
+        category: "간식",
+        emoji: "🌭",
+        time: "8분",
+        desc: "식빵에 소시지와 톡톡 터지는 콘치즈를 넣어 구운 미니 핫도그!",
+        ingredients: ["식빵", "소시지", "옥수수통조림", "모짜렐라치즈"],
+        steps: ["식빵 테두리를 자르고 밀대로 밉니다.", "소시지와 콘치즈를 올리고 돌돌 말아 팬에 구워줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 40,
+        title: "고소한 버터 계란 간장밥",
+        category: "한식",
+        emoji: "🍳",
+        time: "3분",
+        desc: "따뜻한 밥에 버터와 계란 프라이, 간장 한 스푼이면 끝!",
+        ingredients: ["밥", "계란", "버터 1조각", "진간장", "참깨"],
+        steps: ["계란 프라이를 반숙으로 만듭니다.", "갓 지은 밥에 버터를 올리고 계란과 간장을 넣어 쓱쓱 비벼줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 41,
+        title: "바삭바삭 감자튀김",
+        category: "양식",
+        emoji: "🍟",
+        time: "10분",
+        desc: "에어프라이어로 기름 없이 바삭하게 구워내는 짭조름 간식!",
+        ingredients: ["감자", "식용유", "소금", "파슬리가루"],
+        steps: ["감자를 굵직하게 채 썰어 물에 담가 녹말을 뺍니다.", "식용유 약간과 소금을 섞어 에어프라이어 190도에서 15분 구워줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 42,
+        title: "달콤 바질 토마토 에이드",
+        category: "음료",
+        emoji: "🍹",
+        time: "5분",
+        desc: "방울토마토와 향긋한 바질이 만난 고급스러운 스파클링 음료!",
+        ingredients: ["방울토마토", "바질잎", "꿀", "탄산수"],
+        steps: ["껍질을 깐 토마토와 꿀, 바질을 잘 으깹니다.", "컵에 얼음과 함께 탄산수를 부어 완설합니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 43,
+        title: "매콤 달콤 기름 떡볶이",
+        category: "분식",
+        emoji: "🍡",
+        time: "8분",
+        desc: "국물 없이 고춧가루와 기름으로 볶아내어 겉은 바삭 속은 쫄깃!",
+        ingredients: ["떡볶이떡", "고춧가루", "진간장", "설탕", "식용유"],
+        steps: ["불린 떡에 고춧가루, 간장, 설탕을 버무립니다.", "팬에 기름을 넉넉히 두르고 중약불에서 떡을 달달 볶아줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 44,
+        title: "아삭아삭 샐러드 또띠아 랩",
+        category: "양식",
+        emoji: "🌯",
+        time: "7분",
+        desc: "닭가슴살과 싱싱한 야채를 넣어 건강하고 부담 없이 즐기는 또띠아!",
+        ingredients: ["또띠아", "훈제 닭가슴살", "양상추", "토마토", "허니머스타드"],
+        steps: ["또띠아를 팬에 살짝 구워줍니다.", "양상추, 토마토, 닭가슴살을 올리고 소스를 뿌려 단단하게 말아줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 45,
+        title: "초코 아이스크림 브라우니",
+        category: "디저트",
+        emoji: "🍫",
+        time: "5분",
+        desc: "따뜻한 초코 브라우니 위에 시원한 바닐라 아이스크림 한 숟가락!",
+        ingredients: ["초코 브라우니", "바닐라 아이스크림", "초코시럽"],
+        steps: ["브라우니를 전자레인지에 20초 따뜻하게 데웁니다.", "위에 바닐라 아이스크림을 올리고 초코시럽을 둘러줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 46,
+        title: "달콤 팝콘 치킨",
+        category: "간식",
+        emoji: "🍿",
+        time: "10분",
+        desc: "한 입 크기의 닭고기를 튀겨 떡강정 소스에 굴려낸 인기 간식!",
+        ingredients: ["한입 닭고기", "튀김가루", "케첩", "올리고당", "고추장"],
+        steps: ["한입 크기 닭고기를 바삭하게 튀깁니다.", "팬에 양념 소스를 보글보글 끓인 뒤 튀긴 치킨을 넣어 버무려줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 47,
+        title: "고소한 두부 구이 샐러드",
+        category: "한식",
+        emoji: "🥗",
+        time: "8분",
+        desc: "노릇하게 구운 두부와 신선한 야채에 오리엔탈 드레싱을 쏙!",
+        ingredients: ["두부", "어린잎 야채", "오리엔탈 드레싱", "참깨"],
+        steps: ["두부를 깍둑썰기하여 팬에 노릇하게 구워줍니다.", "야채 위에 구운 두부를 올리고 드레싱을 뿌려줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 48,
+        title: "상큼 레몬 탄산 에이드",
+        category: "음료",
+        emoji: "🍋",
+        time: "3분",
+        desc: "상큼함이 비타민처럼 팡팡 터지는 시원한 레몬 에이드!",
+        ingredients: ["레몬즙", "탄산수", "시럽", "얼음", "레몬슬라이스"],
+        steps: ["컵에 얼음과 레몬즙, 시럽을 넣습니다.", "시원한 탄산수를 부어 섞은 뒤 레몬 슬라이스를 올려줍니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 49,
+        title: "바삭바삭 김말이 튀김",
+        category: "분식",
+        emoji: "🍙",
+        time: "10분",
+        desc: "김 속에 양념된 당면을 쏙 넣어 튀겨낸 분식집 대표 튀김!",
+        ingredients: ["김밥용 김", "당면", "간장", "참기름", "튀김가루"],
+        steps: ["삶은 당면에 간장과 참기름으로 간을 합니다.", "김에 당면을 말아 말아준 뒤 튀김옷을 입혀 튀겨냅니다."],
+        saved: false,
+        my: false
+      },
+      {
+        id: 50,
+        title: "촉촉 스윗 프렌치 토스트",
+        category: "디저트",
+        emoji: "🍞",
+        time: "6분",
+        desc: "계란물에 폭 적신 식빵을 버터에 구워 슈가파우더를 뿌려 완성!",
+        ingredients: ["식빵", "계란 2개", "우유", "버터", "슈가파우더"],
+        steps: ["계란과 우유를 섞어 반죽을 만든 뒤 식빵을 충분히 적십니다.", "버터 두른 팬에 약불로 노릇하게 구운 후 슈가파우더를 솔솔 뿌립니다."],
+        saved: false,
+        my: false
+      }
+    ];
+
+    // Navigation History for Hardware Back Button
+    let historyStack = ['main'];
+    let currentTab = 'home';
+
+    // Real-time Clock
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock-display').innerText = `${hours}:${minutes}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // App Navigation Functions
+    function renderView(htmlContent, pushState = true) {
+      const appContainer = document.getElementById('app-content');
+      appContainer.innerHTML = htmlContent;
+      appContainer.scrollTop = 0;
+    }
+
+    function goHome() {
+      historyStack = ['main'];
+      currentTab = 'home';
+      updateTabStyles();
+      showMainView();
+    }
+
+    function goBack() {
+      if (historyStack.length > 1) {
+        historyStack.pop();
+        const prevView = historyStack[historyStack.length - 1];
+        if (prevView === 'main') showMainView(false);
+        else if (prevView.startsWith('detail-')) {
+          const id = parseInt(prevView.split('-')[1]);
+          showDetailView(id, false);
+        } else if (prevView === 'saved') showSavedView(false);
+        else if (prevView === 'my') showMyView(false);
+        else if (prevView === 'add') showAddView(false);
+      } else {
+        showMainView(false);
+      }
+    }
+
+    function updateTabStyles() {
+      document.getElementById('tab-saved').className = `flex flex-col items-center ${currentTab === 'saved' ? 'text-amber-500 font-bold' : 'text-slate-500'}`;
+      document.getElementById('tab-my').className = `flex flex-col items-center ${currentTab === 'my' ? 'text-amber-500 font-bold' : 'text-slate-500'}`;
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      updateTabStyles();
+      if (tab === 'saved') showSavedView();
+      else if (tab === 'my') showMyView();
+      else if (tab === 'add') showAddView();
+    }
+
+    // --- STEP 1: Main View (Search & List) ---
+    function showMainView(push = true) {
+      if (push) historyStack.push('main');
+      currentTab = 'home';
+      updateTabStyles();
+
+      // Pick 3 Random Recommended Recipes
+      const shuffled = [...recipeDatabase].sort(() => 0.5 - Math.random());
+      const randomRecommendations = shuffled.slice(0, 3);
+
+      const html = `
+        <div class="space-y-4">
+          <!-- Search Bar (스케치 1번 반영) -->
+          <div class="bg-white p-2 rounded-2xl shadow-sm border border-amber-200 flex items-center space-x-2">
+            <i class="fa-solid fa-magnifying-glass text-amber-500 text-lg ml-2"></i>
+            <input id="search-input" type="text" placeholder="어떤 요리의 레시피가 궁금해?" 
+              class="w-full bg-transparent outline-none text-sm text-slate-700 placeholder-slate-400 font-medium"
+              onkeypress="if(event.key==='Enter') executeSearch()">
+            <button onclick="executeSearch()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-3 py-1.5 rounded-xl font-bold transition active:scale-95 shrink-0">
+              검색
+            </button>
+          </div>
+
+          <!-- Banner / Notice -->
+          <div class="bg-gradient-to-r from-amber-400 to-orange-400 rounded-2xl p-3.5 text-white shadow-md flex items-center justify-between">
+            <div>
+              <p class="text-[11px] opacity-90 font-medium">유튜브처럼 쉬운 레시피!</p>
+              <h2 class="font-bold text-sm mt-0.5">🍳 내 입맛대로 요리하자!</h2>
+            </div>
+            <span class="text-3xl animate-bounce">👩‍🍳</span>
+          </div>
+
+          <!-- Random Recommendation Section Header -->
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-800 text-sm flex items-center">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-1.5"></i>오늘의 랜덤 추천 레시피!
+            </h3>
+            <button onclick="showMainView(false)" class="text-[11px] text-amber-600 font-bold hover:underline">
+              <i class="fa-solid fa-rotate mr-0.5"></i>새로고침
+            </button>
+          </div>
+
+          <!-- Recipe List Cards (스케치 리스트 구조 반영) -->
+          <div class="space-y-3">
+            ${randomRecommendations.map(item => `
+              <div onclick="startAnalysis(${item.id})" class="bg-white rounded-2xl p-3 shadow-sm border border-slate-100 flex items-center space-x-3 cursor-pointer hover:border-amber-300 transition active:scale-98">
+                <div class="w-16 h-16 bg-amber-100 rounded-xl flex items-center justify-center text-3xl shrink-0 shadow-inner">
+                  ${item.emoji}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <h4 class="font-bold text-slate-800 text-sm truncate">${item.title}</h4>
+                    <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold shrink-0">${item.time}</span>
+                  </div>
+                  <p class="text-xs text-slate-500 line-clamp-2 mt-1">${item.desc}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- All Recipe List -->
+          <h3 class="font-bold text-slate-800 text-sm pt-2">📖 전체 레시피 둘러보기 (${recipeDatabase.length}개)</h3>
+          <div class="grid grid-cols-2 gap-2.5">
+            ${recipeDatabase.map(item => `
+              <div onclick="startAnalysis(${item.id})" class="bg-white p-2.5 rounded-xl border border-slate-100 text-center cursor-pointer hover:border-amber-400 transition active:scale-95 shadow-xs">
+                <div class="text-2xl mb-1">${item.emoji}</div>
+                <div class="font-bold text-xs text-slate-800 truncate">${item.title}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">${item.category}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      renderView(html);
+    }
+
+    // Search Trigger Function
+    function executeSearch() {
+      const query = document.getElementById('search-input').value.trim();
+      if (!query) {
+        alert("검색어를 입력해 줘!");
+        return;
+      }
+      const filtered = recipeDatabase.filter(r => r.title.includes(query) || r.category.includes(query) || r.desc.includes(query));
+      
+      if (filtered.length === 0) {
+        renderView(`
+          <div class="text-center py-12 space-y-3">
+            <div class="text-4xl">🧐</div>
+            <p class="text-sm font-bold text-slate-700">'${query}'에 대한 레시피가 없어!</p>
+            <p class="text-xs text-slate-400">다른 이름으로 검색하거나 새로운 레시피를 등록해보자!</p>
+            <button onclick="showMainView(false)" class="mt-2 bg-amber-500 text-white text-xs px-4 py-2 rounded-xl font-bold">전체 목록으로</button>
+          </div>
+        `);
+      } else {
+        const item = filtered[Math.floor(Math.random() * filtered.length)];
+        startAnalysis(item.id);
+      }
+    }
+
+    // --- STEP 2: Loading / Analysis View ---
+    function startAnalysis(recipeId) {
+      const recipe = recipeDatabase.find(r => r.id === recipeId);
+      
+      const loadingHtml = `
+        <div class="h-full flex flex-col items-center justify-center text-center py-16 space-y-4">
+          <div class="relative w-20 h-20 flex items-center justify-center">
+            <div class="absolute inset-0 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+            <span class="text-3xl">${recipe.emoji}</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-800 text-base">'${recipe.title}'</h3>
+            <p class="text-xs text-amber-600 font-medium mt-1 animate-pulse">맛있는 레시피 분석 중...</p>
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs text-slate-500 max-w-[240px]">
+            💡 팁: '내 입맛대로' 앱에서는 필요 재료를 바로 쇼핑으로 구매할 수 있어!
+          </div>
+        </div>
+      `;
+      renderView(loadingHtml, false);
+
+      setTimeout(() => {
+        showDetailView(recipeId);
+      }, 1200);
+    }
+
+    // --- STEP 3: Result & Detail View (스케치 2번 결과 화면 완벽 구현) ---
+    function showDetailView(recipeId, push = true) {
+      if (push) historyStack.push(`detail-${recipeId}`);
+      const recipe = recipeDatabase.find(r => r.id === recipeId);
+
+      const html = `
+        <div class="space-y-4 pb-4">
+          <!-- Top Title & Search Result Style (스케치 2번 상단 파트) -->
+          <div class="bg-white p-2.5 rounded-2xl shadow-sm border border-amber-200 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-xl">${recipe.emoji}</span>
+              <span class="font-bold text-slate-800 text-sm">${recipe.title}</span>
+            </div>
+            <button onclick="toggleSave(${recipe.id})" class="text-amber-500 text-lg hover:scale-110 transition active:scale-90 px-2">
+              <i class="${recipe.saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
+            </button>
+          </div>
+
+          <!-- Recipe Image & Description Box (스케치 2번 그림과 텍스트 박스) -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+            <div class="w-full h-36 bg-amber-100 rounded-xl flex flex-col items-center justify-center text-center p-3 relative overflow-hidden">
+              <span class="text-5xl mb-1">${recipe.emoji}</span>
+              <h3 class="font-bold text-slate-800 text-lg">${recipe.title} 레시피!</h3>
+              <span class="absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">⏱️ ${recipe.time}</span>
+            </div>
+
+            <!-- Friendly Recommendation Reason -->
+            <div class="bg-amber-50 p-3 rounded-xl text-xs text-slate-700 leading-relaxed border border-amber-100">
+              <span class="font-bold text-amber-700">🥰 아이 추천 이유:</span><br>
+              ${recipe.desc} 쉽고 간단해서 누구나 맛있게 완성할 수 있어!
+            </div>
+          </div>
+
+          <!-- Ingredients & Naver Shopping Link Integration (질문 4번 의도 세팅) -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+            <h4 class="font-bold text-slate-800 text-xs flex items-center justify-between">
+              <span>🛒 필요한 재료 (클릭 시 네이버 쇼핑 연결)</span>
+              <span class="text-[10px] text-amber-600 font-normal">네이버 쇼핑 <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+            </h4>
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              ${recipe.ingredients.map(ing => `
+                <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent(ing)}" target="_blank" rel="noopener noreferrer"
+                  class="bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 text-xs px-2.5 py-1 rounded-lg border border-slate-200 transition flex items-center space-x-1">
+                  <span>${ing}</span>
+                  <i class="fa-solid fa-bag-shopping text-[10px] text-amber-500"></i>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Cooking Steps -->
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+            <h4 class="font-bold text-slate-800 text-xs">👨‍🍳 순서대로 요리하기</h4>
+            <ol class="space-y-2 text-xs text-slate-600">
+              ${recipe.steps.map((step, idx) => `
+                <li class="flex items-start space-x-2">
+                  <span class="bg-amber-500 text-white font-bold w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">${idx + 1}</span>
+                  <span>${step}</span>
+                </li>
+              `).join('')}
+            </ol>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex space-x-2 pt-1">
+            <button onclick="toggleSave(${recipe.id})" class="flex-1 ${recipe.saved ? 'bg-slate-200 text-slate-700' : 'bg-amber-500 text-white'} py-2.5 rounded-xl font-bold text-xs transition active:scale-95 shadow-sm">
+              <i class="fa-solid fa-bookmark mr-1"></i>${recipe.saved ? '저장됨' : '레시피 저장하기'}
+            </button>
+            <button onclick="goHome()" class="bg-slate-800 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition active:scale-95">
+              목록으로
+            </button>
+          </div>
+        </div>
+      `;
+      renderView(html);
+    }
+
+    // Toggle Save Status
+    function toggleSave(id) {
+      const item = recipeDatabase.find(r => r.id === id);
+      if (item) {
+        item.saved = !item.saved;
+        alert(item.saved ? '저장목록에 추가했어! ❤️' : '저장목록에서 해제했어!');
+        showDetailView(id, false);
+      }
+    }
+
+    // --- TAB: Saved List View ---
+    function showSavedView(push = true) {
+      if (push) historyStack.push('saved');
+      const savedItems = recipeDatabase.filter(r => r.saved);
+
+      const html = `
+        <div class="space-y-3">
+          <h2 class="font-bold text-slate-800 text-base flex items-center">
+            <i class="fa-solid fa-bookmark text-amber-500 mr-2"></i>내가 저장한 레시피
+          </h2>
+          ${savedItems.length === 0 ? `
+            <div class="text-center py-12 text-slate-400 space-y-2">
+              <i class="fa-regular fa-bookmark text-3xl"></i>
+              <p class="text-xs">아직 저장한 레시피가 없어!</p>
+              <p class="text-[11px] text-slate-400">마음에 드는 레시피를 저장해보자.</p>
+            </div>
+          ` : `
+            <div class="space-y-2">
+              ${savedItems.map(item => `
+                <div onclick="showDetailView(${item.id})" class="bg-white p-3 rounded-xl border border-slate-100 flex items-center justify-between cursor-pointer hover:border-amber-300 transition active:scale-98 shadow-xs">
+                  <div class="flex items-center space-x-3">
+                    <span class="text-2xl">${item.emoji}</span>
+                    <div>
+                      <h4 class="font-bold text-xs text-slate-800">${item.title}</h4>
+                      <p class="text-[10px] text-slate-400">${item.category} • ${item.time}</p>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      `;
+      renderView(html);
+    }
+
+    // --- TAB: My Recipes View (유튜브 형태) ---
+    function showMyView(push = true) {
+      if (push) historyStack.push('my');
+      const myItems = recipeDatabase.filter(r => r.my);
+
+      const html = `
+        <div class="space-y-3">
+          <h2 class="font-bold text-slate-800 text-base flex items-center">
+            <i class="fa-solid fa-circle-user text-amber-500 mr-2"></i>내가 만든 레시피 채널
+          </h2>
+          <div class="bg-amber-100 p-3 rounded-xl text-xs text-amber-800 flex items-center justify-between">
+            <span>📹 유튜브처럼 자유롭게 공유하는 공간!</span>
+            <button onclick="switchTab('add')" class="bg-amber-500 text-white px-2 py-1 rounded text-[10px] font-bold">올리기</button>
+          </div>
+
+          ${myItems.length === 0 ? `
+            <div class="text-center py-12 text-slate-400 space-y-2">
+              <i class="fa-solid fa-utensils text-3xl"></i>
+              <p class="text-xs">직접 등록한 레시피가 없어!</p>
+              <button onclick="switchTab('add')" class="bg-amber-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold">첫 레시피 만들기</button>
+            </div>
+          ` : `
+            <div class="space-y-2">
+              ${myItems.map(item => `
+                <div onclick="showDetailView(${item.id})" class="bg-white p-3 rounded-xl border border-slate-100 flex items-center justify-between cursor-pointer hover:border-amber-300 transition active:scale-98 shadow-xs">
+                  <div class="flex items-center space-x-3">
+                    <span class="text-2xl">${item.emoji}</span>
+                    <div>
+                      <h4 class="font-bold text-xs text-slate-800">${item.title}</h4>
+                      <span class="text-[9px] bg-green-100 text-green-700 font-bold px-1 rounded">내가 업로드함</span>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-xs text-slate-300"></i>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      `;
+      renderView(html);
+    }
+
+    // --- TAB: Add Recipe View ---
+    function showAddView(push = true) {
+      if (push) historyStack.push('add');
+
+      const html = `
+        <div class="space-y-3">
+          <h2 class="font-bold text-slate-800 text-base flex items-center">
+            <i class="fa-solid fa-plus-circle text-amber-500 mr-2"></i>새 레시피 올리기
+          </h2>
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3 text-xs">
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">요리 이름</label>
+              <input id="add-title" type="text" placeholder="예: 초간단 치즈 라면" class="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">이모지 아이콘</label>
+              <input id="add-emoji" type="text" placeholder="예: 🍜" class="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">한 줄 설명</label>
+              <input id="add-desc" type="text" placeholder="맛있는 이유를 적어줘!" class="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="font-bold text-slate-700 block mb-1">필요한 재료 (쉼표로 구분)</label>
+              <input id="add-ing" type="text" placeholder="예: 라면, 치즈, 계란" class="w-full p-2 border border-slate-200 rounded-lg outline-none focus:border-amber-500">
+            </div>
+            <button onclick="saveNewRecipe()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl transition active:scale-95 shadow-sm text-xs mt-2">
+              업로드하기 🚀
+            </button>
+          </div>
+        </div>
+      `;
+      renderView(html);
+    }
+
+    // Save New Recipe Logic
+    function saveNewRecipe() {
+      const title = document.getElementById('add-title').value.trim();
+      const emoji = document.getElementById('add-emoji').value.trim() || '🍳';
+      const desc = document.getElementById('add-desc').value.trim();
+      const ingRaw = document.getElementById('add-ing').value.trim();
+
+      if (!title || !desc) {
+        alert('요리 이름과 설명을 적어줘!');
+        return;
+      }
+
+      const ingredients = ingRaw ? ingRaw.split(',').map(s => s.trim()) : ['기본 재료'];
+
+      const newRecipe = {
+        id: Date.now(),
+        title: title,
+        category: '나만의 요리',
+        emoji: emoji,
+        time: '10분',
+        desc: desc,
+        ingredients: ingredients,
+        steps: ['맛있게 재료를 준비합니다.', "레시피대로 조리합니다.", "맛있게 완성하여 즐깁니다!"],
+        saved: false,
+        my: true
+      };
+
+      recipeDatabase.unshift(newRecipe);
+      alert('새로운 레시피가 성공적으로 올려졌어! 🎉');
+      showMyView(false);
+    }
+
+    // Initial Load
+    window.onload = function() {
+      showMainView(false);
+    };
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 이승민" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 이승민</div>
+</body>
+</html>

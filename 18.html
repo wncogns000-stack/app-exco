@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강쥐 텅장 - 강아지 맞춤 용품 큐레이션</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons for dog and map icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 스마트폰 화면 테두리 및 그림자 효과 */
+        .phone-container {
+            max-width: 412px;
+            height: 840px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 12px solid #3e2723; /* 깊고 고급스러운 갈색 테두리 */
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        /* 스크롤바 숨기기 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* 구름 둥실둥실 애니메이션 효과 */
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-6px) translateX(4px); }
+        }
+        @keyframes float-reverse {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(6px) translateX(-3px); }
+        }
+        .animate-float-1 {
+            animation: float-slow 4s ease-in-out infinite;
+        }
+        .animate-float-2 {
+            animation: float-reverse 5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-amber-100 flex justify-center items-center min-h-screen p-4 font-sans selection:bg-amber-200">
+
+    <!-- 스마트폰 본체 바깥 레이아웃 -->
+    <div class="phone-container bg-amber-50 flex flex-col justify-between text-stone-800">
+        
+        <!-- 상단 스피커 및 카메라 영역 (디자인 요소) -->
+        <div class="w-full h-6 bg-stone-900 flex justify-center items-center relative z-50">
+            <div class="w-24 h-4 bg-black rounded-full mt-1 flex justify-around items-center px-4">
+                <div class="w-2 h-2 rounded-full bg-stone-800"></div>
+                <div class="w-10 h-1 bg-stone-700 rounded"></div>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 영역 (화면 전환을 위한 Wrapper) -->
+        <div class="flex-1 overflow-y-auto no-scrollbar relative flex flex-col">
+            
+            <!-- [1단계] 시작 화면 -->
+            <div id="screen-start" class="flex-1 flex flex-col p-6 justify-between transition-all duration-300 relative">
+                
+                <!-- ☁️ 포근한 배경 구름 아트워크 1 (왼쪽 위) -->
+                <div class="absolute top-10 left-4 opacity-50 pointer-events-none animate-float-1 z-0">
+                    <svg class="w-14 h-10 text-white fill-current drop-shadow-sm" viewBox="0 0 100 60">
+                        <path d="M20 45 C15 45, 10 40, 10 35 C10 28, 18 25, 23 28 C28 18, 42 15, 50 22 C55 15, 68 15, 73 22 C80 20, 90 25, 90 32 C90 38, 85 45, 75 45 Z"/>
+                    </svg>
+                </div>
+
+                <!-- ☁️ 포근한 배경 구름 아트워크 2 (오른쪽 위) -->
+                <div class="absolute top-20 right-4 opacity-40 pointer-events-none animate-float-2 z-0">
+                    <svg class="w-16 h-12 text-white fill-current drop-shadow-sm" viewBox="0 0 100 60">
+                        <path d="M20 45 C15 45, 10 40, 10 35 C10 28, 18 25, 23 28 C28 18, 42 15, 50 22 C55 15, 68 15, 73 22 C80 20, 90 25, 90 32 C90 38, 85 45, 75 45 Z"/>
+                    </svg>
+                </div>
+
+                <div class="text-center mt-3 z-10">
+                    <span class="text-xs font-bold bg-amber-800 text-white px-3 py-1 rounded-full uppercase tracking-wider">댕댕이 필수 앱</span>
+                    <h1 class="text-3xl font-extrabold text-amber-900 mt-2 tracking-wide drop-shadow-sm">강쥐 텅장</h1>
+                    <p class="text-stone-500 text-xs mt-0.5">집사님 지갑 텅장 만드는 마법의 앱 💸</p>
+                </div>
+
+                <!-- 견종 캐릭터 바꾸기 영역 (귀여운 갈색 푸들로 기본 세팅!) -->
+                <div class="my-4 flex flex-col items-center z-10">
+                    <div onclick="nextCharacter()" class="cursor-pointer group relative bg-amber-200 hover:bg-amber-300 w-40 h-40 rounded-full flex flex-col items-center justify-center border-4 border-dashed border-amber-700 transition-all transform hover:scale-105 shadow-md overflow-hidden">
+                        <!-- 실제 사랑스러운 갈색 푸들 사진이 뿌려지는 곳 -->
+                        <img id="char-img" src="https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=400" alt="갈색 푸들" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1608096299210-db7e38487075?auto=format&fit=crop&q=80&w=300'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-center pb-2">
+                            <span id="char-name" class="font-extrabold text-white text-sm tracking-wide drop-shadow-md">푸들 🐾</span>
+                        </div>
+                        <div class="absolute top-1 right-1 bg-amber-800 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold shadow">
+                            터치 시 순환
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 시작 화면에서 바로 검색하여 결정하는 검색창 -->
+                <div class="bg-white/80 p-3 rounded-2xl border border-amber-200 shadow-sm z-10 -mt-2">
+                    <label class="block text-xs font-extrabold text-amber-950 mb-1.5 text-center flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-magnifying-glass text-amber-800"></i> 키우시는 견종을 바로 검색해 보세요!
+                    </label>
+                    <div class="flex gap-1">
+                        <input type="text" id="start-breed-search" placeholder="예: 비숑 프리제, 시바이누, 진돗개" class="flex-1 px-3 py-1.5 border-2 border-amber-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-amber-800 bg-white" onkeyup="handleStartSearch(this.value)">
+                        <button onclick="searchStartBreed()" class="bg-amber-800 text-white text-xs px-3 rounded-xl font-bold hover:bg-amber-900 transition-colors">적용</button>
+                    </div>
+                    <!-- 신속 선택을 돕는 추천 견종 태그들 -->
+                    <div class="flex flex-wrap gap-1 mt-2 justify-center" id="start-breed-tags">
+                        <!-- JS로 인기 있는 정식 견종 이름 태그들이 들어갑니다 -->
+                    </div>
+                </div>
+
+                <!-- 사용자 조건 입력 섹션 -->
+                <div class="bg-amber-100/70 p-3.5 rounded-2xl border border-amber-200 space-y-3 z-10 mt-2">
+                    <!-- 예산 선택 -->
+                    <div>
+                        <label class="block text-[11px] font-bold text-amber-950 mb-1">💸 집사님 지갑 사정</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="setBudget('low')" id="btn-budget-low" class="py-2 rounded-xl font-bold text-xs bg-amber-800 text-white border-2 border-amber-800 transition-all">
+                                가성비 최고! (저렴이)
+                            </button>
+                            <button onclick="setBudget('high')" id="btn-budget-high" class="py-2 rounded-xl font-bold text-xs bg-white text-amber-800 border-2 border-amber-200 hover:border-amber-800 transition-all">
+                                텅장 대환영! (고급형)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 첫 구매 50% 할인 동의 -->
+                    <div class="flex items-center justify-between bg-amber-200/50 p-2 rounded-xl border border-amber-300">
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold text-amber-950">🎁 첫 방문 웰컴 혜택!</span>
+                            <span class="text-[10px] text-stone-600">3일간 무조건 50% 반값 할인</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="discount-toggle" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-800"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 시작 버튼 -->
+                <button onclick="startAnalysis()" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-extrabold py-3.5 rounded-2xl shadow-lg transform active:scale-95 transition-all text-base mt-2 flex items-center justify-center gap-2 z-10">
+                    <span>추천 받으러 출발하기!</span>
+                    <i class="fa-solid fa-paw"></i>
+                </button>
+            </div>
+
+            <!-- [2단계] 분석 로딩 화면 -->
+            <div id="screen-loading" class="hidden flex-1 flex flex-col justify-center items-center p-6 bg-amber-50 relative">
+                
+                <!-- ☁️ 로딩창 전용 구름 장식 -->
+                <div class="absolute top-16 left-10 opacity-40 pointer-events-none animate-float-1">
+                    <svg class="w-12 h-8 text-white fill-current" viewBox="0 0 100 60">
+                        <path d="M20 45 C15 45, 10 40, 10 35 C10 28, 18 25, 23 28 C28 18, 42 15, 50 22 C55 15, 68 15, 73 22 C80 20, 90 25, 90 32 C90 38, 85 45, 75 45 Z"/>
+                    </svg>
+                </div>
+
+                <div class="relative w-40 h-40 flex items-center justify-center">
+                    <!-- 회전하는 원 -->
+                    <div class="absolute border-4 border-amber-200 border-t-amber-800 rounded-full w-32 h-32 animate-spin"></div>
+                    <img id="loading-dog-img" src="https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=150" alt="진행독" class="w-24 h-24 rounded-full object-cover border-4 border-amber-850 shadow-md">
+                </div>
+                <h3 class="text-xl font-bold text-amber-900 mt-6 text-center" id="loading-text">
+                    댕댕이 정보 수집 중...
+                </h3>
+                <p class="text-stone-500 text-xs mt-2 text-center">
+                    집사님의 남은 잔액과 견종 특성을 매칭하여<br>찰떡맞춤 아이템을 고르고 있어요! 🐾
+                </p>
+            </div>
+
+            <!-- [3단계] 결과 추천 화면 -->
+            <div id="screen-result" class="hidden flex-1 flex flex-col p-5 bg-amber-50 justify-between">
+                <div>
+                    <!-- 위치 및 실시간 날씨 정보 헤더 -->
+                    <div class="bg-amber-100 p-3 rounded-2xl border border-amber-200 flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl" id="weather-emoji">☀️</span>
+                            <div>
+                                <div class="text-xs text-stone-500 font-semibold" id="location-name">내 위치 파악 중...</div>
+                                <div class="text-sm font-bold text-amber-950" id="weather-temp">날씨 불러오는 중..</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold" id="walk-index">산책지수 파악중</span>
+                        </div>
+                    </div>
+
+                    <!-- 견종 검색 및 선택 섹션 -->
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-amber-950 mb-1">🔍 관심 견종 직접 변경/선택</label>
+                        <div class="flex gap-1 mb-1">
+                            <input type="text" id="breed-search" placeholder="견종을 입력하세요 (예: 비숑 프리제, 시바이누)" class="flex-1 px-3 py-1.5 border border-amber-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-amber-800" onkeyup="handleSearch(this.value)">
+                            <button onclick="searchBreed()" class="bg-amber-800 text-white text-xs px-3 rounded-lg font-bold hover:bg-amber-900 transition-colors">검색</button>
+                        </div>
+                        <!-- 추천 태그 (클릭 시 자동 검색 가능하도록 하여 접근성 향상) -->
+                        <div class="flex flex-wrap gap-1 mt-1.5" id="breed-tags">
+                            <!-- JS로 삽입됨 -->
+                        </div>
+                    </div>
+
+                    <!-- 견종 사이즈 토글 버튼 (소형견, 중형견, 대형견) -->
+                    <div class="mb-4">
+                        <div class="grid grid-cols-3 gap-1.5 text-center">
+                            <button onclick="setSize('small')" id="btn-size-small" class="py-1.5 rounded-full text-xs font-bold bg-white text-stone-600 border border-amber-200 hover:border-amber-800 transition-all">
+                                🟡 소형견
+                            </button>
+                            <button onclick="setSize('medium')" id="btn-size-medium" class="py-1.5 rounded-full text-xs font-bold bg-amber-800 text-white border border-amber-800 transition-all">
+                                🟢 중형견
+                            </button>
+                            <button onclick="setSize('large')" id="btn-size-large" class="py-1.5 rounded-full text-xs font-bold bg-white text-stone-600 border border-amber-200 hover:border-amber-800 transition-all">
+                                🔵 대형견
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 추천 이유 & 캐릭터 대화 (실제 강아지 사진이 대화 상대로 나옴) -->
+                    <div class="bg-white rounded-2xl p-3 border border-amber-200 flex gap-3 items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-amber-300">
+                            <img id="result-char-img" src="https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=150" alt="견종 미니" class="w-full h-full object-cover">
+                        </div>
+                        <div class="relative bg-amber-50 p-2.5 rounded-xl border border-amber-100 flex-1">
+                            <div class="absolute left-[-8px] top-4 w-0 h-0 border-t-4 border-t-transparent border-r-8 border-r-amber-50 border-b-4 border-b-transparent"></div>
+                            <p class="text-xs text-amber-950 font-semibold" id="char-bubble-text">"멍멍! 오늘 날씨엔 이 용품들이 최고라구!"</p>
+                        </div>
+                    </div>
+
+                    <!-- 추천 상품 리스트 (JS로 2-3개 랜덤 뿌려줌) -->
+                    <div class="space-y-3" id="recommendations-container">
+                        <!-- 동적 상품 추가 영역 -->
+                    </div>
+
+                    <!-- 하단 견종별 특성 설명 카드 -->
+                    <div class="mt-4 bg-amber-900/10 p-3.5 rounded-2xl border border-amber-900/20">
+                        <h4 class="text-xs font-extrabold text-amber-950 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-info text-amber-800"></i>
+                            <span id="breed-info-title">푸들 특성 정보</span>
+                        </h4>
+                        <p class="text-[11px] text-stone-700 mt-1 leading-relaxed" id="breed-info-desc">
+                            푸들은 곱슬곱슬해서 털이 거의 빠지지 않고 아주 똑똑해요! 영리한 만큼 재미있는 두뇌 놀이 장난감이 필요하답니다.
+                        </p>
+                        <a id="btn-breed-more-link" href="https://search.shopping.naver.com/search/all?query=푸들 특성" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex items-center text-[10px] text-amber-900 font-extrabold hover:underline">
+                            이 링크를 누르면 견종 상세 정보로 이동 🐾 &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 주변 오프라인 쇼핑몰 검색 바로가기 배너 -->
+                <div class="mt-4">
+                    <a id="btn-offline-map" href="https://map.naver.com/v5/search/주변 애견용품점" target="_blank" rel="noopener noreferrer" class="w-full bg-stone-800 hover:bg-stone-900 text-white text-xs py-3 px-4 rounded-xl font-bold flex justify-between items-center transition-all">
+                        <span>📍 우리 동네 오프라인 애견용품점 찾기</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 미니 사이드바 모달 (☰ 버튼 클릭 시 등장) -->
+        <div id="sidebar-menu" class="hidden absolute top-6 left-0 w-full h-[calc(100%-2.5rem)] bg-black/50 z-40 flex justify-start">
+            <div class="bg-amber-50 w-2/3 h-full p-6 shadow-2xl flex flex-col justify-between">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center border-b border-amber-200 pb-3">
+                        <span class="text-lg font-bold text-amber-900">강쥐 텅장 메뉴</span>
+                        <button onclick="toggleSidebar()" class="text-stone-500 hover:text-stone-800 text-xl font-bold">×</button>
+                    </div>
+                    <div class="space-y-4">
+                        <button onclick="goToScreen('start'); toggleSidebar();" class="w-full text-left font-semibold text-sm py-2 hover:bg-amber-100 px-2 rounded transition-all flex items-center gap-2 text-stone-700">
+                            <i class="fa-solid fa-paw text-amber-800"></i> 앱 처음으로 가기
+                        </button>
+                        <button onclick="alertModal('집사님 계좌 잔액 등록', '현재 계좌와 연동되어 지출 통계를 보실 수 있습니다. (데모)')" class="w-full text-left font-semibold text-sm py-2 hover:bg-amber-100 px-2 rounded transition-all flex items-center gap-2 text-stone-700">
+                            <i class="fa-solid fa-wallet text-amber-800"></i> 지갑 관리
+                        </button>
+                        <button onclick="alertModal('첫인사 혜택', '최초 3일간 강쥐 텅장 50% 특별 쿠폰이 정상 적용 중입니다.')" class="w-full text-left font-semibold text-sm py-2 hover:bg-amber-100 px-2 rounded transition-all flex items-center gap-2 text-stone-700">
+                            <i class="fa-solid fa-gift text-amber-800"></i> 쿠폰 보관함
+                        </button>
+                        <button onclick="alertModal('개발자 연락처', '메일을 통해 피드백을 전달해 주시면 더 멋지게 업그레이드할게요! 😄')" class="w-full text-left font-semibold text-sm py-2 hover:bg-amber-100 px-2 rounded transition-all flex items-center gap-2 text-stone-700">
+                            <i class="fa-solid fa-envelope text-amber-800"></i> 건의하기
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center text-[10px] text-stone-400">
+                    강쥐 텅장 v1.4.1
+                </div>
+            </div>
+        </div>
+
+        <!-- 커스텀 알림 모달 창 (iFrame 내 alert 금지 보완책) -->
+        <div id="custom-modal" class="hidden absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-6">
+            <div class="bg-amber-50 rounded-2xl w-full max-w-xs p-5 shadow-2xl border-2 border-amber-800">
+                <h4 id="modal-title" class="text-base font-bold text-amber-950 mb-2">알림</h4>
+                <p id="modal-desc" class="text-xs text-stone-600 mb-5 leading-relaxed">상세 내용이 여기에 들어갑니다.</p>
+                <button onclick="closeModal()" class="w-full bg-amber-800 text-white font-bold py-2 rounded-xl text-xs hover:bg-amber-900 transition-all">
+                    확인
+                </button>
+            </div>
+        </div>
+
+        <!-- 스마트폰 하단 네비게이션 바 -->
+        <div class="bg-stone-900 text-stone-400 h-14 flex justify-around items-center border-t border-stone-800 z-30 select-none">
+            <button onclick="toggleSidebar()" class="hover:text-amber-500 transition-colors w-12 h-10 flex flex-col justify-center items-center">
+                <span class="text-lg">☰</span>
+                <span class="text-[8px]">메뉴</span>
+            </button>
+            <button onclick="goToScreen('start')" class="hover:text-amber-500 transition-colors w-12 h-10 flex flex-col justify-center items-center">
+                <span class="text-xl">⌂</span>
+                <span class="text-[8px]">홈</span>
+            </button>
+            <button onclick="goBack()" class="hover:text-amber-500 transition-colors w-12 h-10 flex flex-col justify-center items-center">
+                <span class="text-lg">◁</span>
+                <span class="text-[8px]">뒤로</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JavaScript 로직 -->
+    <script>
+        // 전역 상태 변수들
+        let currentScreen = 'start';
+        let previousScreen = 'start';
+        let currentCharacterIndex = 2; // 초기 푸들 매칭 인덱스로 조정
+        let selectedBudget = 'low'; // 'low' or 'high'
+        let selectedSize = 'medium'; // 푸들에 매칭되도록 초기 'medium' 설정
+        let currentSelectedBreedName = '푸들'; // 실시간 추적할 선택된 견종명
+
+        // 고화질 실제 강아지 사진 목록 (정확하고 바른 견종 명칭 사용)
+        const characters = [
+            { 
+                breed: '말티즈', 
+                img: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=400', 
+                size: 'small', 
+                desc: '하얗고 사랑스러운 말티즈는 슬개골 관리가 가장 중요하고, 눈 주변의 눈물 자국 관리를 잘 해주어야 합니다.' 
+            },
+            { 
+                breed: '포메라니안', 
+                img: 'https://images.unsplash.com/photo-1591160690555-5debfbc282f0?auto=format&fit=crop&q=80&w=400', 
+                size: 'small', 
+                desc: '솜사탕 같은 이중모 털 관리가 매우 중요하며, 활발하지만 다리 뼈가 약해 뛰거나 내릴 때 매트가 필수예요.' 
+            },
+            { 
+                breed: '푸들', 
+                img: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=400', 
+                size: 'medium', 
+                desc: '곱슬곱슬 귀여운 지능 1등 댕댕이! 지능이 매우 높은 만큼 심심하지 않게 두뇌 자극 장난감(노즈워크)이 좋아요.' 
+            },
+            { 
+                breed: '웰시코기', 
+                img: 'https://images.unsplash.com/photo-1612536057832-2ff7eed58194?auto=format&fit=crop&q=80&w=400', 
+                size: 'medium', 
+                desc: '귀엽고 긴 허리와 짧은 다리가 트레이드마크! 허리 디스크 방지와 엄청난 활동량을 만족시킬 야외 산책이 필수예요!' 
+            },
+            { 
+                breed: '골든 리트리버', 
+                img: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400', 
+                size: 'large', 
+                desc: '천사처럼 온순하고 듬직한 리트리버! 무거운 관절을 보호해 줄 탄탄한 하네스와 튼튼한 대형 장난감이 어울립니다.' 
+            }
+        ];
+
+        // 🐕 정밀 교정된 견종 사전 데이터 (시바이누 사진 완벽히 진짜 갈색 시바이누로 수정 완료!)
+        const breedDictionary = {
+            '말티즈': { 
+                img: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=400', 
+                size: 'small', 
+                desc: '하얗고 작은 체구의 애교쟁이! 슬개골 보호용 침대 계단과 눈물자국 케어 세정액이 아주 유용해요.' 
+            },
+            '포메라니안': { 
+                img: 'https://images.unsplash.com/photo-1591160690555-5debfbc282f0?auto=format&fit=crop&q=80&w=400', 
+                size: 'small', 
+                desc: '귀엽고 풍성한 이중모를 가졌어요. 풍성한 모질 볼륨을 살려주는 전용 빗과 관절 방지 실내 매트가 찰떡궁합!' 
+            },
+            '푸들': { 
+                img: 'https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=400', 
+                size: 'medium', 
+                desc: '곱슬곱슬해서 털이 거의 빠지지 않고 영리해요! 머리가 좋은 만큼 간식을 숨겨놓는 다양한 노즈워크 토이를 강추합니다.' 
+            },
+            '웰시코기': { 
+                img: 'https://images.unsplash.com/photo-1612536057832-2ff7eed58194?auto=format&fit=crop&q=80&w=400', 
+                size: 'medium', 
+                desc: '허리가 길고 귀여운 엉덩이를 가졌어요. 허리를 잘 지켜주는 편안한 매트리스와 체력 소모용 튼튼한 장난감이 필수!' 
+            },
+            '골든 리트리버': { 
+                img: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=400', 
+                size: 'large', 
+                desc: '사람과 강아지 모두를 사랑하는 평화주의자! 듬직한 체구를 지탱해 주는 앞걸이형 가슴줄과 건강한 대형 사료가 아주 좋답니다.' 
+            },
+            '비숑 프리제': {
+                img: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&q=80&w=400',
+                size: 'small',
+                desc: '몽실몽실 하이바 머리가 매력적인 비숑 프리제! 뽀송뽀송 털 엉킴을 풀어줄 고급형 슬리커 빗과 건조기 전용 아로마 미스트를 추천해요.'
+            },
+            '시바이누': {
+                // 시바이누 실제 갈색 시바 사진으로 긴급 수정 완료!
+                img: 'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?auto=format&fit=crop&q=80&w=400',
+                size: 'medium',
+                desc: '깔끔하고 영리하며 똑부러지는 성격의 시바이누! 털이 날리는 털갈이 시기를 똑똑하게 버티게 해줄 전용 브러시와 편안한 가슴 하네스를 추천해요.'
+            },
+            '진돗개': {
+                img: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&q=80&w=400',
+                size: 'medium',
+                desc: '영리하고 집사에게 충성스러운 우리나라 자랑 진돗개! 야외활동과 실외 배변을 선호하므로 튼튼한 리드줄과 비 오는 날용 우비가 잘 어울려요.'
+            },
+            '치와와': {
+                img: 'https://images.unsplash.com/photo-1554681604-03463a5638c1?auto=format&fit=crop&q=80&w=400',
+                size: 'small',
+                desc: '세상에서 가장 작고 활기찬 치와와! 추위를 쉽게 타고 신체 뼈대가 약하므로 집안을 따뜻하게 해줄 온열 매트와 예쁜 겨울 니트 옷을 추천해요.'
+            },
+            '시베리안 허스키': {
+                img: 'https://images.unsplash.com/photo-1531804055935-76f44d7c3621?auto=format&fit=crop&q=80&w=400',
+                size: 'large',
+                desc: '멋진 외모와 달리 장난기 많은 시베리안 허스키! 더위를 무척 많이 타기 때문에 여름철을 시원하게 보낼 수 있는 고성능 쿨링매트가 큰 힘이 돼요.'
+            },
+            '요크셔 테리어': {
+                img: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&q=80&w=400',
+                size: 'small',
+                desc: '움직이는 보석이라 불리는 요크셔 테리어! 윤기 흐르는 긴 머리 털을 빗질해 줄 부드러운 돈모 빗과 앙증맞은 헤어핀이 완벽하게 매칭돼요.'
+            },
+            '미니어처 슈나우저': {
+                img: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&q=80&w=400',
+                size: 'medium',
+                desc: '멋진 턱수염 신사 같은 활기찬 강아지! 피부와 모질을 탄탄하게 가꾸어줄 저자극성 천연 오가닉 샴푸와 보습 크림이 찰떡이랍니다.'
+            },
+            '비글': {
+                img: 'https://images.unsplash.com/photo-1505628346881-b72b27e84530?auto=format&fit=crop&q=80&w=400',
+                size: 'medium',
+                desc: '지치지 않는 쾌활한 성격의 비글! 호기심 가득한 에너지를 건강하게 발산해 줄 튼튼한 노즈워크 장난감과 튼튼한 줄 하네스가 최고예요.'
+            },
+            '닥스훈트': {
+                img: 'https://images.unsplash.com/photo-1518384401463-d3873e6a6431?auto=format&fit=crop&q=80&w=400',
+                size: 'small',
+                desc: '허리가 길고 귀여운 다리를 가진 닥스훈트! 척추에 무리가 가지 않도록 경사도가 낮은 실내 안전 슬라이드 슬로프 가구 사용을 추천해요.'
+            }
+        };
+
+        // 현실적인 용품 데이터 풀 (18개 구성)
+        const itemPool = [
+            // 소형견 - 가성비(low)
+            { id: 1, size: 'small', budget: 'low', name: '미끄럼 방지 발바닥 밤', price: 4900, emoji: '🐾', intro: '소형견 슬개골 보호를 위해 보습과 미끄럼 방지를 한 번에 해결해 줘요!' },
+            { id: 2, size: 'small', budget: 'low', name: '초미세 모질 브러쉬', price: 6500, emoji: '🪮', intro: '털 엉킴 방지! 아프지 않고 기분 좋은 마사지 빗질 타임~' },
+            { id: 3, size: 'small', budget: 'low', name: '유기농 저알레르기 덴탈껌', price: 7900, emoji: '🦷', intro: '작은 입에도 쏙! 치석 제거와 스트레스 해소에 짱!' },
+            
+            // 소형견 - 고급형(high)
+            { id: 4, size: 'small', budget: 'high', name: '슬개골 안심 스웨이드 계단 (3단)', price: 39000, emoji: '🪵', intro: '소파나 침대 오르내릴 때 우리 아가 관절을 지켜주는 꿀템!' },
+            { id: 5, size: 'small', budget: 'high', name: '프리미엄 눈 건강 영양제', price: 29900, emoji: '👁️', intro: '눈물 자국과 망막 보호를 위해 매일 먹이는 필수 눈 보약!' },
+            { id: 6, size: 'small', budget: 'high', name: '초경량 인체공학 하네스', price: 25000, emoji: '🐕', intro: '목 압박이 전혀 없어 기침이 잦은 소형견에게 딱 맞춤이에요.' },
+
+            // 중형견 - 가성비(low)
+            { id: 7, size: 'medium', budget: 'low', name: '대용량 수제 오리목뼈 간식', price: 8500, emoji: '🦴', intro: '오독오독 씹는 맛이 최고! 칼슘 보충에 강력 추천하는 간식!' },
+            { id: 8, size: 'medium', budget: 'low', name: '야간 산책 LED 반사 안전밴드', price: 5900, emoji: '✨', intro: '밤 산책도 안심하고 안전하게! 시야를 번쩍 지켜줘요.' },
+            { id: 9, size: 'medium', budget: 'low', name: '초강력 3m 자동 리드줄', price: 11900, emoji: '🧵', intro: '활동적인 중형견도 거뜬히 버티는 부드러운 그립감의 자동 리드줄!' },
+
+            // 중형견 - 고급형(high)
+            { id: 10, size: 'medium', budget: 'high', name: '인조가죽 컴포트 마약 쿠션', price: 48000, emoji: '🛋️', intro: '눕자마자 기절하는 포근함! 무너지지 않는 쿠션감을 선사해요.' },
+            { id: 11, size: 'medium', budget: 'high', name: '인공지능 자동 급식기', price: 62000, emoji: '🍲', intro: '바쁜 집사님을 대신해 규칙적인 식사 시간을 똑똑하게 챙겨줍니다!' },
+            { id: 12, size: 'medium', budget: 'high', name: '산책 후 보습 거품 발세정제', price: 18000, emoji: '🫧', intro: '물 없이 깔끔하게 산책 매너를 마무리할 수 있는 고급 세정제!' },
+
+            // 대형견 - 가성비(low)
+            { id: 13, size: 'large', budget: 'low', name: '자이언트 고무 공 터그 장난감', price: 8900, emoji: '⚽', intro: '대형견의 강한 치악력도 끄떡없는 초고탄성 친환경 고무공!' },
+            { id: 14, size: 'large', budget: 'low', name: '야외 휴대용 원터치 물통', price: 9500, emoji: '💧', intro: '산책 도중 갈증 해소! 물 흘림 방지 장치가 되어 있어 완전 편해요.' },
+            { id: 15, size: 'large', budget: 'low', name: '대용량 먼지 안 나는 배변패드', price: 14900, emoji: '📑', intro: '대형견 소변도 빠르게 흡수하여 새지 않고 보송하게 말려줍니다.' },
+
+            // 대형견 - 고급형(high)
+            { id: 16, size: 'large', budget: 'high', name: '어깨 당김 방지 앞걸이 프리벤션 하네스', price: 42000, emoji: '🎽', intro: '강하게 끄는 대형견도 편안하게 제어하여 즐거운 산책을 도와줘요.' },
+            { id: 17, size: 'large', budget: 'high', name: '관절 보호 정형외과 메모리폼 침대', price: 89000, emoji: '🛏️', intro: '몸무게가 많이 나가는 대형견의 뼈와 허리를 탄탄하게 받쳐줘요.' },
+            { id: 18, size: 'large', budget: 'high', name: '대형견 전용 무독성 실리콘 매트 & 높이조절 식기', price: 37000, emoji: '🥣', intro: '수월한 소화를 돕는 높낮이 조절이 되는 위생적인 고급 식기입니다.' }
+        ];
+
+        // 윈도우 로드 완료 후 태그 생성 실행
+        window.onload = function() {
+            renderBreedTags();
+            renderStartBreedTags();
+            // 기본 시작화면 견종에 푸들 정보 세팅
+            applyBreedToStartScreen('푸들');
+        }
+
+        // 시작 화면을 위한 간편 터치 견종 목록 태그
+        function renderStartBreedTags() {
+            const container = document.getElementById('start-breed-tags');
+            container.innerHTML = "";
+            
+            // 시작 화면에서 바로 쉽게 고를 수 있는 6대 추천 견종
+            const recommendList = ['비숑 프리제', '시바이누', '진돗개', '푸들', '웰시코기', '골든 리트리버'];
+            
+            recommendList.forEach(key => {
+                if (breedDictionary[key]) {
+                    const tag = document.createElement('button');
+                    tag.className = "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-[10px] font-bold px-2 py-1 rounded-lg transition-all";
+                    tag.innerText = `🏷️ ${key}`;
+                    tag.onclick = function() {
+                        document.getElementById('start-breed-search').value = key;
+                        applyBreedToStartScreen(key);
+                    };
+                    container.appendChild(tag);
+                }
+            });
+        }
+
+        // 결과화면의 견종 목록 태그 생성 (기존 로직 유지)
+        function renderBreedTags() {
+            const tagContainer = document.getElementById('breed-tags');
+            tagContainer.innerHTML = "";
+            const keys = Object.keys(breedDictionary);
+            
+            keys.slice(0, 8).forEach(key => {
+                const tag = document.createElement('button');
+                tag.className = "bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-full transition-all";
+                tag.innerText = `📸 ${key}`;
+                tag.onclick = function() {
+                    document.getElementById('breed-search').value = key;
+                    selectBreedFromTag(key);
+                };
+                tagContainer.appendChild(tag);
+            });
+        }
+
+        // 화면 전환 함수
+        function goToScreen(screenId) {
+            previousScreen = currentScreen;
+            currentScreen = screenId;
+
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-loading').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+
+            document.getElementById('screen-' + screenId).classList.remove('hidden');
+        }
+
+        // 뒤로가기 동작
+        function goBack() {
+            if (currentScreen === 'loading') {
+                goToScreen('start');
+            } else if (currentScreen === 'result') {
+                goToScreen('start');
+            } else if (currentScreen === 'start') {
+                alertModal('알림', '가장 첫 화면입니다!');
+            }
+        }
+
+        // 시작화면 견종 바꾸기 (실제 사진 순환 교체!)
+        function nextCharacter() {
+            currentCharacterIndex = (currentCharacterIndex + 1) % characters.length;
+            const character = characters[currentCharacterIndex];
+            
+            applyBreedToStartScreen(character.breed);
+        }
+
+        // 선택/검색한 견종 정보를 시작 화면에 실시간 적용하는 로직
+        function applyBreedToStartScreen(breedName) {
+            currentSelectedBreedName = breedName;
+            const charImg = document.getElementById('char-img');
+            const charNameText = document.getElementById('char-name');
+
+            if (breedDictionary[breedName]) {
+                const data = breedDictionary[breedName];
+                charImg.src = data.img;
+                charImg.alt = breedName;
+                charNameText.innerText = `${breedName} 🐾`;
+                
+                // 크기 자동 설정 동기화
+                setSize(data.size);
+                
+                // 결과 화면 검색창 값도 동기화
+                document.getElementById('breed-search').value = breedName;
+                updateBreedInfo(breedName);
+            } else {
+                // 사전에 없는 견종 입력 시 기본 이미지 처리 및 이름 세팅
+                charImg.src = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300";
+                charNameText.innerText = `${breedName} 🐾`;
+            }
+        }
+
+        // 시작 화면 실시간 타이핑 매칭
+        function handleStartSearch(val) {
+            const trimmed = val.trim();
+            if (breedDictionary[trimmed]) {
+                applyBreedToStartScreen(trimmed);
+            }
+        }
+
+        // 시작 화면 검색 적용 버튼 클릭 시
+        function searchStartBreed() {
+            const val = document.getElementById('start-breed-search').value.trim();
+            if (!val) {
+                alertModal('입력 에러', '검색하고 싶은 강아지 견종을 적어 주세요! (예: 비숑 프리제, 시바이누)');
+                return;
+            }
+
+            if (breedDictionary[val]) {
+                applyBreedToStartScreen(val);
+            } else {
+                // 사전에 없을 시
+                alertModal('견종 알림', `'${val}'은(는) 새로운 강아지 친구네요! 제가 아직 배움이 부족해 임시 기본 이미지로 설정하고 추천을 준비할게요! 🐾`);
+                applyBreedToStartScreen(val);
+            }
+        }
+
+        // 예산 설정 변경
+        function setBudget(type) {
+            selectedBudget = type;
+            const btnLow = document.getElementById('btn-budget-low');
+            const btnHigh = document.getElementById('btn-budget-high');
+
+            if (type === 'low') {
+                btnLow.className = "py-2 rounded-xl font-bold text-xs bg-amber-800 text-white border-2 border-amber-800 transition-all";
+                btnHigh.className = "py-2 rounded-xl font-bold text-xs bg-white text-amber-800 border-2 border-amber-200 hover:border-amber-800 transition-all";
+            } else {
+                btnHigh.className = "py-2 rounded-xl font-bold text-xs bg-amber-800 text-white border-2 border-amber-800 transition-all";
+                btnLow.className = "py-2 rounded-xl font-bold text-xs bg-white text-amber-800 border-2 border-amber-200 hover:border-amber-800 transition-all";
+            }
+        }
+
+        // 강아지 크기 설정 변경
+        function setSize(size) {
+            selectedSize = size;
+            const btnSmall = document.getElementById('btn-size-small');
+            const btnMedium = document.getElementById('btn-size-medium');
+            const btnLarge = document.getElementById('btn-size-large');
+
+            // 기본 비활성 스타일 적용
+            [btnSmall, btnMedium, btnLarge].forEach(btn => {
+                btn.className = "py-1.5 rounded-full text-xs font-bold bg-white text-stone-600 border border-amber-200 hover:border-amber-800 transition-all";
+            });
+
+            // 활성화 스타일 적용
+            if (size === 'small') {
+                btnSmall.className = "py-1.5 rounded-full text-xs font-bold bg-amber-800 text-white border border-amber-800 transition-all";
+            } else if (size === 'medium') {
+                btnMedium.className = "py-1.5 rounded-full text-xs font-bold bg-amber-800 text-white border border-amber-800 transition-all";
+            } else if (size === 'large') {
+                btnLarge.className = "py-1.5 rounded-full text-xs font-bold bg-amber-800 text-white border border-amber-800 transition-all";
+            }
+
+            // 실시간 리스트 재정비
+            if (currentScreen === 'result') {
+                renderRecommendations();
+            }
+        }
+
+        // 2단계 로딩 애니메이션 및 날씨 조회 연동
+        function startAnalysis() {
+            goToScreen('loading');
+            
+            const loadingText = document.getElementById('loading-text');
+            const loadingImg = document.getElementById('loading-dog-img');
+            
+            // 현재 최종 선택된 견종명 기준 이미지 획득
+            let selectedImgUrl = "https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=150";
+            if (breedDictionary[currentSelectedBreedName]) {
+                selectedImgUrl = breedDictionary[currentSelectedBreedName].img;
+            }
+
+            // 로딩창의 강아지 이미지도 동기화하여 귀엽게 연출
+            loadingImg.src = selectedImgUrl;
+
+            // 로딩 메시지 순차 노출로 실감나게 표현
+            setTimeout(() => {
+                loadingText.innerText = "오늘 날씨와 바람의 기온 파악 중...⛅";
+            }, 600);
+
+            setTimeout(() => {
+                loadingText.innerText = `우리 소중한 ${currentSelectedBreedName} 맞춤 품목 정렬 중...💎`;
+            }, 1200);
+
+            // 실시간 날씨 데이터 수집
+            fetchWeatherAndLocation();
+
+            // 1.8초 뒤 결과 화면 로딩 완료
+            setTimeout(() => {
+                renderRecommendations();
+                updateBreedInfo(currentSelectedBreedName);
+                goToScreen('result');
+            }, 1800);
+        }
+
+        // 실시간 날씨 정보 가져오기 (Open-Meteo & Nominatim)
+        function fetchWeatherAndLocation() {
+            const locName = document.getElementById('location-name');
+            const weatherTemp = document.getElementById('weather-temp');
+            const weatherEmoji = document.getElementById('weather-emoji');
+            const walkIndex = document.getElementById('walk-index');
+
+            if (!navigator.geolocation) {
+                fallbackWeather("위치 비활성화");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    try {
+                        // 1. 역지오코딩으로 지역명 획득
+                        const geoUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+                        const geoRes = await fetch(geoUrl, { headers: { "User-Agent": "DogWalletApp" } });
+                        const geoData = await geoRes.json();
+                        const city = geoData.address.city || geoData.address.town || geoData.address.village || geoData.address.province || "우리동네";
+                        locName.innerText = `📍 ${city}`;
+
+                        // 2. Open-Meteo 날씨조회
+                        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
+                        const weatherRes = await fetch(weatherUrl);
+                        const weatherData = await weatherRes.json();
+                        const temp = Math.round(weatherData.current_weather.temperature);
+                        const code = weatherData.current_weather.weathercode;
+
+                        // 날씨 코드에 맞춰 이모지 세팅
+                        let emoji = "☀️";
+                        let statusText = "매우 좋음";
+                        if (code === 0) { emoji = "☀️"; statusText = "산책 최고! 👍"; }
+                        else if (code >= 1 && code <= 3) { emoji = "🌤️"; statusText = "산책 좋음 😎"; }
+                        else if (code >= 45 && code <= 48) { emoji = "🌫️"; statusText = "보통 🌫️"; }
+                        else if (code >= 51 && code <= 67) { emoji = "🌧️"; statusText = "비조심! ☔"; }
+                        else if (code >= 71 && code <= 77) { emoji = "❄️"; statusText = "눈조심! ⛄"; }
+                        else if (code >= 80 && code <= 82) { emoji = "🌦️"; statusText = "우산 챙겨요"; }
+                        else { emoji = "⛈️"; statusText = "실내놀이 추천"; }
+
+                        weatherEmoji.innerText = emoji;
+                        weatherTemp.innerText = `${temp}°C ${emoji}`;
+                        walkIndex.innerText = `산책 지수: ${statusText}`;
+                        walkIndex.className = "text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold animate-pulse";
+
+                        // 캐릭터 말풍선 업데이트
+                        document.getElementById('char-bubble-text').innerText = `"${emoji} 오늘 기온은 약 ${temp}도네요! 산책 여건에 꼭 맞는 알뜰 꿀템을 골라왔개!"`;
+
+                    } catch (err) {
+                        fallbackWeather("정보 획득 오류");
+                    }
+                },
+                (error) => {
+                    fallbackWeather("날씨 권한 없음");
+                }
+            );
+        }
+
+        // 날씨 획득 실패 시 폴백
+        function fallbackWeather(reason) {
+            document.getElementById('location-name').innerText = "📍 지구의 어느 곳";
+            document.getElementById('weather-temp').innerText = "날씨 정보 없음 🐾";
+            document.getElementById('weather-emoji').innerText = "⛅";
+            const walkIndex = document.getElementById('walk-index');
+            walkIndex.innerText = "산책 보통";
+            walkIndex.className = "text-[10px] bg-stone-500 text-white px-2 py-0.5 rounded-full font-bold";
+            document.getElementById('char-bubble-text').innerText = `"오늘도 우리 집사랑 산책하는 게 가장 좋개! 멋진 맞춤 용품들을 구경해 보라개!"`;
+        }
+
+        // 견종 검색 로직 (결과화면용)
+        function handleSearch(val) {
+            const trimmed = val.trim();
+            if (breedDictionary[trimmed]) {
+                currentSelectedBreedName = trimmed;
+                updateBreedInfo(trimmed);
+                setSize(breedDictionary[trimmed].size);
+            }
+        }
+
+        // 결과화면 간편 태그 클릭 선택 시 동작
+        function selectBreedFromTag(breedName) {
+            if (breedDictionary[breedName]) {
+                currentSelectedBreedName = breedName;
+                updateBreedInfo(breedName);
+                setSize(breedDictionary[breedName].size);
+            }
+        }
+
+        // 견종 직접 입력 후 검색 버튼 눌렀을 때 (결과화면용)
+        function searchBreed() {
+            const val = document.getElementById('breed-search').value.trim();
+            if (!val) {
+                alertModal('입력 에러', '검색하고 싶은 강아지 견종을 적어 주세요! (예: 비숑 프리제, 시바이누 등)');
+                return;
+            }
+
+            if (breedDictionary[val]) {
+                currentSelectedBreedName = val;
+                updateBreedInfo(val);
+                setSize(breedDictionary[val].size);
+            } else {
+                alertModal('견종 자동 찾기', `'${val}'은(는) 새로운 댕댕이군요! 더 자세한 맞춤 지식을 백과사전에서 찾아드릴게요! 🐾`);
+                const safeUrl = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(val + ' 특성')}`;
+                window.open(safeUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        // 견종 특성 정보 및 이미지 업데이트
+        function updateBreedInfo(breedName) {
+            const title = document.getElementById('breed-info-title');
+            const desc = document.getElementById('breed-info-desc');
+            const link = document.getElementById('btn-breed-more-link');
+            const resultImg = document.getElementById('result-char-img');
+
+            if (breedDictionary[breedName]) {
+                title.innerText = `${breedName} 특성 정보`;
+                desc.innerText = breedDictionary[breedName].desc;
+                link.href = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(breedName + ' 특성')}`;
+                resultImg.src = breedDictionary[breedName].img;
+            } else {
+                title.innerText = `${breedName} 특성 정보`;
+                desc.innerText = `${breedName}은(는) 정말 매력 넘치는 강아지예요! 슬개골 보호와 성향별 전용 간식을 주면 아주 건강해져요.`;
+                link.href = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(breedName + ' 특성')}`;
+                resultImg.src = "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=150";
+            }
+        }
+
+        // [핵심] 랜덤 큐레이션 알고리즘
+        function renderRecommendations() {
+            const container = document.getElementById('recommendations-container');
+            container.innerHTML = "";
+
+            const filteredItems = itemPool.filter(item => {
+                return item.size === selectedSize && item.budget === selectedBudget;
+            });
+
+            const shuffled = [...filteredItems].sort(() => 0.5 - Math.random());
+            const selectedItems = shuffled.slice(0, 3);
+
+            const isDiscounted = document.getElementById('discount-toggle').checked;
+
+            if (selectedItems.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 bg-white rounded-2xl border border-dashed border-amber-300">
+                        <span class="text-3xl">🏜️</span>
+                        <p class="text-xs font-bold text-amber-900 mt-2">일치하는 추천 물품이 없어요!</p>
+                        <p class="text-[10px] text-stone-400 mt-1">지갑 사정이나 소/중/대형견 탭을 다시 골라보세요!</p>
+                    </div>`;
+                return;
+            }
+
+            selectedItems.forEach(item => {
+                let finalPrice = item.price;
+                let priceHTML = `<span class="text-sm font-extrabold text-amber-950">₩${finalPrice.toLocaleString()}</span>`;
+
+                if (isDiscounted) {
+                    finalPrice = Math.round(item.price / 2);
+                    priceHTML = `
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] line-through text-stone-400">₩${item.price.toLocaleString()}</span>
+                            <span class="text-xs font-black text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">50% 반값!</span>
+                            <span class="text-sm font-extrabold text-amber-950">₩${finalPrice.toLocaleString()}</span>
+                        </div>`;
+                }
+
+                const itemCard = document.createElement('div');
+                itemCard.className = "bg-white p-3.5 rounded-2xl border border-amber-200 shadow-sm hover:shadow-md transition-all flex justify-between items-center gap-3";
+                
+                const naverShoppingUrl = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(item.name)}`;
+                const naverMapUrl = `https://map.naver.com/v5/search/${encodeURIComponent(item.name)}`;
+
+                itemCard.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <span class="text-3xl bg-amber-50 p-2 rounded-xl border border-amber-100 flex-shrink-0">${item.emoji}</span>
+                        <div class="min-w-0 flex-1">
+                            <h5 class="text-xs font-extrabold text-stone-800 truncate">${item.name}</h5>
+                            <p class="text-[10px] text-stone-500 line-clamp-1 my-0.5">${item.intro}</p>
+                            ${priceHTML}
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1 flex-shrink-0">
+                        <a href="${naverShoppingUrl}" target="_blank" rel="noopener noreferrer" class="bg-amber-800 hover:bg-amber-900 text-white text-[10px] font-extrabold px-2 py-1.5 rounded-lg flex items-center justify-center gap-1 whitespace-nowrap transition-colors">
+                            <i class="fa-solid fa-cart-shopping"></i> 쇼핑몰
+                        </a>
+                        <a href="${naverMapUrl}" target="_blank" rel="noopener noreferrer" class="bg-stone-800 hover:bg-stone-900 text-white text-[10px] font-extrabold px-2 py-1.5 rounded-lg flex items-center justify-center gap-1 whitespace-nowrap transition-colors">
+                            <i class="fa-solid fa-location-dot"></i> 매장찾기
+                        </a>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+            });
+        }
+
+        // 미니 사이드바 열고 닫기
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar-menu');
+            if (sidebar.classList.contains('hidden')) {
+                sidebar.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('hidden');
+            }
+        }
+
+        // 아이프레임 경고 보완 모달 제어
+        function alertModal(title, desc) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        // 모달창 닫기
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+    </script>
+<div id="expo-credit" role="note" aria-label="개발자 이예나" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 이예나</div>
+</body>
+</html>

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>옷 OK</title>
+    <!-- 귀여운 폰트 불러오기 (옷 글자를 사람처럼 보이게 하기 위해 둥근 폰트 사용) -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nunito:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 리셋 및 폰트 설정 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Jua', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f4f8; /* 배경은 부드러운 색 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 스마트폰 UI 기기 모양 */
+        #smartphone {
+            width: 360px;
+            height: 720px;
+            background: #ffffff; /* 하얀색 몽글몽글 배경 */
+            border-radius: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1), inset 0 0 0 10px #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.8); /* 💡 화면 전체를 80%로 축소했어! */
+        }
+
+        /* 상태바 (시간, 날씨) */
+        #status-bar {
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            color: #64748b;
+            font-family: 'Nunito', sans-serif;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 10;
+        }
+
+        /* 메인 컨텐츠 영역 */
+        #app-content {
+            flex: 1;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #ffffff;
+        }
+
+        /* 몽글몽글 구름 배경 장식 */
+        .cloud {
+            position: absolute;
+            background: #f8fafc;
+            border-radius: 50%;
+            z-index: 0;
+        }
+        .cloud-1 { width: 200px; height: 200px; top: -50px; left: -50px; }
+        .cloud-2 { width: 150px; height: 150px; top: 100px; right: -40px; }
+        .cloud-3 { width: 300px; height: 300px; bottom: 50px; left: -100px; opacity: 0.5; }
+
+        /* 화면 공통 */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+        .screen.active {
+            display: flex;
+        }
+
+        /* --- 스크롤을 위해 추가 --- */
+        #screen-select {
+            justify-content: flex-start;
+            padding-bottom: 80px; /* 하단 네비게이션바 여백 */
+            overflow-y: auto;
+        }
+
+        /* --- 로고 스타일 (스케치 반영) --- */
+        .logo-container {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .logo-person {
+            font-size: 60px;
+            color: #334155;
+            line-height: 1;
+            /* 사람 모양처럼 보이게 살짝 회전 및 그림자 */
+            text-shadow: 2px 2px 0px #cbd5e1;
+        }
+        .logo-text {
+            font-size: 50px;
+            color: #334155;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* --- 화면 1: 시작 화면 --- */
+        #screen-start {
+            justify-content: center;
+        }
+        /* 큰 네모 체크 버튼 (스케치 반영) */
+        .big-check-btn {
+            width: 160px;
+            height: 160px;
+            background: #ffffff;
+            border: 4px solid #334155;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 5px 5px 0px #e2e8f0;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+        .big-check-btn:active {
+            transform: translate(5px, 5px);
+            box-shadow: 0px 0px 0px #e2e8f0;
+        }
+        .big-check-mark {
+            font-size: 100px;
+            color: #3b82f6; /* 파란색 체크 */
+        }
+        .start-hint {
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 18px;
+        }
+
+        /* --- 화면 2: 조건 선택 화면 --- */
+        .question-title {
+            font-size: 24px;
+            color: #334155;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+        /* 네모 체크 버튼 스타일 */
+        .option-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border: 3px solid #cbd5e1;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .option-label span {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+        .option-label input {
+            display: none;
+        }
+        .option-label:has(input:checked) {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+        .action-btn {
+            margin-top: auto;
+            margin-bottom: 20px;
+            width: 100%;
+            padding: 15px;
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .action-btn:active {
+            background: #1e293b;
+        }
+
+        /* --- 추가된 상세 조건 입력 폼 스타일 --- */
+        .form-section {
+            width: 100%;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .form-section label {
+            font-size: 16px;
+            color: #475569;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .styled-select, .styled-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            font-family: 'Jua', sans-serif;
+            font-size: 16px;
+            outline: none;
+            background: white;
+        }
+        .styled-select:focus, .styled-input:focus {
+            border-color: #3b82f6;
+        }
+        .radio-group {
+            display: flex;
+            gap: 10px;
+        }
+        .radio-label {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+        .radio-label input {
+            display: none;
+        }
+        .radio-label:has(input:checked) {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        /* --- 화면 3: 로딩 화면 --- */
+        #screen-loading {
+            justify-content: center;
+        }
+        .loader {
+            font-size: 60px;
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+        .loading-text {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #334155;
+            text-align: center;
+        }
+
+        /* --- 화면 4: 결과 화면 (스케치 반영) --- */
+        .result-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+            padding-bottom: 20px;
+        }
+        .result-item {
+            background: #ffffff;
+            border: 3px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            text-decoration: none; /* 링크 밑줄 제거 */
+            color: inherit;
+            transition: transform 0.2s;
+        }
+        .result-item:active {
+            transform: scale(0.98);
+        }
+        .item-icon {
+            font-size: 40px;
+            background: #f1f5f9;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-name {
+            font-size: 20px;
+            color: #334155;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .item-reason {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.3;
+        }
+        .naver-tag {
+            font-size: 10px;
+            background: #03c75a;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* 하단 네비게이션 바 */
+        #nav-bar {
+            height: 60px;
+            background: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #e2e8f0;
+            z-index: 10;
+        }
+        .nav-btn {
+            font-size: 24px;
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            transition: color 0.2s;
+        }
+        .nav-btn:active {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="smartphone">
+        <!-- 상태바 (시간, 날씨 연동) -->
+        <div id="status-bar">
+            <span id="current-time">12:00</span>
+            <span id="weather-info">날씨 찾는 중... ☁️</span>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div id="app-content">
+            <!-- 배경 구름 장식 -->
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+
+            <!-- 1. 시작 화면 -->
+            <div id="screen-start" class="screen active">
+                <div class="logo-container">
+                    <!-- 사람(졸라맨)처럼 보이는 '옷' 글자 -->
+                    <div class="logo-person">옷</div>
+                    <div class="logo-text">OK</div>
+                </div>
+                <!-- 스케치에 있던 큰 네모 체크 버튼 -->
+                <div class="big-check-btn" onclick="goToScreen('screen-select')">
+                    <span class="big-check-mark">✔️</span>
+                </div>
+                <div class="start-hint">버튼을 눌러서 시작해!</div>
+            </div>
+
+            <!-- 2. 조건 선택 화면 -->
+            <div id="screen-select" class="screen">
+                <div class="logo-container" style="transform: scale(0.6); margin: 10px 0;">
+                    <div class="logo-person">옷</div>
+                    <div class="logo-text">OK</div>
+                </div>
+                
+                <h2 class="question-title">오늘 어떤 옷을 찾고 있어?</h2>
+                
+                <div class="options-grid">
+                    <label class="option-label">
+                        <span>👕</span>
+                        편한 티셔츠
+                        <input type="checkbox" name="style" value="top">
+                    </label>
+                    <label class="option-label">
+                        <span>👖</span>
+                        멋진 바지
+                        <input type="checkbox" name="style" value="bottom">
+                    </label>
+                    <label class="option-label">
+                        <span>🧥</span>
+                        따뜻한 겉옷
+                        <input type="checkbox" name="style" value="outer">
+                    </label>
+                    <label class="option-label">
+                        <span>👟</span>
+                        활동적인 룩
+                        <input type="checkbox" name="style" value="sporty">
+                    </label>
+                </div>
+
+                <!-- 💡 새롭게 추가된 상세 조건 입력 칸 -->
+                <div class="form-section">
+                    <label>성별</label>
+                    <div class="radio-group">
+                        <label class="radio-label">여성<input type="radio" name="gender" value="여성"></label>
+                        <label class="radio-label">남성<input type="radio" name="gender" value="남성"></label>
+                        <label class="radio-label">공용<input type="radio" name="gender" value="남녀공용" checked></label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label>사이즈</label>
+                    <select id="size-select" class="styled-select">
+                        <option value="">상관없음</option>
+                        <option value="S">S (스몰)</option>
+                        <option value="M">M (미디움)</option>
+                        <option value="L">L (라지)</option>
+                        <option value="XL">XL (엑스라지)</option>
+                        <option value="Free">Free (프리사이즈)</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label>색상</label>
+                    <select id="color-select" class="styled-select">
+                        <option value="">상관없음</option>
+                        <option value="블랙">🖤 블랙</option>
+                        <option value="화이트">🤍 화이트</option>
+                        <option value="그레이">🩶 그레이</option>
+                        <option value="네이비">💙 네이비</option>
+                        <option value="베이지">🤎 베이지</option>
+                        <option value="레드">❤️ 레드</option>
+                        <option value="핑크">🩷 핑크</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label>자세한 스타일 (선택)</label>
+                    <input type="text" id="detail-input" class="styled-input" placeholder="예: 오버핏, 스트라이프, 반집업 등">
+                </div>
+                <br> <!-- 버튼과 간격 띄우기 -->
+
+                <button class="action-btn" onclick="startRecommendation()">나에게 맞는 옷 찾기!</button>
+            </div>
+
+            <!-- 3. 로딩 화면 -->
+            <div id="screen-loading" class="screen">
+                <div class="loader">옷 OK</div>
+                <div class="loading-text">
+                    <span id="season-text">계절</span>을 분석해서<br>
+                    최고의 옷을 고르는 중이야...!
+                </div>
+            </div>
+
+            <!-- 4. 결과 추천 화면 -->
+            <div id="screen-result" class="screen">
+                <div class="logo-container" style="transform: scale(0.6); margin: 10px 0;">
+                    <div class="logo-person">옷</div>
+                    <div class="logo-text">OK</div>
+                </div>
+                
+                <h2 class="question-title" style="margin-top: 0;">짠! 널 위한 추천이야 ✨</h2>
+                <div class="start-hint" style="margin-top: 0; margin-bottom: 10px; font-size:14px;">(목록을 누르면 네이버 쇼핑으로 이동해!)</div>
+
+                <div class="result-list" id="result-list-container">
+                    <!-- 자바스크립트로 추천 결과가 여기에 들어갑니다. -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 네비게이션 바 -->
+        <div id="nav-bar">
+            <button class="nav-btn" onclick="alert('앗! 메뉴 기능은 준비 중이야 🛠️')">☰</button>
+            <button class="nav-btn" onclick="goToScreen('screen-start')">⌂</button>
+            <button class="nav-btn" onclick="goBack()">◁</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 실시간 시간 및 날씨/계절 데이터 로직 ---
+        let currentSeason = 'spring'; // 기본 계절
+        let screenHistory = ['screen-start']; // 뒤로가기를 위한 기록
+
+        // 시계 업데이트
+        function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0시는 12시로 표시
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('current-time').innerText = `${ampm} ${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 날씨 및 위치 가져오기 (Open-Meteo API)
+        function getWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const temp = data.current_weather.temperature;
+                                const code = data.current_weather.weathercode;
+                                let emoji = '☀️';
+                                if (code >= 1 && code <= 3) emoji = '☁️';
+                                if (code >= 45 && code <= 48) emoji = '🌫️';
+                                if (code >= 51 && code <= 67) emoji = '🌧️';
+                                if (code >= 71 && code <= 77) emoji = '❄️';
+                                
+                                document.getElementById('weather-info').innerText = `내 위치 ${emoji} ${temp}℃`;
+                                
+                                // 온도에 따른 계절 판단
+                                if (temp >= 23) currentSeason = 'summer';
+                                else if (temp <= 5) currentSeason = 'winter';
+                                else if (temp > 5 && temp < 15) currentSeason = 'fall';
+                                else currentSeason = 'spring';
+                            })
+                            .catch(error => {
+                                document.getElementById('weather-info').innerText = "날씨 정보 없음 ☁️";
+                            });
+                    },
+                    (error) => {
+                        document.getElementById('weather-info').innerText = "위치 권한 없음 ☁️";
+                    }
+                );
+            }
+        }
+        // 페이지 로드 시 날씨 가져오기 실행
+        getWeather();
+
+        // --- 2. 화면 이동 로직 ---
+        function goToScreen(screenId) {
+            // 모든 화면 숨기기
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            // 새 화면 보이기
+            document.getElementById(screenId).classList.add('active');
+            
+            // 기록에 추가 (현재 화면과 다를 때만)
+            if (screenHistory[screenHistory.length - 1] !== screenId) {
+                screenHistory.push(screenId);
+            }
+        }
+
+        function goBack() {
+            if (screenHistory.length > 1) {
+                screenHistory.pop(); // 현재 화면 제거
+                const previousScreen = screenHistory[screenHistory.length - 1];
+                
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                document.getElementById(previousScreen).classList.add('active');
+            }
+        }
+
+        // --- 3. 옷 추천 데이터베이스 및 추천 로직 ---
+        const clothingDB = [
+            // 봄/가을
+            { name: "포근한 맨투맨", type: "top", season: ["spring", "fall"], emoji: "👕", reason: "요즘 날씨에 활동하기 편하고 귀여운 스타일을 연출하기 딱 좋아!" },
+            { name: "편안한 조거팬츠", type: "bottom", season: ["spring", "fall", "winter"], emoji: "👖", reason: "입은 듯 안 입은 듯 짱 편해서 매일 입고 싶어질걸?" },
+            { name: "멋쟁이 데님자켓", type: "outer", season: ["spring", "fall"], emoji: "🧥", reason: "가볍게 걸치기만 해도 스타일이 확 살아나는 마법의 아이템!" },
+            { name: "스포티 후드티", type: "sporty", season: ["spring", "fall", "winter"], emoji: "🧢", reason: "모자 푹 눌러쓰고 힙하게! 운동할 때도, 놀 때도 최고야." },
+            
+            // 여름
+            { name: "시원한 반팔티", type: "top", season: ["summer"], emoji: "👕", reason: "더운 날씨엔 역시 땀 흡수 잘 되고 통풍이 잘 되는 반팔티가 최고지!" },
+            { name: "찰랑찰랑 쿨링 바지", type: "bottom", season: ["summer"], emoji: "👖", reason: "햇빛은 막아주고 피부엔 시원하게 닿아서 엄청 쾌적해!" },
+            { name: "여름 린넨 셔츠", type: "outer", season: ["summer"], emoji: "👔", reason: "에어컨 바람이 추울 때 가볍게 툭 걸치기 좋은 시원한 셔츠야." },
+            { name: "통기성 런닝화", type: "sporty", season: ["summer"], emoji: "👟", reason: "발에 땀 차지 않게 시원하게 뛰어놀 수 있게 해줄게!" },
+
+            // 겨울
+            { name: "따뜻한 숏패딩", type: "outer", season: ["winter"], emoji: "🧥", reason: "추운 날씨에도 빵빵하고 따뜻하게 널 지켜줄 거야!" },
+            { name: "기모 밴딩 바지", type: "bottom", season: ["winter"], emoji: "👖", reason: "안에 부드러운 털이 있어서 다리가 하나도 안 시려워!" },
+            { name: "부드러운 니트", type: "top", season: ["winter"], emoji: "🧣", reason: "포근하게 몸을 감싸줘서 추운 겨울도 따뜻하게 보낼 수 있어." },
+            { name: "방한용 털부츠", type: "sporty", season: ["winter"], emoji: "🥾", reason: "눈 밭을 굴러도 발끝까지 따뜻하게 보호해주는 든든한 친구!" }
+        ];
+
+        function getSeasonText(season) {
+            const map = { 'spring': '따뜻한 봄', 'summer': '더운 여름', 'fall': '선선한 가을', 'winter': '추운 겨울' };
+            return map[season] || '현재 날씨';
+        }
+
+        function startRecommendation() {
+            // 선택된 조건 확인
+            const checkedBoxes = document.querySelectorAll('input[name="style"]:checked');
+            let selectedTypes = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            // 아무것도 안 골랐다면 기본값 세팅
+            if (selectedTypes.length === 0) {
+                selectedTypes = ['top', 'bottom', 'outer', 'sporty'];
+            }
+
+            // 💡 추가된 조건들 가져오기
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const size = document.getElementById('size-select').value;
+            const color = document.getElementById('color-select').value;
+            const detail = document.getElementById('detail-input').value;
+
+            // 로딩 화면 표시
+            goToScreen('screen-loading');
+            document.getElementById('season-text').innerText = getSeasonText(currentSeason);
+
+            // 1초 뒤 결과 화면 표시 (너무 오래 걸리지 않게 시간 단축!)
+            setTimeout(() => {
+                generateResults(selectedTypes, gender, size, color, detail);
+                goToScreen('screen-result');
+            }, 1000);
+        }
+
+        function generateResults(selectedTypes, gender, size, color, detail) {
+            // 1. 조건(계절 + 선택한 종류)에 맞는 옷 필터링
+            let filteredClothes = clothingDB.filter(item => {
+                return item.season.includes(currentSeason) && selectedTypes.includes(item.type || item.style);
+            });
+
+            // 필터링 결과가 없으면 전체에서 계절에 맞는 것만 고르기
+            if (filteredClothes.length === 0) {
+                filteredClothes = clothingDB.filter(item => item.season.includes(currentSeason));
+            }
+
+            // 2. 랜덤하게 2~3개 섞기
+            filteredClothes.sort(() => Math.random() - 0.5);
+            const selectedItems = filteredClothes.slice(0, 2); // 스케치처럼 2개 추천
+
+            // 3. 화면에 출력
+            const container = document.getElementById('result-list-container');
+            container.innerHTML = ''; // 초기화
+
+            selectedItems.forEach(item => {
+                // 💡 네이버 쇼핑 검색 링크 생성 시 상세 조건(성별, 색상, 사이즈, 상세입력)을 검색어에 합치기!
+                const queryParts = [gender, color, detail, item.name, size];
+                
+                // 빈 값(상관없음 등)은 빼고 띄어쓰기로 연결 (예: "여성 블랙 오버핏 포근한 맨투맨 S")
+                const finalQuery = queryParts.filter(part => part && part.trim() !== '').join(' ');
+                
+                const searchQuery = encodeURIComponent(finalQuery);
+                const shoppingLink = `https://search.shopping.naver.com/search/all?query=${searchQuery}`;
+
+                const itemHTML = `
+                    <a href="${shoppingLink}" target="_blank" rel="noopener noreferrer" class="result-item">
+                        <div class="item-icon">${item.emoji}</div>
+                        <div class="item-info">
+                            <div class="item-name">
+                                ${item.name} <span class="naver-tag">N쇼핑</span>
+                            </div>
+                            <div class="item-reason">${item.reason}</div>
+                            <!-- 어떤 키워드로 검색되는지 살짝 보여주기 -->
+                            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                                🔍 <b>검색 키워드:</b> ${finalQuery}
+                            </div>
+                        </div>
+                    </a>
+                `;
+                container.innerHTML += itemHTML;
+            });
+        }
+    </script>
+<div id="expo-credit" role="note" aria-label="개발자 김채원" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 김채원</div>
+</body>
+</html>

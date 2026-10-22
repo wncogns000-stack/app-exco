@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>노래 콕콕 - 기분 맞춤 음악 추천</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbit&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            user-select: none;
+        }
+
+        .font-orbit {
+            font-family: 'Orbit', sans-serif;
+        }
+
+        /* Neon Glow Effects */
+        .neon-text-pink {
+            text-shadow: 0 0 5px #f43f5e, 0 0 10px #f43f5e, 0 0 20px #f43f5e, 0 0 40px #e11d48;
+        }
+        
+        .neon-text-cyan {
+            text-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4, 0 0 20px #06b6d4, 0 0 40px #0891b2;
+        }
+
+        .neon-border {
+            box-shadow: 0 0 10px #a855f7, inset 0 0 10px #a855f7;
+            border: 2px solid #c084fc;
+        }
+
+        .neon-button-pink {
+            background: linear-gradient(135deg, #f43f5e, #881337);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.6);
+        }
+        .neon-button-pink:hover {
+            box-shadow: 0 0 25px rgba(244, 63, 94, 0.9);
+        }
+
+        .neon-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+        }
+
+        /* Phone Frame Customization */
+        .phone-container {
+            width: 100%;
+            max-width: 390px;
+            height: 800px;
+            max-height: 92vh;
+            border-radius: 40px;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.4), 0 0 60px rgba(6, 182, 212, 0.2);
+        }
+
+        /* Loading Spinner Animation */
+        @keyframes spin-neon {
+            0% { transform: rotate(0deg); box-shadow: 0 0 15px #06b6d4; }
+            50% { transform: rotate(180deg); box-shadow: 0 0 25px #f43f5e; }
+            100% { transform: rotate(360deg); box-shadow: 0 0 15px #06b6d4; }
+        }
+
+        .neon-spinner {
+            animation: spin-neon 1.5s linear infinite;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-2 sm:p-4 bg-slate-950">
+
+    <!-- Smartphone UI Frame -->
+    <div class="phone-container relative flex flex-col bg-slate-900 border-4 border-slate-700 overflow-hidden text-white">
+        
+        <!-- Top Status Bar Mockup -->
+        <div class="w-full h-8 bg-slate-950/80 px-6 flex justify-between items-center text-xs text-slate-400 z-50 pt-1">
+            <span id="top-time" class="font-semibold">12:00</span>
+            <div class="w-16 h-4 bg-black rounded-full mx-auto"></div> <!-- Speaker Notch -->
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-signal text-[10px]"></i>
+                <i class="fa-solid fa-wifi text-[10px]"></i>
+                <i class="fa-solid fa-battery-full text-xs"></i>
+            </div>
+        </div>
+
+        <!-- Main Screen Display Container -->
+        <div id="screen-container" class="flex-1 overflow-y-auto px-5 py-4 relative flex flex-col justify-between">
+            
+            <!-- PAGE 1: START SCREEN -->
+            <div id="page-start" class="flex flex-col items-center justify-between h-full py-4 text-center">
+                <div class="mt-4">
+                    <span class="px-3 py-1 bg-purple-900/60 border border-purple-500/50 rounded-full text-xs text-purple-300 font-orbit uppercase tracking-widest">Neon Music AI</span>
+                    <h1 class="text-4xl font-extrabold mt-3 neon-text-pink tracking-wide font-orbit">노래 콕콕</h1>
+                    <p class="text-sm text-cyan-300 mt-2 font-light">지금 네 기분에 딱 맞는 노래를 콕! 추천해줄게 🎧</p>
+                </div>
+
+                <!-- Live Environment Info Banner -->
+                <div class="w-full neon-card rounded-2xl p-4 my-auto text-left space-y-2">
+                    <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
+                        <span class="text-xs text-slate-400"><i class="fa-regular fa-calendar-check mr-1 text-purple-400"></i>오늘 날짜</span>
+                        <span id="env-date" class="text-xs font-bold text-slate-200">2026.07.21</span>
+                    </div>
+                    <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
+                        <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1 text-cyan-400"></i>현재 시간</span>
+                        <span id="env-time" class="text-xs font-bold text-slate-200">오후 1:49</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-400"><i class="fa-solid fa-location-dot mr-1 text-pink-400"></i>위치 & 날씨</span>
+                        <span id="env-weather" class="text-xs font-bold text-pink-300">위치 정보 확인 중...</span>
+                    </div>
+                </div>
+
+                <!-- Mood Selection Prompt -->
+                <div class="w-full space-y-3">
+                    <p class="text-sm font-semibold text-slate-300">오늘 네 기분은 어때? 👇</p>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button onclick="selectMood('신남')" class="p-3 bg-slate-800/80 hover:bg-pink-900/40 border border-pink-500/40 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95">
+                            <span class="text-xl">🤩</span> 신나요!
+                        </button>
+                        <button onclick="selectMood('우울/슬픔')" class="p-3 bg-slate-800/80 hover:bg-cyan-900/40 border border-cyan-500/40 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95">
+                            <span class="text-xl">🌧️</span> 위로가 필요해
+                        </button>
+                        <button onclick="selectMood('차분/집중')" class="p-3 bg-slate-800/80 hover:bg-purple-900/40 border border-purple-500/40 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95">
+                            <span class="text-xl">☕</span> 조용하고 싶어
+                        </button>
+                        <button onclick="selectMood('심심/지루')" class="p-3 bg-slate-800/80 hover:bg-amber-900/40 border border-amber-500/40 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition active:scale-95">
+                            <span class="text-xl">⚡</span> 에너지 필요!
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: ANALYSIS / LOADING SCREEN -->
+            <div id="page-analysis" class="hidden flex flex-col items-center justify-center h-full text-center space-y-6">
+                <div class="relative w-28 h-28 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-cyan-400 border-t-transparent neon-spinner"></div>
+                    <i class="fa-solid fa-music text-4xl text-pink-500 animate-pulse"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-cyan-300 font-orbit">노래 콕콕 AI 분석 중</h2>
+                    <p id="analysis-text" class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        선택한 기분과 실시간 날씨, 시간 데이터를<br>조합해서 최고의 노래를 찾고 있어!
+                    </p>
+                </div>
+                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden p-0.5 border border-purple-500/30">
+                    <div id="progress-bar" class="bg-gradient-to-r from-cyan-500 to-pink-500 h-full rounded-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: RESULT RECOMMENDATIONS SCREEN -->
+            <div id="page-result" class="hidden flex flex-col h-full space-y-3 py-1">
+                <div class="text-center pb-1 border-b border-slate-800">
+                    <span class="text-[11px] text-cyan-400 font-orbit">COKCOK RECOMMENDATION</span>
+                    <h2 class="text-lg font-bold text-white">오늘 너만을 위한 콕콕 추천 🎵</h2>
+                </div>
+
+                <!-- Reason Summary Badge -->
+                <div id="result-reason-box" class="p-2.5 rounded-xl bg-purple-950/50 border border-purple-500/30 text-xs text-purple-200">
+                    <!-- Dynamic Recommendation Reason -->
+                </div>
+
+                <!-- Song List Container -->
+                <div id="song-list" class="flex-1 space-y-2.5 overflow-y-auto pr-1">
+                    <!-- Song Cards inserted here -->
+                </div>
+
+                <!-- Retry Button -->
+                <button onclick="goToPage('start')" class="w-full py-2.5 neon-button-pink rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 active:scale-95 transition">
+                    <i class="fa-solid fa-rotate-right"></i> 다른 기분으로 다시 콕콕하기
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Smartphone Bottom Navigation Bar -->
+        <div class="w-full h-12 bg-slate-950 border-t border-slate-800/80 flex justify-around items-center text-slate-400 text-lg z-50">
+            <button onclick="alert('메뉴: 노래 콕콕 v1.0 / 만든이: 나만의 AI 앱')" class="hover:text-cyan-400 active:scale-90 transition p-2" title="메뉴">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <button onclick="goToPage('start')" class="hover:text-pink-400 active:scale-90 transition p-2" title="홈">
+                <i class="fa-solid fa-house"></i>
+            </button>
+            <button onclick="handleBack()" class="hover:text-purple-400 active:scale-90 transition p-2" title="뒤로가기">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- State Management ---
+        let currentPage = 'start';
+        let previousPage = 'start';
+        let selectedMood = '';
+        let currentWeatherData = { location: '위치 미확인', temp: '--°C', emoji: '☀️' };
+
+        // --- Song Database (Filtered for Safety & Kids Friendly) ---
+        const songDatabase = {
+            '신남': [
+                { title: "Dynamite", artist: "방탄소년단 (BTS)", genre: "K-POP", desc: "신나는 댄스 비트로 기분을 최고의 하이텐션으로 업!" },
+                { title: "Super Shy", artist: "NewJeans", genre: "K-POP", desc: "톡톡 튀는 비트와 상큼함으로 어깨를 들썩이게 만들어!" },
+                { title: "손오공", artist: "세븐틴 (SEVENTEEN)", genre: "K-POP", desc: "파워풀한 에너지로 없던 자신감도 뿜뿜하게 해주는 곡!" },
+                { title: "UNFORGIVEN", artist: "르세라핌", genre: "K-POP", desc: "당당하고 당찬 에너지가 필요할 때 들으면 딱 좋아!" },
+                { title: "Butter", artist: "방탄소년단 (BTS)", genre: "K-POP", desc: "부드럽고 신나는 버터표 멜로디로 기분 전환 완벽!" },
+                { title: "사건의 지평선", artist: "윤하", genre: "ROCK/POP", desc: "벅차오르는 감동과 신나는 록 사운드의 환상 조합!" },
+                { title: "Spicy", artist: "aespa", genre: "K-POP", desc: "통통 튀는 매운맛 에너지로 지루할 틈이 없는 곡!" },
+                { title: "I AM", artist: "IVE (아이브)", genre: "K-POP", desc: "높이 날아오르는 듯한 당당한 기분을 선물해줄게!" },
+                { title: "Candy", artist: "NCT DREAM", genre: "K-POP", desc: "달콤하고 신나는 레트로 감성으로 기분 완전UP!" },
+                { title: "퀸카 (Queencard)", artist: "(여자)아이들", genre: "K-POP", desc: "나 자신이 가장 멋있어 보이는 마법의 노래!" }
+            ],
+            '우울/슬픔': [
+                { title: "밤편지", artist: "아이유 (IU)", genre: "BALLAD", desc: "따뜻한 가사와 목소리가 지친 마음에 안아주는 느낌!" },
+                { title: "모든 날, 모든 순간", artist: "폴킴", genre: "BALLAD", desc: "잔잔한 멜로디로 슬픈 기분을 부드럽게 감싸줄게." },
+                { title: "지푸라기라도 잡고 싶은 마음", artist: "AKMU (악뮤)", genre: "ACOUSTIC", desc: "공감되는 가사로 마음의 무게를 덜어주는 노래." },
+                { title: "봄날", artist: "방탄소년단 (BTS)", genre: "K-POP", desc: "보고 싶은 친구나 추억을 떠올리며 위로받는 곡." },
+                { title: "Love Lee", artist: "AKMU (악뮤)", genre: "POP", desc: "귀여운 리듬으로 슬픈 생각을 싹 잊게 만들어줘!" },
+                { title: "스물셋", artist: "아이유 (IU)", genre: "POP", desc: "복잡한 마음을 조금은 가볍게 털어낼 수 있어." },
+                { title: "주저하는 연인들을 위해", artist: "잔나비", genre: "INDIE", desc: "몽환적이고 빈티지한 음색으로 마음을 편안하게 해줘." },
+                { title: "신호등", artist: "이무진", genre: "ACOUSTIC", desc: "혼란스러운 마음을 토닥토닥 위로해주는 밝은 멜로디." },
+                { title: "선물", artist: "멜로망스", genre: "BALLAD", desc: "오늘 하루도 수고한 나에게 전하는 선물 같은 노래." },
+                { title: "한 페이지가 될 수 있게", artist: "DAY6", genre: "BAND", desc: "슬픔을 날려버리는 시원시원한 밴드 사운드!" }
+            ],
+            '차분/집중': [
+                { title: "Rainy Days", artist: "V (방탄소년단)", genre: "R&B", desc: "빗소리와 함께 편안하게 차분해지는 감성 비트." },
+                { title: "IU's Strawberry Moon", artist: "아이유 (IU)", genre: "EASY LISTENING", desc: "달콤하고 잔잔해서 마음이 한결 평화로워져." },
+                { title: "Maybe", artist: "Yiruma (이루마)", genre: "PIANO", desc: "아름다운 피아노 선율로 생각 정리에 도움을 줘." },
+                { title: "Attention (Acoustic ver.)", artist: "NewJeans", genre: "ACOUSTIC", desc: "자극 없이 잔잔하게 듣기 좋은 어쿠스틱 음악." },
+                { title: "너의 의미", artist: "아이유 (feat. 김창완)", genre: "ACOUSTIC", desc: "따스한 햇살 아래서 편안하게 듣기 좋은 클래식." },
+                { title: "Lofi Study Beats", artist: "Chillhop", genre: "LO-FI", desc: "공부할 때나 책 읽을 때 집중력을 쏙 올려줘!" },
+                { title: "귀로", artist: "나얼", genre: "SOUL", desc: "깊고 잔잔한 울림으로 마음에 휴식을 선물해." },
+                { title: "Square (2017)", artist: "백예린", genre: "INDIE", desc: "시원하고 청량한 바람을 맞으며 쉬는 기분!" },
+                { title: "Paul Kim - 커피한잔할래요", artist: "폴킴", genre: "ACOUSTIC", desc: "따스하고 편안한 분위기로 차분함을 되찾아줘." },
+                { title: "자장가", artist: "아이유 (IU)", genre: "BALLAD", desc: "지친 하루의 끝에서 모든 걱정을 잠재우는 곡." }
+            ],
+            '심심/지루': [
+                { title: "Hype Boy", artist: "NewJeans", genre: "K-POP", desc: "지루할 틈 없이 세련된 리듬으로 기분 전환 200%!" },
+                { title: "Ditto", artist: "NewJeans", genre: "K-POP", desc: "몽환적이면서 묘하게 끌리는 중독성 강한 멜로디!" },
+                { title: "Teddy Bear", artist: "STAYC (스테이씨)", genre: "K-POP", desc: "귀여운 에너지가 뿜뿜! 심심했던 하루가 즐거워져." },
+                { title: "손오공 (Super)", artist: "세븐틴", genre: "K-POP", desc: "강렬한 퍼포먼스 사운드로 졸음도 싹 달아나!" },
+                { title: "ETA", artist: "NewJeans", genre: "K-POP", desc: "빠른 템포와 비트로 머릿속을 상큼하게 환기!" },
+                { title: "Fast Forward", artist: "전소미", genre: "DANCE", desc: "트렌디한 테크노 비트로 심심할 때 들으면 몸이 절로 둥실!" },
+                { title: "Smoke", artist: "다이나믹 듀오, 이영지", genre: "HIPHOP", desc: "힙하고 쿨한 리듬으로 텐션을 리셋해보자!" },
+                { title: "Love Lee", artist: "AKMU", genre: "POP", desc: "달콤하고 재치 있는 가사로 미소 짓게 되는 곡!" },
+                { title: "건물 사이에 피어난 장미", artist: "H1-KEY", genre: "POP", desc: "멜로디를 따라 부르다 보면 지루함은 금세 빠이!" },
+                { title: "Kitsch", artist: "IVE (아이브)", genre: "K-POP", desc: "반전 매력 넘치는 비트로 언제 들어도 짜릿해!" }
+            ]
+        };
+
+        // --- Init Function ---
+        window.onload = function() {
+            updateDateTime();
+            setInterval(updateDateTime, 10000); // 10 sec update
+            fetchLocationAndWeather();
+        };
+
+        // --- Live Date & Time Updates ---
+        function updateDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? '오후' : '오전';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0시를 12시로 표기
+
+            document.getElementById('env-date').textContent = `${year}.${month}.${date}`;
+            document.getElementById('env-time').textContent = `${ampm} ${hours}:${minutes}`;
+            document.getElementById('top-time').textContent = `${hours}:${minutes}`;
+        }
+
+        // --- Live Location & Weather Fetch (Geolocation + Open-Meteo API) ---
+        function fetchLocationAndWeather() {
+            const weatherEl = document.getElementById('env-weather');
+
+            if (!navigator.geolocation) {
+                currentWeatherData = { location: '위치 정보 미지원', temp: '', emoji: '🌤️' };
+                weatherEl.textContent = "날씨 정보 없음";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    try {
+                        // Open-Meteo Weather API
+                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                        const data = await res.json();
+                        
+                        if (data && data.current_weather) {
+                            const temp = Math.round(data.current_weather.temperature);
+                            const weatherCode = data.current_weather.weathercode;
+                            const emoji = getWeatherEmoji(weatherCode);
+
+                            currentWeatherData = {
+                                location: '내 주변',
+                                temp: `${temp}°C`,
+                                emoji: emoji
+                            };
+                            weatherEl.textContent = `${currentWeatherData.location} ${emoji} ${currentWeatherData.temp}`;
+                        } else {
+                            weatherEl.textContent = "날씨 정보 없음";
+                        }
+                    } catch (err) {
+                        weatherEl.textContent = "날씨 정보 없음";
+                    }
+                },
+                (error) => {
+                    // Position Permission Denied or Failed
+                    weatherEl.textContent = "날씨 정보 없음";
+                },
+                { timeout: 7000 }
+            );
+        }
+
+        // Weather Code to Emoji Helper
+        function getWeatherEmoji(code) {
+            if (code === 0) return '☀️'; // Clear
+            if (code >= 1 && code <= 3) return '☁️'; // Clouds
+            if (code >= 45 && code <= 48) return '🌫️'; // Fog
+            if (code >= 51 && code <= 67) return '🌧️'; // Rain
+            if (code >= 71 && code <= 77) return '❄️'; // Snow
+            if (code >= 80 && code <= 82) return '🌦️'; // Showers
+            if (code >= 95) return '⚡'; // Thunderstorm
+            return '🌤️';
+        }
+
+        // --- Screen Navigation ---
+        function goToPage(pageId) {
+            previousPage = currentPage;
+            currentPage = pageId;
+
+            document.getElementById('page-start').classList.add('hidden');
+            document.getElementById('page-analysis').classList.add('hidden');
+            document.getElementById('page-result').classList.add('hidden');
+
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+        }
+
+        function handleBack() {
+            if (currentPage === 'result' || currentPage === 'analysis') {
+                goToPage('start');
+            }
+        }
+
+        // --- Select Mood & Trigger Analysis Step ---
+        function selectMood(mood) {
+            selectedMood = mood;
+            goToPage('analysis');
+
+            // Animate Progress Bar
+            const pBar = document.getElementById('progress-bar');
+            pBar.style.width = '0%';
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                pBar.style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        renderResults();
+                        goToPage('result');
+                    }, 400);
+                }
+            }, 300);
+        }
+
+        // --- Render 2-3 Random Recommendations ---
+        function renderResults() {
+            const listContainer = document.getElementById('song-list');
+            const reasonBox = document.getElementById('result-reason-box');
+            listContainer.innerHTML = '';
+
+            const now = new Date();
+            const hour = now.getHours();
+            let timeText = hour >= 6 && hour < 12 ? '밝은 아침' : (hour >= 12 && hour < 18 ? '나른한 오후' : '감성 가득한 밤');
+            
+            const weatherDesc = currentWeatherData.temp !== '' ? `${currentWeatherData.emoji} ${currentWeatherData.temp}` : '오늘 날씨';
+
+            // Customized Recommendation Reason Text
+            reasonBox.innerHTML = `
+                <div class="font-bold text-pink-300 mb-0.5"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>맞춤 큐레이션 완료!</div>
+                <div>${timeText} (${weatherDesc}), ✨<b>[${selectedMood}]</b> 기분인 너를 위해 딱 맞는 노래 3곡을 콕콕 집어왔어!</div>
+            `;
+
+            // Random Pick 3 Songs from DB
+            const pool = songDatabase[selectedMood] || songDatabase['신남'];
+            const shuffled = [...pool].sort(() => 0.5 - Math.random());
+            const selectedSongs = shuffled.slice(0, 3);
+
+            // Generate Song Cards with YouTube Links
+            selectedSongs.forEach((song, idx) => {
+                const searchKeyword = encodeURIComponent(`${song.artist} ${song.title}`);
+                const youtubeUrl = `https://www.youtube.com/results?search_query=${searchKeyword}`;
+
+                const card = document.createElement('div');
+                card.className = "neon-card rounded-2xl p-3 flex flex-col justify-between hover:border-pink-500/60 transition group";
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center font-orbit font-bold text-white shadow-md">
+                                0${idx + 1}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-white group-hover:text-pink-300 transition line-clamp-1">${song.title}</h3>
+                                <p class="text-xs text-slate-400">${song.artist} • <span class="text-cyan-400 font-semibold">${song.genre}</span></p>
+                            </div>
+                        </div>
+                        <a href="${youtubeUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="px-2.5 py-1.5 bg-red-600/90 hover:bg-red-600 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-lg shadow-red-900/40 shrink-0 transition active:scale-95">
+                            <i class="fa-brands fa-youtube text-sm"></i> 들어보기
+                        </a>
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-300 bg-slate-900/60 p-2 rounded-lg border border-slate-800">
+                        💬 ${song.desc}
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+    </script>
+<div id="expo-credit" role="note" aria-label="개발자 오선우" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 오선우</div>
+</body>
+</html>

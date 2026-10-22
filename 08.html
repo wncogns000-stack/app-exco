@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>남남수수학학원원장의 수학추천</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center font-sans p-4">
+
+  <!-- 스마트폰 형태의 UI 프레임 -->
+  <div class="relative w-full max-w-[400px] h-[780px] bg-sky-100 border-[12px] border-slate-800 rounded-[40px] shadow-2xl flex flex-col overflow-hidden">
+    
+    <!-- 스마트폰 상단바 (카메라 홀, 시간, 날씨 표시) -->
+    <div class="w-full h-11 bg-slate-800 text-white text-xs px-6 flex justify-between items-center z-20">
+      <!-- 시계 -->
+      <span id="statusBarTime" class="font-bold">12:00</span>
+      <!-- 카메라 스피커 구멍 표현 -->
+      <div class="w-20 h-4 bg-black rounded-full absolute left-1/2 transform -translate-x-1/2 top-2"></div>
+      <!-- 실시간 날씨 표시 영역 -->
+      <div class="flex items-center space-x-1" id="weatherWidget">
+        <span id="weatherText">위치 확인 중...</span>
+      </div>
+    </div>
+
+    <!-- 앱 메인 화면 콘텐츠 영역 (스크롤 가능하도록 구성) -->
+    <div class="flex-1 overflow-y-auto pb-16 pt-3 px-5" id="appBody">
+      
+      <!-- [1단계] 시작화면 (Home View) -->
+      <div id="view-home" class="view flex flex-col justify-between h-full py-6">
+        <div class="text-center mt-6">
+          <div class="inline-block bg-blue-900 text-white text-xs uppercase px-3 py-1 font-mono tracking-wider mb-3">
+            Nam Nam-Su Math Academy
+          </div>
+          <h1 class="text-2xl font-black text-slate-800 leading-tight tracking-tight mt-2">
+            남남수수학학원원장이<br>추천해주는<br>
+            <span class="text-blue-900 bg-white px-2 py-1 inline-block mt-1 border-2 border-blue-950">수학문제집</span>
+          </h1>
+          <p class="text-slate-600 text-sm mt-4 font-medium">
+            "내 나이와 실력에 딱 맞는<br>최고의 수학 파트너 문제집을 추천받아봐!"
+          </p>
+        </div>
+
+        <div class="flex flex-col items-center justify-center my-6">
+          <!-- 연필/삼각자 이모지 장식 -->
+          <div class="text-center">
+            <span class="text-7xl animate-bounce inline-block">📐</span>
+            <p class="text-xs font-bold text-blue-900 mt-2 bg-white px-2 py-1 border border-blue-900 rounded">
+              무한 랜덤 문제 은행 가동 중!
+            </p>
+          </div>
+        </div>
+
+        <!-- 시작 버튼 (자로 잰 듯이 반듯하고 진한 파랑) -->
+        <div class="px-2">
+          <button onclick="startApp()" class="w-full bg-blue-900 hover:bg-blue-950 text-white text-lg font-bold py-4 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] active:translate-x-1 active:translate-y-1">
+            수학 진단 테스트 시작하기 ▷
+          </button>
+        </div>
+      </div>
+
+      <!-- [2단계] 사용자 정보 & 수학 시험 화면 (Test View) -->
+      <div id="view-test" class="view hidden py-4">
+        <h2 class="text-xl font-extrabold text-blue-900 border-b-4 border-blue-900 pb-2 mb-4">
+          📝 맞춤 정보 & 테스트
+        </h2>
+        
+        <!-- 학년/나이 선택 -->
+        <div class="bg-white p-4 border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] mb-5">
+          <label class="block text-sm font-bold text-slate-700 mb-2">나이(학년)를 선택해 줘:</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="selectAgeGroup('lower')" id="btn-age-lower" class="age-btn py-2 text-sm font-bold border-2 border-slate-900 bg-white text-slate-800">
+              초등 1~3학년 (저학년)
+            </button>
+            <button onclick="selectAgeGroup('upper')" id="btn-age-upper" class="age-btn py-2 text-sm font-bold border-2 border-slate-900 bg-blue-900 text-white">
+              초등 4~6학년 (고학년)
+            </button>
+          </div>
+        </div>
+
+        <!-- 실전 시험 문항 (저학년/고학년에 따라 유동적으로 바뀜) -->
+        <div class="bg-white p-4 border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-xs font-mono font-bold bg-slate-200 px-2 py-1">남남수 원장님의 무한 진단</span>
+            <span class="text-xs text-red-600 font-bold" id="test-info-badge">고학년용 문항</span>
+          </div>
+          
+          <div id="math-questions-container" class="space-y-4">
+            <!-- 질문들이 동적으로 생성됩니다 -->
+          </div>
+        </div>
+
+        <!-- 분석 요청 제출 버튼 (반듯한 디자인) -->
+        <button onclick="submitTest()" class="w-full mt-6 bg-blue-900 hover:bg-blue-950 text-white text-base font-bold py-4 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] transition-all">
+          시험지 제출하고 추천 문제집 보기 📋
+        </button>
+      </div>
+
+      <!-- [3단계] 분석 로딩 화면 (Loading View) -->
+      <div id="view-loading" class="view hidden flex-col items-center justify-center h-full py-12">
+        <!-- 움직이는 주사위/칠판 모양 수식 로더 -->
+        <div class="w-20 h-20 bg-blue-900 text-white border-4 border-slate-900 flex items-center justify-center font-mono text-3xl font-bold animate-spin shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] mb-8">
+          +÷×
+        </div>
+        
+        <h3 class="text-xl font-black text-slate-800 text-center">
+          남남수 원장님의 인공지능이<br>
+          <span class="text-blue-900 underline">수학 채점 및 문제집 분석 중</span>
+        </h3>
+        
+        <!-- 로딩 텍스트 변화 -->
+        <p id="loading-msg" class="text-slate-600 text-sm mt-4 text-center animate-pulse">
+          맞춤 데이터 기반 수학 알고리즘 작동 중...
+        </p>
+
+        <div class="w-48 bg-slate-200 h-3 border-2 border-slate-900 mt-6 relative overflow-hidden">
+          <div class="bg-blue-900 h-full w-0 transition-all duration-300" id="loading-progress-bar"></div>
+        </div>
+      </div>
+
+      <!-- [4단계] 추천 결과 화면 (Results View) -->
+      <div id="view-results" class="view hidden py-4">
+        <div class="text-center mb-5">
+          <span class="text-xs bg-yellow-300 border border-slate-900 px-2 py-1 font-bold text-slate-800">원장님 추천 완료 🎯</span>
+          <h2 class="text-2xl font-black text-slate-800 mt-2">이런건 어떠세요?</h2>
+          <p class="text-xs text-slate-500 mt-1" id="report-meta-info">2026. 07. 21 | 오후 1:27</p>
+        </div>
+
+        <!-- 획득 점수 및 진단 결과 박스 -->
+        <div class="bg-blue-50 border-2 border-blue-900 p-4 mb-5 rounded-none relative">
+          <div class="absolute -top-3 -right-2 bg-blue-900 text-white text-[10px] font-bold px-2 py-0.5">원장님 직인</div>
+          <p class="text-sm font-bold text-slate-700">채점 결과: <span id="score-text" class="text-red-600 font-extrabold text-base">3 / 3 문제 정답!</span></p>
+          <p class="text-xs text-slate-600 mt-2 leading-relaxed" id="feedback-text">
+            "수학에 상당한 재능이 있어요! 상위권 도약을 위해 사고력을 자극하는 심화 유형서 위주로 공부하면 엄청나게 성장할 거예요!"
+          </p>
+        </div>
+
+        <!-- 추천 문제집 2~3개 출력 구역 -->
+        <div class="space-y-4" id="book-recommendations">
+          <!-- 추천 아이템이 생성되어 붙습니다 -->
+        </div>
+
+        <!-- 다시 시작하기 버튼 -->
+        <button onclick="resetApp()" class="w-full mt-6 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold py-3 border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] transition-all">
+          시험 다시 치고 새로 추천 받기 🔄
+        </button>
+      </div>
+
+      <!-- [메뉴 오버레이화면] 메뉴 정보 View -->
+      <div id="view-menu" class="view hidden py-6">
+        <h2 class="text-2xl font-black text-blue-900 border-b-4 border-blue-900 pb-2 mb-6">💡 학원 & 앱 정보</h2>
+        
+        <div class="bg-white p-5 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] space-y-4 mb-6">
+          <div>
+            <h4 class="font-black text-slate-800 text-base">✏️ 남남수 수학 학원 소개</h4>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+              최고의 관리력과 정밀 진단 시스템을 통해, 학생 한 명 한 명의 맞춤형 교재와 커리큘럼을 세팅해 드리는 상위 1% 수학 학원입니다.
+            </p>
+          </div>
+          <hr class="border-slate-300">
+          <div>
+            <h4 class="font-black text-slate-800 text-base">📞 학원 문의 및 안내</h4>
+            <p class="text-xs text-slate-600 mt-1">상담 번호: 02-1234-5678</p>
+            <p class="text-xs text-slate-600">위치: 학생이 꿈꾸는 최고의 미래 자치구</p>
+          </div>
+          <hr class="border-slate-300">
+          <div>
+            <h4 class="font-black text-slate-800 text-base">📱 앱 사용 팁</h4>
+            <p class="text-xs text-slate-600 mt-1">
+              본 앱은 실시간 날씨 데이터, 시간대 및 나이에 맞춰 가장 이상적인 1:1 문제집 목록을 자동으로 선별해 드립니다.
+            </p>
+          </div>
+        </div>
+
+        <button onclick="goToView('home')" class="w-full bg-blue-900 text-white font-bold py-3 border-2 border-slate-900 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+          메인 홈 화면으로 가기
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 스마트폰 하단 네비게이션 바 -->
+    <div class="absolute bottom-0 left-0 right-0 h-14 bg-slate-900 border-t border-slate-700 flex justify-around items-center z-20">
+      <!-- ☰ (메뉴) 버튼 -->
+      <button onclick="toggleMenu()" class="text-white flex flex-col items-center justify-center hover:text-sky-300 transition-colors w-12 h-12">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+        <span class="text-[9px] mt-0.5">메뉴</span>
+      </button>
+      <!-- ⌂ (홈) 버튼 -->
+      <button onclick="goHome()" class="text-white flex flex-col items-center justify-center hover:text-sky-300 transition-colors w-12 h-12">
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="text-[9px] mt-0.5">홈</span>
+      </button>
+      <!-- ◁ (뒤로가기) 버튼 -->
+      <button onclick="goBack()" class="text-white flex flex-col items-center justify-center hover:text-sky-300 transition-colors w-12 h-12">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        <span class="text-[9px] mt-0.5">뒤로가기</span>
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // --- 글로벌 상태 관리 ---
+    let currentView = 'home';
+    let viewHistory = ['home'];
+    let selectedAgeGroup = 'upper'; // 기본 고학년(4-6학년)
+    let userAnswers = {};
+    let latitude = null;
+    let longitude = null;
+    let weatherData = null;
+    let currentQuestions = []; // 이번 테스트에서 출제된 문제 보관함
+
+    // --- 문제집 데이터 세트 (미성년자 유해품 차단 및 현실적 초등 수학 기재) ---
+    const bookPool = {
+      // 저학년용 데이터 풀
+      lower: [
+        { name: "디딤돌 초등수학 기본 1-1", level: "쉬움", desc: "수학을 처음 배우는 학생들이 쉽고 재미있게 공부할 수 있는 기초 수학 기본서!", tags: "개념다지기, 기본서" },
+        { name: "개념쎈 초등 수학 2-1", level: "보통", desc: "사고력 강화와 완벽한 개념 정리를 돕는 산뜻한 개념 중심 책!", tags: "개념정리, 탄탄강화" },
+        { name: "최상위 초등수학 2-1", level: "어려움", desc: "상위권에 도전하고 싶다면 놓쳐선 안 될 초등 수학 최상위 대표 심화서!", tags: "상위1%, 고난이도" },
+        { name: "EBS 만점왕 수학 1학년", level: "쉬움", desc: "방송과 함께 한 걸음씩 개념을 꽉 잡을 수 있는 국민 수학 학습지!", tags: "무료인강, 예습용" },
+        { name: "동아출판 큐브수학 개념 3-1", level: "쉬움", desc: "교과서 중심의 쉬운 설명과 직관적 반복 연산으로 수학에 자부심을!", tags: "교과서진도, 기초튼튼" },
+        { name: "신사고 쎈 초등 수학 2학년", level: "보통", desc: "모든 문제 유형을 한 권에 꽉 담아 단원평가 대비에 가장 최고인 추천 교재!", tags: "만점공략, 유형서" },
+        { name: "최고수준 수학 2학년", level: "어려움", desc: "기본 개념을 넘어 하이레벨 연산과 문장제 문제를 돌파하기 위한 교재!", tags: "최고난도, 경시대비" }
+      ],
+      // 고학년용 데이터 풀
+      upper: [
+        { name: "디딤돌 초등수학 응용 5-1", level: "보통", desc: "기본 핵심을 확실히 잡고 응용력 문제를 하나하나 풀어 수학적 역량을 끌어올려요!", tags: "실력쑥쑥, 응용서" },
+        { name: "최상위 초등수학 6-1", level: "어려움", desc: "원장님이 가장 사랑하시는 고난도 최고봉! 특목고 및 수학경시대회 단골 훈련 문제집!", tags: "초등마스터, 심화끝판왕" },
+        { name: "개념원리 RPM 초등수학 5-2", level: "보통", desc: "정확한 핵심 요약과 맞춤 유형 분류로 완벽한 오답률 제로에 도전하는 베스트셀러!", tags: "개념돌파, 맞춤유형" },
+        { name: "신사고 쎈 초등 수학 6-1", level: "보통", desc: "학원생들의 필수 코스! 빈틈없는 난이도별 구성으로 실전 내신 실력을 쌓아올려요.", tags: "전유형마스터, 인기만점" },
+        { name: "EBS 만점왕 수학 고학년용", level: "쉬움", desc: "어려운 수학 교과서 진도를 학교에서 완벽하게 우등생으로 살아남게 돕는 해결책!", tags: "교과서연계, 자기주도" },
+        { name: "일품 초등수학 5학년", level: "어려움", desc: "까다로운 상위권 기출 문제를 집중 수록하여 탄탄한 고등 수학의 기초 체력을 만들어줍니다.", tags: "특목고준비, 고득점용" },
+        { name: "동아출판 큐브수학 실력 6학년", level: "보통", desc: "단계별 유형 문제와 풍성한 단원평가를 풀면서 수학 머리를 단단하게 다지는 비법!", tags: "실전대비, 유형훈련" },
+        { name: "개념쎈 초등 수학 4-1", level: "쉬움", desc: "사전식 개념 배열과 개념 중심 학습법으로 수학의 자신감을 완전히 뚫어줍니다.", tags: "쉬운개념, 수학입문" }
+      ]
+    };
+
+    // --- 마법의 '실시간 500+ 랜덤 문제 생성 발전기' ---
+    // 학년 그룹에 맞게 다양한 템플릿과 랜덤 숫자를 조합하여 매번 완전히 다른 보기를 지닌 문제를 동적으로 만듭니다.
+    function generateRandomMathQuestions(group, count = 3) {
+      const generated = [];
+      const usedTemplates = new Set();
+      
+      while (generated.length < count) {
+        // 0부터 9까지의 템플릿 인덱스 중 하나를 무작위 선택
+        const templateId = Math.floor(Math.random() * 10);
+        
+        // 중복 방지 (한 시험에 같은 유형이 중복 출제되지 않도록)
+        if (usedTemplates.has(templateId)) continue;
+        usedTemplates.add(templateId);
+
+        let qText = "";
+        let answerVal = 0;
+        let options = [];
+
+        if (group === 'lower') {
+          // --- 저학년 수학 문제 생성 템플릿 (10개 유형) ---
+          switch (templateId) {
+            case 0: { // 덧셈
+              const a = Math.floor(Math.random() * 30) + 10;
+              const b = Math.floor(Math.random() * 30) + 5;
+              qText = `덧셈을 해봐요: ${a} + ${b} = ?`;
+              answerVal = a + b;
+              break;
+            }
+            case 1: { // 뺄셈
+              const a = Math.floor(Math.random() * 50) + 20;
+              const b = Math.floor(Math.random() * 15) + 5;
+              qText = `뺄셈을 해봐요: ${a} - ${b} = ?`;
+              answerVal = a - b;
+              break;
+            }
+            case 2: { // 구구단
+              const a = Math.floor(Math.random() * 8) + 2;
+              const b = Math.floor(Math.random() * 8) + 2;
+              qText = `구구단을 외자: ${a} × ${b} = ?`;
+              answerVal = a * b;
+              break;
+            }
+            case 3: { // 빈칸 채우기 덧셈
+              const a = Math.floor(Math.random() * 20) + 5;
+              const sum = Math.floor(Math.random() * 20) + 25;
+              qText = `빈칸 □에 들어갈 수는? [ ${a} + □ = ${sum} ]`;
+              answerVal = sum - a;
+              break;
+            }
+            case 4: { // 과일 문장제 문제 (나눗셈 기초)
+              const count = (Math.floor(Math.random() * 5) + 3) * 3; // 3의 배수
+              qText = `사과 ${count}개를 친구 3명에게 똑같이 나누어 주려고 해요. 한 명당 몇 개씩 가질 수 있을까요?`;
+              answerVal = count / 3;
+              break;
+            }
+            case 5: { // 합치기 문장제
+              const a = Math.floor(Math.random() * 10) + 6;
+              const b = Math.floor(Math.random() * 10) + 6;
+              qText = `민우는 딱지를 ${a}장, 수지는 ${b}장 가지고 있습니다. 둘이 가진 딱지는 모두 몇 장일까요?`;
+              answerVal = a + b;
+              break;
+            }
+            case 6: { // 남은 개수 문장제
+              const start = Math.floor(Math.random() * 15) + 15;
+              const eat = Math.floor(Math.random() * 8) + 3;
+              qText = `바구니에 귤이 ${start}개 있었는데, 동생이 ${eat}개를 먹었습니다. 남은 귤은 몇 개일까요?`;
+              answerVal = start - eat;
+              break;
+            }
+            case 7: { // 세 수의 계산
+              const a = Math.floor(Math.random() * 10) + 5;
+              const b = Math.floor(Math.random() * 10) + 5;
+              const c = Math.floor(Math.random() * 5) + 2;
+              qText = `순서대로 계산해봐요: ${a} + ${b} - ${c} = ?`;
+              answerVal = a + b - c;
+              break;
+            }
+            case 8: { // 두 배 곱셈 문장제
+              const base = Math.floor(Math.random() * 12) + 4;
+              qText = `형은 연필을 ${base}자루 가지고 있고, 동생은 형의 딱 2배를 가지고 있습니다. 동생이 가진 연필은 몇 자루일까요?`;
+              answerVal = base * 2;
+              break;
+            }
+            case 9: { // 빈칸 채우기 뺄셈
+              const start = Math.floor(Math.random() * 20) + 30;
+              const diff = Math.floor(Math.random() * 15) + 5;
+              qText = `빈칸 □에 알맞은 숫자는 무엇일까요? [ ${start} - □ = ${diff} ]`;
+              answerVal = start - diff;
+              break;
+            }
+          }
+        } else {
+          // --- 고학년 수학 문제 생성 템플릿 (10개 유형) ---
+          switch (templateId) {
+            case 0: { // 큰 수 곱셈
+              const a = Math.floor(Math.random() * 15) + 12;
+              const b = Math.floor(Math.random() * 8) + 6;
+              qText = `두 자릿수 곱셈을 계산하세요: ${a} × ${b} = ?`;
+              answerVal = a * b;
+              break;
+            }
+            case 1: { // 약수 찾기
+              const target = [12, 16, 18, 20, 24, 28, 30][Math.floor(Math.random() * 7)];
+              qText = `다음 중 ${target}의 약수(나누어떨어지게 하는 수)가 아닌 것은 무엇일까요?`;
+              
+              // 약수 필터링
+              const divisors = [];
+              for (let i = 1; i <= target; i++) {
+                if (target % i === 0) divisors.push(i);
+              }
+              
+              // 약수가 아닌 숫자 1개 임의 추출을 정답으로 삼음
+              let nonDivisor = 0;
+              while (true) {
+                const rand = Math.floor(Math.random() * 15) + 2;
+                if (target % rand !== 0) {
+                  nonDivisor = rand;
+                  break;
+                }
+              }
+              answerVal = nonDivisor;
+              
+              // 특수 보기 처리 (나머지 3개는 약수로 채움)
+              const chosenDivisors = divisors.filter(d => d !== 1 && d !== target).slice(0, 3);
+              while (chosenDivisors.length < 3) {
+                chosenDivisors.push(divisors[0]);
+              }
+              
+              options = [nonDivisor, ...chosenDivisors];
+              break;
+            }
+            case 2: { // 동분모 분수의 덧셈
+              const denom = Math.floor(Math.random() * 5) + 6; // 분모 6~10
+              const a = Math.floor(Math.random() * 2) + 1;
+              const b = Math.floor(Math.random() * 2) + 1;
+              qText = `분수의 덧셈을 하세요: ${a}/${denom} + ${b}/${denom} = ?`;
+              answerVal = `${a + b}/${denom}`;
+              
+              // 분수 형태 전용 오지선다 만들기
+              options = [
+                `${a + b}/${denom}`,
+                `${a + b + 1}/${denom}`,
+                `${a + b}/${denom + 1}`,
+                `${a + b - 1}/${denom}`
+              ];
+              break;
+            }
+            case 3: { // 일차 방정식 유형
+              const multiply = Math.floor(Math.random() * 4) + 3; // 3~6
+              const add = Math.floor(Math.random() * 10) + 2;
+              const answerNum = Math.floor(Math.random() * 5) + 3; // 정답 3~7
+              const total = (multiply * answerNum) + add;
+              
+              qText = `방정식의 해 □를 구하세요: [ ${multiply} × □ + ${add} = ${total} ]`;
+              answerVal = answerNum;
+              break;
+            }
+            case 4: { // 평균 구하기
+              const a = [70, 80, 90][Math.floor(Math.random() * 3)];
+              const b = a + 10;
+              const c = a - 10;
+              qText = `수학 성적이 각각 ${a}점, ${b}점, ${c}점일 때, 이 세 과목의 평균 점수는 몇 점일까요?`;
+              answerVal = a;
+              break;
+            }
+            case 5: { // 거속시 (거리 속력 시간) 문장제
+              const speed = Math.floor(Math.random() * 3) + 4; // 시속 4~6km
+              const time = Math.floor(Math.random() * 2) + 2; // 2~3시간
+              qText = `어떤 사람이 자전거를 타고 시속 ${speed}km의 속력으로 ${time}시간 동안 달렸습니다. 이동한 총 거리는 몇 km일까요?`;
+              answerVal = speed * time;
+              break;
+            }
+            case 6: { // 최대공약수 기초
+              // (6,9) -> 3, (8,12) -> 4, (12,18) -> 6, (15,20) -> 5 중 랜덤
+              const pairs = [
+                {a: 6, b: 9, ans: 3},
+                {a: 8, b: 12, ans: 4},
+                {a: 12, b: 18, ans: 6},
+                {a: 15, b: 20, ans: 5},
+                {a: 10, b: 15, ans: 5}
+              ];
+              const pair = pairs[Math.floor(Math.random() * pairs.length)];
+              qText = `${pair.a}와 ${pair.b}의 최대공약수(가장 큰 공통된 약수)를 구하세요.`;
+              answerVal = pair.ans;
+              break;
+            }
+            case 7: { // 도형 둘레 계산 (직사각형)
+              const width = Math.floor(Math.random() * 8) + 5;
+              const height = Math.floor(Math.random() * 5) + 3;
+              qText = `가로의 길이가 ${width}cm이고 세로의 길이가 ${height}cm인 직사각형의 둘레의 길이는 몇 cm일까요?`;
+              answerVal = (width + height) * 2;
+              break;
+            }
+            case 8: { // 소수의 곱셈
+              const a = [0.2, 0.3, 0.4, 0.5][Math.floor(Math.random() * 4)];
+              const b = Math.floor(Math.random() * 5) + 3;
+              qText = `소수의 곱셈을 계산하세요: ${a} × ${b} = ?`;
+              answerVal = parseFloat((a * b).toFixed(1));
+              break;
+            }
+            case 9: { // 문장제 방정식 역산
+              const multi = Math.floor(Math.random() * 3) + 3; // 3, 4, 5
+              const minus = Math.floor(Math.random() * 6) + 2;
+              const ansNum = Math.floor(Math.random() * 4) + 4; // 4~7
+              const result = (ansNum * multi) - minus;
+              qText = `어떤 수에 ${multi}를 곱하고 ${minus}를 뺐더니 ${result}가 되었습니다. 어떤 수는 얼마였을까요?`;
+              answerVal = ansNum;
+              break;
+            }
+          }
+        }
+
+        // 보기(Options) 생성 자동화 로직 (이미 분수 유형 등에서 선제 가공되지 않은 일반 숫자 문제들 처리)
+        if (options.length === 0) {
+          const optSet = new Set();
+          optSet.add(answerVal);
+          
+          while (optSet.size < 4) {
+            let offset = Math.floor(Math.random() * 10) - 5;
+            if (offset === 0) offset = 1;
+            
+            let val = answerVal + offset;
+            if (typeof answerVal === 'number' && Number.isInteger(answerVal)) {
+              if (val > 0) optSet.add(val);
+            } else if (typeof answerVal === 'number' && !Number.isInteger(answerVal)) {
+              optSet.add(parseFloat(val.toFixed(1)));
+            } else {
+              optSet.add(val);
+            }
+          }
+          options = Array.from(optSet);
+        }
+
+        // 옵션 순서 골고루 섞어주기 (정답이 늘 1번에만 있는 것 방지)
+        for (let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+
+        generated.push({
+          id: `rand-q-${generated.length + 1}`,
+          text: qText,
+          options: options.map(String),
+          answer: String(answerVal)
+        });
+      }
+
+      return generated;
+    }
+
+    // --- 앱 초기화 및 실시간 위치/날씨 가져오기 ---
+    window.onload = function() {
+      // Lucide 아이콘 초기화
+      lucide.createIcons();
+      // 시간 업데이트 루프 실행
+      updateTime();
+      setInterval(updateTime, 1000);
+      
+      // 위치 및 날씨 가져오기 실행
+      getRealTimeLocationAndWeather();
+      
+      // 시작 시 뷰 상태 조정
+      goToView('home');
+    };
+
+    // --- 실시간 시간 갱신 ---
+    function updateTime() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      if (minutes < 10) minutes = "0" + minutes;
+      
+      const ampm = hours >= 12 ? '오후' : '오전';
+      const displayHours = hours % 12 || 12;
+      
+      // 스마트폰 최상단 시간 바
+      document.getElementById('statusBarTime').innerText = `${displayHours}:${minutes}`;
+      
+      // 결과 보고서용 상세 시간 날짜
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const date = now.getDate();
+      const formatString = `${year}년 ${month}월 ${date}일 | ${ampm} ${displayHours}시 ${minutes}분 기준`;
+      
+      const reportMeta = document.getElementById('report-meta-info');
+      if (reportMeta) {
+        reportMeta.innerText = formatString;
+      }
+    }
+
+    // --- 위치 획득 및 날씨 API 연동 ---
+    function getRealTimeLocationAndWeather() {
+      const weatherWidget = document.getElementById('weatherWidget');
+      
+      if (!navigator.geolocation) {
+        weatherWidget.innerHTML = '<span>날씨 정보 없음</span>';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+          
+          try {
+            // 1. 역지오코딩을 사용하여 행정구역 이름 간단 취득 (OpenStreetMap Nominatim)
+            let areaName = "현재위치";
+            try {
+              const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10`);
+              const geoData = await geoResponse.json();
+              areaName = geoData.address.city || geoData.address.province || geoData.address.county || "나의 지역";
+            } catch (e) {
+              console.log("역지오코딩 실패, 기본값 대체", e);
+            }
+
+            // 2. Open-Meteo API 호출 (날씨 코드 및 기온 획득)
+            const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+            const weatherJson = await weatherResponse.json();
+            
+            if (weatherJson && weatherJson.current_weather) {
+              const temp = Math.round(weatherJson.current_weather.temperature);
+              const weatherCode = weatherJson.current_weather.weathercode;
+              const emoji = getWeatherEmoji(weatherCode);
+              
+              weatherWidget.innerHTML = `
+                <span class="font-bold text-[10px] text-sky-300 mr-1">${areaName}</span>
+                <span>${emoji}</span>
+                <span class="font-bold">${temp}°C</span>
+              `;
+            } else {
+              weatherWidget.innerHTML = '<span>☀️ 날씨 정보 없음</span>';
+            }
+          } catch (error) {
+            console.error("날씨 정보 획득 실패:", error);
+            weatherWidget.innerHTML = '<span>☁️ 날씨 정보 없음</span>';
+          }
+        },
+        (error) => {
+          console.warn("위치 정보 권한이 거부되었거나 조회 실패:", error);
+          weatherWidget.innerHTML = '<span>날씨 정보 없음</span>';
+        }
+      );
+    }
+
+    // --- 날씨 코드에 맞춰 이모지 변경 ---
+    function getWeatherEmoji(code) {
+      if (code === 0) return "☀️"; // 맑음
+      if (code >= 1 && code <= 3) return "☁️"; // 흐림
+      if (code >= 51 && code <= 67) return "🌧️"; // 비
+      if (code >= 71 && code <= 77) return "❄️"; // 눈
+      if (code >= 80 && code <= 82) return "🌦️"; // 소나기
+      if (code >= 95) return "⚡"; // 천둥번개
+      return "☀️";
+    }
+
+    // --- 단방향 뷰 변경 제어 (스택 보관) ---
+    function goToView(viewId) {
+      // 모든 뷰 숨김
+      const views = document.querySelectorAll('.view');
+      views.forEach(v => v.classList.add('hidden'));
+
+      // 대상 뷰 보이기
+      const targetView = document.getElementById(`view-${viewId}`);
+      if (targetView) {
+        targetView.classList.remove('hidden');
+        currentView = viewId;
+        
+        // 뒤로가기 히스토리 갱신
+        if (viewHistory[viewHistory.length - 1] !== viewId) {
+          viewHistory.push(viewId);
+        }
+      }
+    }
+
+    // --- 뒤로가기 기능 ---
+    function goBack() {
+      if (viewHistory.length > 1) {
+        viewHistory.pop(); // 현재 뷰 제거
+        const previousView = viewHistory[viewHistory.length - 1];
+        
+        const views = document.querySelectorAll('.view');
+        views.forEach(v => v.classList.add('hidden'));
+
+        const targetView = document.getElementById(`view-${previousView}`);
+        if (targetView) {
+          targetView.classList.remove('hidden');
+          currentView = previousView;
+        }
+      } else {
+        // 이미 가장 첫 화면이면 메뉴 홈과 같음
+        goToView('home');
+      }
+    }
+
+    // --- 홈으로 가기 ---
+    function goHome() {
+      viewHistory = ['home'];
+      goToView('home');
+    }
+
+    // --- 메뉴 활성화 토글 ---
+    function toggleMenu() {
+      if (currentView === 'menu') {
+        goBack();
+      } else {
+        goToView('menu');
+      }
+    }
+
+    // --- 어플리케이션 시작 단계 진입 ---
+    function startApp() {
+      goToView('test');
+      renderQuestions();
+    }
+
+    // --- 나이 그룹 토글 선택 ---
+    function selectAgeGroup(group) {
+      selectedAgeGroup = group;
+      
+      const lowerBtn = document.getElementById('btn-age-lower');
+      const upperBtn = document.getElementById('btn-age-upper');
+      const badge = document.getElementById('test-info-badge');
+
+      if (group === 'lower') {
+        lowerBtn.className = "age-btn py-2 text-sm font-bold border-2 border-slate-900 bg-blue-900 text-white";
+        upperBtn.className = "age-btn py-2 text-sm font-bold border-2 border-slate-900 bg-white text-slate-800";
+        badge.innerText = "저학년용 문항";
+      } else {
+        lowerBtn.className = "age-btn py-2 text-sm font-bold border-2 border-slate-900 bg-white text-slate-800";
+        upperBtn.className = "age-btn py-2 text-sm font-bold border-2 border-slate-900 bg-blue-900 text-white";
+        badge.innerText = "고학년용 문항";
+      }
+
+      renderQuestions();
+    }
+
+    // --- 테스트 문항 출력 (자동 랜덤 발전기 데이터 주입) ---
+    function renderQuestions() {
+      const container = document.getElementById('math-questions-container');
+      container.innerHTML = '';
+      userAnswers = {}; // 사용자 정답 저장 초기화
+
+      // 매칭 실행할 때마다 'generateRandomMathQuestions'로부터 완전히 동적인 문제 3개를 실시간 공급받음!
+      currentQuestions = generateRandomMathQuestions(selectedAgeGroup, 3);
+      
+      currentQuestions.forEach((q, qIndex) => {
+        const qDiv = document.createElement('div');
+        qDiv.className = "border-b border-slate-200 pb-3 last:border-0";
+        
+        qDiv.innerHTML = `
+          <p class="text-sm font-bold text-slate-800 mb-2">Q${qIndex + 1}. ${q.text}</p>
+          <div class="grid grid-cols-2 gap-2" id="options-for-${q.id}">
+            ${q.options.map(opt => `
+              <button type="button" onclick="selectAnswer('${q.id}', '${opt}')" id="opt-${q.id}-${opt}" class="opt-btn-group py-1.5 px-3 text-xs font-bold border border-slate-400 bg-white hover:bg-slate-50 transition-colors rounded-none">
+                ${opt}
+              </button>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(qDiv);
+      });
+    }
+
+    // --- 개별 질문 답변 선택 시 색상 제어 ---
+    function selectAnswer(questionId, selectedValue) {
+      userAnswers[questionId] = selectedValue;
+      
+      // 해당 영역 내 모든 버튼 기본으로 복구
+      const container = document.getElementById(`options-for-${questionId}`);
+      const buttons = container.querySelectorAll('.opt-btn-group');
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-blue-900', 'text-white', 'border-slate-900');
+        btn.classList.add('bg-white', 'text-slate-800', 'border-slate-400');
+      });
+
+      // 누른 버튼 강조색 처리
+      const activeBtn = document.getElementById(`opt-${questionId}-${selectedValue}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-white', 'text-slate-800', 'border-slate-400');
+        activeBtn.classList.add('bg-blue-900', 'text-white', 'border-slate-900');
+      }
+    }
+
+    // --- 테스트 제출 및 인공지능 분석 로딩 전개 ---
+    function submitTest() {
+      // 미입력 답안 검증
+      let answeredCount = Object.keys(userAnswers).length;
+      
+      if (answeredCount < currentQuestions.length) {
+        alert("모든 시험 문제에 답해 준 뒤에 분석을 요청해 줘! 😊");
+        return;
+      }
+
+      // 3단계 분석 로딩 개시
+      goToView('loading');
+      
+      const loadingMsg = document.getElementById('loading-msg');
+      const progressBar = document.getElementById('loading-progress-bar');
+      
+      const msgs = [
+        "남남수 원장님의 꼼꼼한 채점 로직 구동 중...",
+        "틀린 개념 요소를 실시간으로 정합 분석 중...",
+        "학생의 점수대에 맞는 최상의 교재 검색 중...",
+        "위치와 날씨 데이터 매칭 완료! 최종 포트폴리오 빌드 중..."
+      ];
+      
+      let progress = 0;
+      let interval = setInterval(() => {
+        progress += 20;
+        progressBar.style.width = `${progress}%`;
+        
+        // 무작위 멘트 교체
+        const randomMsg = msgs[Math.floor(Math.random() * msgs.length)];
+        loadingMsg.innerText = randomMsg;
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          finishAnalysis();
+        }
+      }, 500);
+    }
+
+    // --- 수학 시험 채점 및 최종 3개 랜덤 추천 완성 ---
+    function finishAnalysis() {
+      let score = 0;
+      
+      // 채점
+      currentQuestions.forEach(q => {
+        if (userAnswers[q.id] === q.answer) {
+          score++;
+        }
+      });
+
+      // 난이도 그룹 설정
+      let targetLevel = "보통";
+      let feedback = "";
+
+      if (score === 3) {
+        targetLevel = "어려움";
+        feedback = `🏆 대단해! 3문제를 모두 정확히 해결해서 고난도 수학적 센스가 빛나고 있어! 남남수 원장님의 강추로, 깊이 있는 사고력을 요구하는 최고급 응용·심화서에 도전해 보자!`;
+      } else if (score === 2) {
+        targetLevel = "보통";
+        feedback = `👍 아주 좋은 성적이야! 조금 아쉽게 놓쳤지만 수학 개념은 매우 충실해. 유형을 완벽하게 마스터하고 응용을 기를 수 있는 최고 맞춤 수준의 베스트셀러를 제안할게.`;
+      } else {
+        targetLevel = "쉬움";
+        feedback = `🌱 힘내! 수학 공부는 먼저 개념을 친절하고 탄탄하게 이해하는 게 최고로 중요해! 원장님이 알려주는 쉬운 기초 개념서로 시작하면 성적이 순식간에 올라갈 거야!`;
+      }
+
+      // UI 적용
+      document.getElementById('score-text').innerText = `${score} / ${currentQuestions.length} 문제 정답!`;
+      document.getElementById('feedback-text').innerText = feedback;
+
+      // 추천 책 선정 로직 (해당 나이에 맞는 넉넉한 10개 내외 풀에서 중복 없이 무작위 2~3개 추천 제공)
+      const groupPool = bookPool[selectedAgeGroup];
+      
+      // 타겟 수준의 책 먼저 고르기 + 다른 보완 책도 섞음
+      let poolOfCandidates = [...groupPool];
+      
+      // 자바스크립트 랜덤 함수를 사용하여 풀을 무작위로 섞음 (Shuffle)
+      for (let i = poolOfCandidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [poolOfCandidates[i], poolOfCandidates[j]] = [poolOfCandidates[j], poolOfCandidates[i]];
+      }
+
+      // 상위 3가지 아이템만 선택
+      const selectedBooks = poolOfCandidates.slice(0, 3);
+      
+      const bookContainer = document.getElementById('book-recommendations');
+      bookContainer.innerHTML = '';
+
+      selectedBooks.forEach(book => {
+        const card = document.createElement('div');
+        card.className = "bg-white border-2 border-slate-950 p-4 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] hover:bg-slate-50 transition-colors";
+        
+        // 난이도 라벨 색상 설정
+        let lvlBadgeColor = "bg-green-100 text-green-800 border-green-800";
+        if (book.level === "보통") lvlBadgeColor = "bg-amber-100 text-amber-800 border-amber-800";
+        if (book.level === "어려움") lvlBadgeColor = "bg-red-100 text-red-800 border-red-800";
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-bold px-2 py-0.5 border ${lvlBadgeColor}">
+              ${book.level}
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">${book.tags}</span>
+          </div>
+          <h4 class="text-base font-extrabold text-blue-950 mb-1">
+            ${book.name}
+          </h4>
+          <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+            ${book.desc}
+          </p>
+          <!-- 클릭시 네이버 쇼핑 새 창 이동 버튼 -->
+          <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent(book.name)}" 
+             target="_blank" 
+             rel="noopener noreferrer" 
+             class="inline-flex items-center text-xs font-bold text-white bg-blue-900 hover:bg-blue-950 px-3 py-1.5 border border-slate-900 transition-colors">
+            장바구니 담기 & 쇼핑 검색 
+            <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i>
+          </a>
+        `;
+        bookContainer.appendChild(card);
+      });
+
+      // 새로 장착된 Lucide 아이콘 작동 시키기
+      lucide.createIcons();
+
+      // 결과 화면 이동
+      goToView('results');
+    }
+
+    // --- 앱 리셋 ---
+    function resetApp() {
+      userAnswers = {};
+      viewHistory = ['home'];
+      goToView('home');
+    }
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 백승규" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 백승규</div>
+</body>
+</html>

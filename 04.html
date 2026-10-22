@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학용품 추천 앱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* 고양이 귀 모양 느낌의 버튼 스타일 (스케치 반영) */
+        .cat-btn {
+            border-radius: 20px 20px 25px 25px;
+            position: relative;
+        }
+        .cat-btn::before, .cat-btn::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            width: 20px;
+            height: 20px;
+            background-color: #000;
+            border-radius: 4px;
+        }
+        .cat-btn::before { left: 15px; transform: rotate(-20deg); }
+        .cat-btn::after { right: 15px; transform: rotate(20deg); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 select-none">
+
+    <div class="w-full max-w-sm h-[680px] bg-white border-4 border-black rounded-[40px] shadow-2xl flex flex-col justify-between overflow-hidden relative">
+        
+        <div class="bg-black text-white px-5 py-3 text-xs flex justify-between items-center z-10">
+            <span id="current-time">00:00</span>
+            <span id="env-info" class="font-medium truncate max-w-[180px]">위치/날씨 확인 중...</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto relative bg-white flex flex-col">
+            
+            <div id="screen-1" class="flex-1 flex flex-col items-center justify-between p-6 text-center">
+                <div class="w-full mt-4">
+                    <div class="text-xs font-bold text-gray-400 tracking-widest mb-1">STATIONERY AI</div>
+                    <h1 class="text-5xl font-black text-black tracking-wider border-b-4 border-black pb-3 inline-block">학용품</h1>
+                </div>
+
+                <div class="my-auto py-8">
+                    <div class="w-32 h-32 border-4 border-black rounded-2xl mx-auto flex items-center justify-center bg-gray-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <span class="text-6xl">✏️</span>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600 font-bold">지금 시간과 내 위치에 딱 맞는<br>최적의 학용품을 추천해 드려요!</p>
+                </div>
+
+                <div class="w-full mb-4">
+                    <button onclick="startAnalysis()" class="cat-btn w-full bg-black text-white text-2xl font-bold py-4 shadow-[4px_4px_0px_0px_rgba(150,150,150,1)] active:translate-y-1 transition-all">
+                        추천
+                    </button>
+                </div>
+            </div>
+
+            <div id="screen-2" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <div class="animate-bounce text-6xl mb-6">🔍</div>
+                <h2 class="text-xl font-bold mb-2">학용품 큐레이션 중...</h2>
+                <p id="analysis-text" class="text-xs text-gray-500 leading-relaxed max-w-[200px]">
+                    현재 시간과 위치 데이터를 분석하여 꼭 필요한 아이템을 찾고 있습니다.
+                </p>
+                <div class="w-32 h-2 bg-gray-200 rounded-full mt-6 overflow-hidden">
+                    <div class="w-full h-full bg-black animate-pulse"></div>
+                </div>
+            </div>
+
+            <div id="screen-3" class="hidden flex-1 flex flex-col p-5 overflow-y-auto">
+                <div class="text-center mb-4">
+                    <h2 class="text-lg font-black text-black border-b-2 border-black inline-block pb-1">AI 맞춤 추천 결과</h2>
+                    <p class="text-[11px] text-gray-500 mt-1">클릭하면 네이버 쇼핑으로 바로 연결돼요!</p>
+                </div>
+
+                <div id="recommend-list" class="space-y-3 flex-1">
+                    </div>
+
+                <button onclick="startAnalysis()" class="w-full bg-white border-2 border-black text-black font-bold py-3 rounded-xl mt-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-0.5 transition-all text-sm">
+                    🔄 다시 추천 받기
+                </button>
+            </div>
+
+            <div id="screen-menu" class="hidden absolute inset-0 bg-black/90 text-white p-6 flex flex-col justify-between z-20">
+                <div>
+                    <h2 class="text-2xl font-bold border-b border-gray-700 pb-2 mb-4">메뉴</h2>
+                    <ul class="space-y-4 text-sm">
+                        <li class="p-2 border-b border-gray-800">📱 앱 이름: 학용품 추천 AI</li>
+                        <li class="p-2 border-b border-gray-800">🕒 연결 서비스: 네이버 쇼핑</li>
+                        <li class="p-2 border-b border-gray-800">🎨 디자인 모드: 모노톤 바이너리</li>
+                    </ul>
+                </div>
+                <button onclick="closeMenu()" class="w-full bg-white text-black font-bold py-3 rounded-xl">닫기</button>
+            </div>
+
+        </div>
+
+        <div class="bg-black text-white h-12 flex justify-around items-center border-t border-gray-800 text-lg">
+            <button onclick="openMenu()" class="hover:text-gray-400 px-4 py-1">☰</button>
+            <button onclick="goHome()" class="hover:text-gray-400 px-4 py-1">⌂</button>
+            <button onclick="goBack()" class="hover:text-gray-400 px-4 py-1">◁</button>
+        </div>
+
+    </div>
+
+    <script>
+        // 학용품 데이터 풀 (10개 이상)
+        const items = [
+            { name: "부드러운 제트스트림 볼펜", emoji: "🖊️", category: "필기류", reason: "언제 어디서나 끊김 없이 깔끔한 메모가 필요할 때 완벽해요!" },
+            { name: "대용량 아기자기 필통", emoji: "👝", category: "수납", reason: "모든 학용품을 한 번에 정리해 줄 깔끔한 필수 아이템!" },
+            { name: "파스텔 형광펜 세트", emoji: "🖍️", category: "강조", reason: "눈이 피로하지 않은 색감으로 핵심 내용을 쏙쏙 짚어줘요." },
+            { name: "잘 지워지는 미술 지우개", emoji: "🧹", category: "수정", reason: "자국 없이 깨끗하게 지워져서 집중력을 유지해 줍니다." },
+            { name: "스프링 모눈 노트", emoji: "📓", category: "노트", reason: "글씨나 그림, 오답 노트 정리까지 깔끔하게 작성할 수 있어요." },
+            { name: "안전 휴대용 스틱 풀", emoji: "🧴", category: "접착", reason: "손에 묻지 않고 깔끔하게 오려 붙이기 작업하기 좋아요." },
+            { name: "스마트 3M 포스트잇", emoji: "📝", category: "메모", reason: "중요한 일정이나 잊기 쉬운 암기 사항을 붙여두세요!" },
+            { name: "스테인리스 안전 자", emoji: "📏", category: "측정", reason: "바른 선을 긋거나 만들기 수업 시간에 빠질 수 없죠." },
+            { name: "수정테이프 리필형", emoji: "📼", category: "수정", reason: "볼펜 글씨를 깔끔하게 다듬어주는 공부 메이트예요." },
+            { name: "아날로그 탁상 스톱워치", emoji: "⏱️", category: "시간관리", reason: "공부 시간과 집중 시간을 똑똑하게 측정해 보세요." },
+            { name: "독서대 휴대용 서포터", emoji: "📖", category: "독서", reason: "바른 자세로 책을 보며 공부 효율을 최대로 올려줘요." },
+            { name: "샤프심 0.5mm HB 3세트", emoji: "✏️", category: "소모품", reason: "갑자기 샤프심이 떨어지지 않도록 미리 챙겨두는 센스!" }
+        ];
+
+        let historyStack = ['screen-1'];
+
+        // 실시간 시간 업데이트
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('current-time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 위치 및 날씨 정보 가져오기 (Open-Meteo & Geolocation)
+        function fetchLocationAndWeather() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    try {
+                        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                        const weatherData = await weatherRes.json();
+                        const temp = Math.round(weatherData.current_weather.temperature);
+                        const code = weatherData.current_weather.weathercode;
+                        const emoji = getWeatherEmoji(code);
+
+                        const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`);
+                        const geoData = await geoRes.json();
+                        const locName = geoData.locality || geoData.city || "내 동네";
+
+                        document.getElementById('env-info').innerText = `${locName} | ${emoji} ${temp}°C`;
+                    } catch (e) {
+                        document.getElementById('env-info').innerText = "날씨 정보 없음";
+                    }
+                }, () => {
+                    document.getElementById('env-info').innerText = "날씨 정보 없음";
+                });
+            } else {
+                document.getElementById('env-info').innerText = "날씨 정보 없음";
+            }
+        }
+        fetchLocationAndWeather();
+
+        function getWeatherEmoji(code) {
+            if (code === 0) return "☀️";
+            if (code <= 3) return "☁️";
+            if (code <= 67) return "🌧️";
+            if (code <= 77) return "❄️";
+            return "🌤️";
+        }
+
+        // 화면 전환 로직
+        function showScreen(screenId) {
+            ['screen-1', 'screen-2', 'screen-3', 'screen-menu'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            if (screenId !== 'screen-menu' && historyStack[historyStack.length - 1] !== screenId) {
+                historyStack.push(screenId);
+            }
+        }
+
+        // 분석 실행 로직
+        function startAnalysis() {
+            showScreen('screen-2');
+            setTimeout(() => {
+                renderRecommendations();
+                showScreen('screen-3');
+            }, 1200);
+        }
+
+        // 랜덤 3개 추천 생성
+        function renderRecommendations() {
+            const listContainer = document.getElementById('recommend-list');
+            listContainer.innerHTML = '';
+
+            // 랜덤 셔플 후 3개 추출
+            const shuffled = [...items].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, 3);
+
+            selected.forEach(item => {
+                const shoppingUrl = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(item.name)}`;
+                
+                const card = document.createElement('a');
+                card.href = shoppingUrl;
+                card.target = "_blank";
+                card.rel = "noopener noreferrer";
+                card.className = "block bg-white border-2 border-black rounded-xl p-3 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-50 active:translate-y-0.5 transition-all";
+                
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="text-3xl bg-gray-100 p-2 rounded-lg border border-black">${item.emoji}</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold bg-black text-white px-1.5 py-0.5 rounded">${item.category}</span>
+                                <span class="text-[10px] text-gray-500 font-bold">네이버 쇼핑 ↗</span>
+                            </div>
+                            <h3 class="font-black text-sm text-black mt-1">${item.name}</h3>
+                            <p class="text-[11px] text-gray-600 mt-0.5 leading-snug">${item.reason}</p>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // 네비게이션 버튼 동작
+        function goHome() {
+            historyStack = ['screen-1'];
+            showScreen('screen-1');
+        }
+
+        function goBack() {
+            if (historyStack.length > 1) {
+                historyStack.pop();
+                const prev = historyStack[historyStack.length - 1];
+                showScreen(prev);
+            }
+        }
+
+        function openMenu() {
+            document.getElementById('screen-menu').classList.remove('hidden');
+        }
+
+        function closeMenu() {
+            document.getElementById('screen-menu').classList.add('hidden');
+        }
+    </script>
+<div id="expo-credit" role="note" aria-label="개발자 김윤아" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 김윤아</div>
+</body>
+</html>

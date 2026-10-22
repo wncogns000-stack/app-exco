@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>미니 플레인 - 취향 맞춤 세계 여행지 추천</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts & Lucide Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f1f5f9;
+    }
+    /* 스크롤바 숨기기 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+  <!-- 스마트폰 기기 외형 프레임 (세련된 화이트/실버 스마트폰 외형) -->
+  <div class="relative w-full max-w-[412px] h-[824px] bg-gradient-to-b from-sky-400 via-sky-300 to-blue-100 rounded-[48px] shadow-2xl border-[12px] border-slate-200 flex flex-col overflow-hidden text-slate-800">
+    
+    <!-- 상단 스피커 & 카메라 노치 영역 -->
+    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-6 bg-slate-200 rounded-b-2xl z-50 flex items-center justify-center">
+      <div class="w-12 h-1 bg-slate-400 rounded-full mb-1"></div>
+    </div>
+
+    <!-- 스마트폰 상단바 (시간, 날씨 퀵뷰) -->
+    <div class="pt-8 px-6 pb-2 flex justify-between items-center text-xs text-slate-700 font-bold z-10 bg-sky-400/30 backdrop-blur-sm">
+      <span id="statusBarTime">13:28</span>
+      <div class="flex items-center gap-1">
+        <span id="statusBarLocation">로딩 중...</span>
+        <span id="statusBarWeather">🌡️ --°C</span>
+      </div>
+    </div>
+
+    <!-- 메인 앱 콘텐츠 영역 -->
+    <div id="appContainer" class="flex-1 overflow-y-auto no-scrollbar px-6 pb-20 relative">
+      
+      <!-- ==========================================
+           STAGE 1: 시작 & 조건 선택 화면
+           ========================================== -->
+      <div id="stage1" class="block py-4">
+        <!-- 앱 로고 및 인트로 -->
+        <div class="text-center my-4">
+          <div class="inline-flex items-center justify-center w-14 h-14 bg-white rounded-3xl shadow-lg shadow-sky-300/50 mb-2 animate-bounce">
+            <i data-lucide="plane" class="w-9 h-9 text-sky-500"></i>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight text-white drop-shadow-[0_2px_4px_rgba(14,165,233,0.4)]">미니 플레인</h1>
+          <p class="text-[10px] text-sky-900 font-bold mt-0.5">Mini Plane • 뭉게구름 타고 떠나는 100선 세계 여행</p>
+        </div>
+
+        <!-- 실시간 날씨 및 날짜 요약 카드 -->
+        <div class="bg-white/90 backdrop-blur-md rounded-3xl p-4 mb-4 border border-white/50 shadow-md">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[10px] text-sky-600 font-extrabold uppercase tracking-wider">실시간 기상 감지</span>
+            <span class="text-[10px] text-slate-500 font-medium" id="currentDate">2026. 07. 21</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 id="weatherText" class="text-sm font-extrabold text-slate-800">날씨 정보를 수집 중입니다...</h2>
+              <p id="weatherRecommendText" class="text-[11px] text-slate-500 mt-0.5 font-medium leading-tight">날씨에 최적인 여행지를 계산할 준비를 합니다.</p>
+            </div>
+            <div id="weatherIconBig" class="text-2xl filter drop-shadow">🌎</div>
+          </div>
+        </div>
+
+        <!-- 질문 코너 -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-extrabold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] mb-1.5">
+              <span class="bg-white/30 text-sky-950 px-2 py-0.5 rounded-full text-[10px] font-black mr-1">Q1</span>어떤 분위기의 여행지를 선호해? (10종 분위기)
+            </label>
+            <!-- 10개 옵션을 슬림하게 보여줄 수 있는 grid-cols-2 레이아웃 -->
+            <div class="grid grid-cols-2 gap-2" id="preferenceContainer">
+              <button onclick="selectPref('city')" id="btn-pref-city" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🌆</div>
+                <div class="font-extrabold text-xs text-slate-800">트렌디 도시</div>
+                <div class="text-[9px] text-slate-500 leading-tight">쇼핑과 활기찬 도심</div>
+              </button>
+              <button onclick="selectPref('nature')" id="btn-pref-nature" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🌴</div>
+                <div class="font-extrabold text-xs text-slate-800">여유로운 자연</div>
+                <div class="text-[9px] text-slate-500 leading-tight">해변 휴양과 숲속 힐링</div>
+              </button>
+              <button onclick="selectPref('history')" id="btn-pref-history" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🏰</div>
+                <div class="font-extrabold text-xs text-slate-800">문화 & 역사</div>
+                <div class="text-[9px] text-slate-500 leading-tight">세계 유적지와 역사 탐방</div>
+              </button>
+              <button onclick="selectPref('adventure')" id="btn-pref-adventure" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🌋</div>
+                <div class="font-extrabold text-xs text-slate-800">액티브 어드벤처</div>
+                <div class="text-[9px] text-slate-500 leading-tight">대자연과 이색 탐험</div>
+              </button>
+              <button onclick="selectPref('gourmet')" id="btn-pref-gourmet" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🍕</div>
+                <div class="font-extrabold text-xs text-slate-800">맛있는 먹방</div>
+                <div class="text-[9px] text-slate-500 leading-tight">길거리 간식과 맛집 투어</div>
+              </button>
+              <button onclick="selectPref('themepark')" id="btn-pref-themepark" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🎡</div>
+                <div class="font-extrabold text-xs text-slate-800">판타지 파크</div>
+                <div class="text-[9px] text-slate-500 leading-tight">꿈과 상상의 놀이공원</div>
+              </button>
+              <button onclick="selectPref('shopping')" id="btn-pref-shopping" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🛍️</div>
+                <div class="font-extrabold text-xs text-slate-800">쇼핑 & 마켓</div>
+                <div class="text-[9px] text-slate-500 leading-tight">예쁜 소품샵과 플리마켓</div>
+              </button>
+              <button onclick="selectPref('art')" id="btn-pref-art" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🎨</div>
+                <div class="font-extrabold text-xs text-slate-800">예술 & 미술관</div>
+                <div class="text-[9px] text-slate-500 leading-tight">미술 작품과 디자인 감성</div>
+              </button>
+              <button onclick="selectPref('relax')" id="btn-pref-relax" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">♨️</div>
+                <div class="font-extrabold text-xs text-slate-800">힐링 & 온천</div>
+                <div class="text-[9px] text-slate-500 leading-tight">전통 온천과 노천탕 스파</div>
+              </button>
+              <button onclick="selectPref('space')" id="btn-pref-space" class="pref-btn p-2.5 bg-white/80 border-2 border-transparent hover:border-sky-400 rounded-2xl text-left transition duration-200 shadow-sm">
+                <div class="text-lg mb-0.5">🚀</div>
+                <div class="font-extrabold text-xs text-slate-800">우주 & 과학</div>
+                <div class="text-[9px] text-slate-500 leading-tight">NASA와 미래 가상 과학관</div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-extrabold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] mb-2">
+              <span class="bg-white/30 text-sky-950 px-2.5 py-1 rounded-full text-xs font-black mr-2">Q2</span>누구와 함께 가고 싶어?
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="selectCompanion('solo')" id="btn-comp-solo" class="comp-btn py-3 bg-white/80 border border-transparent rounded-2xl text-xs font-bold text-slate-700 hover:border-sky-400 transition shadow-sm">🙋‍♂️ 나홀로</button>
+              <button onclick="selectCompanion('friends')" id="btn-comp-friends" class="comp-btn py-3 bg-white/80 border border-transparent rounded-2xl text-xs font-bold text-slate-700 hover:border-sky-400 transition shadow-sm">👥 친구와</button>
+              <button onclick="selectCompanion('family')" id="btn-comp-family" class="comp-btn py-3 bg-white/80 border border-transparent rounded-2xl text-xs font-bold text-slate-700 hover:border-sky-400 transition shadow-sm">👨‍👩‍👧 가족과</button>
+              <button onclick="selectCompanion('partner')" id="btn-comp-partner" class="comp-btn py-3 bg-white/80 border border-transparent rounded-2xl text-xs font-bold text-slate-700 hover:border-sky-400 transition shadow-sm">👩‍❤️‍👨 연인과</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 매칭 시작 버튼 -->
+        <button onclick="startAnalysis()" class="w-full mt-6 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-black py-4 px-6 rounded-2xl shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2 transition duration-200">
+          <span>나만의 비행기 띄우기</span>
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- ==========================================
+           STAGE 2: 데이터 분석 중 로딩 화면
+           ========================================== -->
+      <div id="stage2" class="hidden py-16 text-center">
+        <div class="relative w-36 h-36 mx-auto mb-10">
+          <!-- 비행기 회전 애니메이션 -->
+          <div class="absolute inset-0 rounded-full border-4 border-dashed border-white/60 animate-[spin_8s_linear_infinite]"></div>
+          <div class="absolute inset-2 rounded-full border-2 border-white/20"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i data-lucide="plane-takeoff" class="w-16 h-16 text-white drop-shadow-md animate-pulse"></i>
+          </div>
+        </div>
+        
+        <h2 class="text-xl font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)] mb-2">실시간 취향 지도 분석 중...</h2>
+        <p class="text-xs text-sky-900 max-w-[280px] mx-auto leading-relaxed font-bold mb-6">
+          현재 날씨와 선택하신 여행 스타일을 수집하여 전 세계 100여 개 대형 여행지 데이터에서 최적의 추천 장소를 탐색 중입니다.
+        </p>
+
+        <!-- 진행 상황 로그창 (맑고 깨끗한 구름빛 테마) -->
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl p-4 text-left font-mono text-[11px] text-sky-700 space-y-1 h-32 overflow-hidden border border-white/50 shadow-sm">
+          <div id="logLine1">✓ 사용자 위치 감지 완료...</div>
+          <div id="logLine2" class="opacity-0">✓ 전 세계 100선 랜드마크 데이터 필터링...</div>
+          <div id="logLine3" class="opacity-0">✓ 청소년 최우수 안전 안심 여행등급 확인!</div>
+          <div id="logLine4" class="opacity-0">✓ 최고의 3대 매칭 여행지 선별 성공!</div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           STAGE 3: 추천 결과 화면
+           ========================================== -->
+      <div id="stage3" class="hidden py-4">
+        <div class="text-center mb-6">
+          <span class="inline-block bg-white text-sky-600 text-xs font-black px-3 py-1 rounded-full border border-sky-200 shadow-sm mb-2">큐레이션 성공!</span>
+          <h2 class="text-2xl font-black text-white drop-shadow">미니 플레인의 추천 목록</h2>
+          <p class="text-xs text-sky-900 font-bold mt-1">네가 좋아할 만한 맞춤 여행지를 엄선했어 ✈️</p>
+        </div>
+
+        <!-- 날씨 요약 칩 -->
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl p-3 mb-5 flex items-center justify-between text-xs border border-white/50 shadow-sm text-slate-700">
+          <div class="flex items-center gap-2">
+            <span class="text-base" id="resultWeatherEmoji">☀️</span>
+            <span class="font-extrabold text-slate-800" id="resultWeatherDesc">도착지 추천 기준</span>
+          </div>
+          <span class="text-sky-600 font-extrabold" id="weatherTip">따뜻한 나라 우선 추천</span>
+        </div>
+
+        <!-- 결과 카드 리스트 장소 (JS에서 렌더링) -->
+        <div id="resultList" class="space-y-4">
+          <!-- 카드 구조 동적 생성 예정 -->
+        </div>
+
+        <!-- 다시 하기 버튼 -->
+        <button onclick="resetApp()" class="w-full mt-6 bg-white/80 hover:bg-white text-sky-600 border border-sky-200 py-3.5 rounded-2xl text-xs font-black transition flex items-center justify-center gap-2 shadow-sm">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>처음부터 다시 추천받기</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 하단 스마트폰 내비게이션 바 (화이트/블루 테마) -->
+    <div class="absolute bottom-0 inset-x-0 h-16 bg-white border-t border-slate-100 flex items-center justify-around text-slate-500 z-50 px-4">
+      <!-- ☰ 메뉴 버튼 (알림창 팝업 기능) -->
+      <button onclick="toggleMenu()" class="flex flex-col items-center justify-center py-2 px-4 hover:text-sky-500 transition">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+        <span class="text-[9px] mt-1 font-bold">메뉴</span>
+      </button>
+      <!-- ⌂ 홈 버튼 (첫 페이지로 점프) -->
+      <button onclick="goToHome()" class="flex flex-col items-center justify-center py-2 px-4 hover:text-sky-500 transition">
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="text-[9px] mt-1 font-bold">홈</span>
+      </button>
+      <!-- ◁ 뒤로가기 버튼 -->
+      <button onclick="handleBackBtn()" class="flex flex-col items-center justify-center py-2 px-4 hover:text-sky-500 transition">
+        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        <span class="text-[9px] mt-1 font-bold">뒤로가기</span>
+      </button>
+    </div>
+
+    <!-- 모달: 메뉴 팝업 정보 -->
+    <div id="menuModal" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-6">
+      <div class="bg-white rounded-3xl w-full max-w-[320px] p-5 shadow-2xl border border-sky-100">
+        <h3 class="text-base font-black text-sky-600 mb-2 flex items-center gap-2">
+          <i data-lucide="info" class="w-5 h-5"></i>
+          <span>미니 플레인 정보</span>
+        </h3>
+        <p class="text-xs text-slate-600 leading-relaxed font-medium mb-4">
+          '미니 플레인'은 실시간 날짜, 시간, 현재 날씨 정보를 반영해 여행지를 엄선하는 스마트 트래블 플래너입니다. 안전하고 청소년 친화적인 청정 여행 데이터만 보유하고 있어요!
+        </p>
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center justify-between text-[11px] bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <span class="text-slate-500 font-bold">제작 버전</span>
+            <span class="text-sky-600 font-extrabold">v1.4 (100대 명소 모드)</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px] bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <span class="text-slate-500 font-bold">여행 풀 데이터</span>
+            <span class="text-emerald-600 font-extrabold">완벽 가동 중 (100개 명소)</span>
+          </div>
+        </div>
+        <button onclick="toggleMenu()" class="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-black py-3 rounded-2xl text-xs transition shadow-md shadow-sky-400/20">
+          닫기
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- 글로벌 상태 관리 ---
+    let currentStage = 1;
+    let selectedPreference = '';
+    let selectedCompanion = '';
+    
+    // 날씨 정보 기본 세팅
+    let weatherData = {
+      locationName: "서울",
+      temp: 24,
+      condition: "sunny",
+      isColdSeason: false, // 겨울 등 추운 시즌 여부
+      emoji: "☀️",
+      desc: "맑음"
+    };
+
+    // --- 수집된 고품질 전세계 여행지 풀 (중복 절대 없음, 10개 분위기별 완벽한 10개씩 매칭 총 100개 명소) ---
+    const travelDatabase = {
+      city: [
+        { name: "일본 도쿄", tempType: "mild", desc: "네온사인이 화려하고 디즈니랜드가 있어 볼거리가 넘치는 대표 도시야! 맛있는 디저트와 귀여운 캐릭터 샵이 가득해.", link: "도쿄" },
+        { name: "싱가포르", tempType: "warm", desc: "초록빛 나무들이 가득한 친환경 미래 도시! 가든스 바이 더 베이의 슈퍼트리 쇼와 유니버설 스튜디오는 최고의 선택이지.", link: "싱가포르" },
+        { name: "프랑스 파리", tempType: "mild", desc: "에펠탑이 눈앞에 반짝이는 낭만적인 도시야. 센강을 따라 걷거나 예술 작품이 가득한 박물관에 방문하면 영화 속 주인공이 된 느낌!", link: "프랑스 파리" },
+        { name: "미국 뉴욕", tempType: "mild", desc: "타임스스퀘어의 화려한 전광판과 브로드웨이 뮤지컬이 반겨주는 도시의 심장! 센트럴 파크에서 자전거 타기도 너무 신나.", link: "뉴욕 센트럴파크" },
+        { name: "영국 런던", tempType: "mild", desc: "빨간 2층 버스를 타고 빅벤과 타워브리지를 구경해보자! 해리포터 스튜디오는 평생 잊지 못할 마법 같은 추억을 줄 거야.", link: "영국 런던" },
+        { name: "대만 타이베이", tempType: "warm", desc: "야시장의 끝없는 길거리 음식 축제! 웅장한 타이베이 101 빌딩에서 도심 야경을 즐기고 버블티의 원조를 맛볼 수 있어.", link: "대만 타이베이" },
+        { name: "호주 시드니", tempType: "mild", desc: "돛 모양의 아름다운 오페라 하우스와 넓고 푸른 달링하버가 매력적인 항구도시야. 도심과 바로 연결된 본다이 비치도 있어.", link: "호주 시드니" },
+        { name: "아랍에미리트 두바이", tempType: "warm", desc: "세계에서 가장 높은 부르즈 할리파와 엄청난 규모의 분수 쇼가 있는 곳! 모래사막 투어와 초현대적인 건물들이 조화를 이뤄.", link: "두바이" },
+        { name: "홍콩", tempType: "warm", desc: "빅토리아 피크에서 내려다보는 환상적인 야경과 짜릿한 트램 여행! 디즈니랜드와 길거리 딤섬 투어로 하루 종일 바쁜 도시야.", link: "홍콩" },
+        { name: "태국 방콕", tempType: "warm", desc: "금빛 찬란한 왕궁들과 화려한 쇼핑몰이 공존하는 역동적인 메트로폴리스! 맛있는 팟타이와 야시장의 시끌벅적한 재미가 쏠쏠해.", link: "태국 방콕" }
+      ],
+      nature: [
+        { name: "미국 하와이", tempType: "warm", desc: "와이키키 해변의 푸른 파도를 보며 훌라춤을 배워보자! 따뜻한 날씨와 멋진 야자수 아래에서 완벽한 휴식을 취할 수 있어.", link: "하와이" },
+        { name: "인도네시아 발리", tempType: "warm", desc: "신들의 섬이라 불리는 곳으로 초록빛 논 뷰와 눈부신 해변이 반겨줘. 해질녘 붉게 물드는 바다를 보며 힐링할 수 있단다.", link: "인도네시아 발리" },
+        { name: "필리핀 보라카이", tempType: "warm", desc: "새하얀 밀가루 같은 화이트 비치와 맑고 투명한 바다가 펼쳐진 지상낙원! 바다 위에서 즐기는 돛단배 투어는 정말 환상적이야.", link: "보라카이" },
+        { name: "스위스 인터라켄", tempType: "cold", desc: "알프스산맥의 웅장한 만년설을 바라보며 기차 여행을 해봐. 동화 속에서 튀어나온 것 같은 맑은 호수와 초원이 눈을 사로잡을 거야.", link: "스위스 인터라켄" },
+        { name: "베트남 다낭", tempType: "warm", desc: "길게 뻗은 미케 비치와 바나힐 테마파크의 거대한 '골든 브릿지'가 있는 곳! 밤마다 용다리에서 펼쳐지는 물·불꽃 쇼도 볼거리야.", link: "베트남 다낭" },
+        { name: "몰디브", tempType: "warm", desc: "에메랄드빛 투명한 바다 위에 지어진 수상 가옥에서 아침을 시작해봐. 아기 상어와 알록달록 열대어들이 발밑으로 지나다녀.", link: "몰디브" },
+        { name: "일본 홋카이도", tempType: "cold", desc: "겨울에는 새하얀 눈의 나라, 여름에는 알록달록 라벤더 꽃밭이 펼쳐지는 매력적인 자연 명소! 따끈한 온천 여행으로 몸도 맘도 힐링해.", link: "홋카이도" },
+        { name: "뉴질랜드 퀸스타운", tempType: "cold", desc: "반지 속 세계 같은 맑은 와카티푸 호수와 웅장한 설산들이 둘러싸고 있는 레포츠의 천국! 평화로운 자연 속에서 깊은 호흡을 해봐.", link: "뉴질랜드 퀸스타운" },
+        { name: "괌", tempType: "warm", desc: "남태평양의 따뜻하고 고요한 파도가 치는 아름다운 섬이야. 돌고래 투어를 떠나 바다 위로 뛰어오르는 돌고래 가족을 만나봐!", link: "괌" },
+        { name: "캐나다 밴프 국립공원", tempType: "cold", desc: "보석 같은 에메랄드빛 루이스 호수와 로키산맥의 하얀 침엽수림이 장관을 이뤄! 보는 순간 가슴이 뻥 뚫리는 대자연의 극치지.", link: "캐나다 밴프" }
+      ],
+      history: [
+        { name: "이탈리아 로마", tempType: "mild", desc: "걸어 다니는 곳곳이 전부 거대한 역사박물관이야! 콜로세움과 트레비 분수에서 동전을 던지며 소원을 빌어볼 수 있어.", link: "이탈리아 로마" },
+        { name: "이집트 카이로", tempType: "warm", desc: "책으로만 보던 신비로운 피라미드와 스핑크스를 내 눈으로 직접 마주하는 경이로운 순간! 고대 문명의 미스터리를 탐험해봐.", link: "이집트 피라미드" },
+        { name: "그리스 아테네", tempType: "mild", desc: "파르테논 신전의 거대한 기둥 아래 서서 신들의 이야기를 들어봐. 인류 민주주의와 철학의 시발점에서 지식을 가득 채워갈 수 있어.", link: "그리스 아테네" },
+        { name: "페루 마추픽추", tempType: "mild", desc: "안데스산맥 해발 2,400m에 숨겨진 공중도시! 잉카 문명의 신비함과 그 자리를 지키는 귀여운 라마들이 너를 반겨줄 거야.", link: "마추픽추" },
+        { name: "캄보디아 시엠립", tempType: "warm", desc: "거대한 밀림 속에 웅장하게 서 있는 신비로운 앙코르와트 사원이야. 붉은 저녁노을이 사원 뒤로 지는 풍경은 최고의 감동을 선사해.", link: "앙코르와트" },
+        { name: "중국 베이징", tempType: "mild", desc: "우주에서도 보인다는 거대한 만리장성을 걷고, 황제들의 거처였던 웅장한 자금성을 탐방하며 오랜 아시아 역사의 품격을 느껴봐.", link: "중국 자금성" },
+        { name: "터키 이스탄불", tempType: "mild", desc: "동양과 서양이 만나는 아시아와 유럽의 교차로! 아야 소피아 성당의 웅장한 돔과 밤하늘을 수놓는 모스크들의 조화가 신비로워.", link: "터키 이스탄불" },
+        { name: "멕시코 치첸이차", tempType: "warm", desc: "고대 마야 문명의 정교한 피라미드 '엘 카스티요'가 있는 역사지구야. 계단 개수가 1년의 날짜를 의미하는 정교한 수학적 역사 명소!", link: "치첸이차" },
+        { name: "스페인 그라나다", tempType: "mild", desc: "이슬람 문화와 유럽의 예술이 어우러진 알함브라 궁전이 가득한 곳! 섬세한 레이스 장식 같은 궁전 벽면과 정원 분수들이 너무 아름다워.", link: "스페인 그라나다" },
+        { name: "일본 교토", tempType: "mild", desc: "천년의 역사를 품은 고요한 목조건물들과 붉은 신사 기둥의 긴 터널! 조용하고 평화로운 분위기 속에서 고풍스러운 역사를 즐겨봐.", link: "일본 교토" }
+      ],
+      adventure: [
+        { name: "남아프리카공화국 케이프타운", tempType: "mild", desc: "테이블처럼 납작한 모양의 테이블 마운틴에 올라가보고, 볼더스 해변에서 야생 펭귄들과 나란히 걸어볼 수 있는 초이색 모험지!", link: "케이프타운 볼더스해변" },
+        { name: "미국 그랜드 캐니언", tempType: "mild", desc: "수억 년의 세월 동안 깎아 내려진 거대한 붉은색 협곡의 장엄함! 경비행기를 타거나 유리로 된 전망대 위를 걷는 심장 쫄깃한 체험!", link: "그랜드 캐니언" },
+        { name: "아이슬란드 레이캬비크", tempType: "cold", desc: "하늘을 수놓는 초록빛 신비로운 오로라를 직접 사냥하러 가자! 부글부글 끓는 간헐천과 얼어붙은 빙하 하이킹이 기다리고 있어.", link: "아이슬란드 오로라" },
+        { name: "케냐 나이로비 야생사파리", tempType: "warm", desc: "야생 동물의 낙원! 오픈카를 타고 초원을 누비며 사자, 코끼리, 기린들이 자유롭게 뛰어노는 진짜 자연을 바로 곁에서 탐험해.", link: "케냐 사파리" },
+        { name: "칠레 파타고니아", tempType: "cold", desc: "남미 대륙 최남단, 거대하고 날카로운 화강암 봉우리와 푸른 빙하를 탐험하는 트래킹! 탐험가들의 심장을 뛰게 만드는 끝판왕 명소야.", link: "파타고니아 토레스델파이네" },
+        { name: "호주 그레이트 배리어 리프", tempType: "warm", desc: "우주에서도 보이는 지구 최대 규모의 산호초 지대! 바닷속으로 들어가 거대한 바다거북, 알록달록 니모들과 수영하는 마법 같은 경험.", link: "그레이트 배리어 리프" },
+        { name: "볼리비아 우유니 소금사막", tempType: "mild", desc: "하늘과 땅의 경계가 사라지는 거대한 거울 같은 소금 호수! 인생 최고의 착시 사진을 찍고 밤하늘에 쏟아지는 은하수를 감상하자.", link: "우유니 소금사막" },
+        { name: "노르웨이 피오르드", tempType: "cold", desc: "빙하가 깎아 만든 아찔한 절벽과 깊고 푸른 바닷길을 크루즈를 타고 항해해보자! 숨이 막힐 듯한 자연의 웅장함을 마주하게 돼.", link: "노르웨이 피오르드" },
+        { name: "코스타리카 아레날", tempType: "warm", desc: "부글거리는 활화산 주변의 열대우림에서 집라인을 타고 정글 속을 질주해보자! 자연 온천과 신비로운 야생 동물을 가까이 만나요.", link: "코스타리카 아레날" },
+        { name: "네팔 포카라 (히말라야)", tempType: "cold", desc: "세계의 지붕 히말라야 설산을 정면으로 바라보며 즐기는 패러글라이딩! 구름 위를 날아다니며 세상 전체를 내려다보는 모험의 천국이야.", link: "네팔 포카라" }
+      ],
+      gourmet: [
+        { name: "일본 오사카", tempType: "mild", desc: "도톤보리의 거대한 게 간판 아래에서 따끈한 타코야키와 오코노미야키를 한입에 냠냠! 세상에서 가장 친숙하고 풍요로운 먹방 여행이야.", link: "오사카 도톤보리" },
+        { name: "이탈리아 나폴리", tempType: "mild", desc: "화덕에서 갓 구워내 겉은 바삭하고 속은 쫄깃하게 늘어나는 진짜 치즈 피자의 고향! 토마토와 바질의 향긋함이 환상적이야.", link: "나폴리 피자" },
+        { name: "대만 타이난", tempType: "warm", desc: "백 년 전통의 우육면과 야시장의 달콤한 탕후루, 망고 빙수가 끊임없이 위장을 두드리는 곳! 맛있는 음식을 사랑하는 이에겐 천국 같은 곳이야.", link: "대만 타이난 야시장" },
+        { name: "프랑스 리옹", tempType: "mild", desc: "프랑스 요리의 진짜 미식 수도라 불리는 곳! 골목길의 보물 같은 레스토랑에서 입안에 사르르 녹는 정통 크레페와 달콤한 타르트를 맛봐.", link: "프랑스 리옹 미식" },
+        { name: "말레이시아 페낭", tempType: "warm", desc: "길거리 가득 고소한 냄새가 진동하는 아시아 최대의 야외 푸드 스퀘어! 볶음 국수인 차콰이테오와 달콤한 연유 차인 떼따릭은 필수야.", link: "페낭 켄벨스트리트" },
+        { name: "태국 치앙마이", tempType: "warm", desc: "숲이 우거진 평화로운 분위기 속에서 고소하고 살짝 매콤한 코코넛 카레 국수 '카오소이'를 호르륵! 이국적이고 매력적인 디저트도 가득해.", link: "치앙마이 야시장" },
+        { name: "베트남 하노이", tempType: "warm", desc: "초록빛 호숫가를 바라보며 숯불 향이 가득 밴 진정한 오리지널 분짜와 부드러운 쌀국수를 후후 불며 맛보는 정겨운 미식 투어야.", link: "하노이 호안끼엠" },
+        { name: "대한민국 제주도", tempType: "mild", desc: "푸른 바다를 보며 쫄깃한 전복죽과 고소한 흑돼지구이, 새콤달콤한 생귤 아이스크림까지! 우리나라 최고의 힐링 먹거리 섬이 아닐까?", link: "제주도 동문시장" },
+        { name: "스페인 바르셀로나", tempType: "mild", desc: "지중해 햇살 아래 싱싱한 해산물이 듬뿍 올라간 대형 파에야(철판 볶음밥)와 갓 튀긴 바삭한 츄러스에 진한 초콜릿을 찍어 먹어봐!", link: "바르셀로나 보케리아시장" },
+        { name: "중국 청두", tempType: "warm", desc: "매콤하고 얼얼한 사천 마라훠궈의 진정한 본고장! 입안이 얼얼할 때 달콤하고 촉촉한 꿀 떡과 자스민 티로 달콤하게 마무리해봐.", link: "청두 관자이샹즈" }
+      ],
+      themepark: [
+        { name: "미국 올랜도 디즈니월드", tempType: "warm", desc: "지구상에서 가장 거대한 테마파크이자 동화 속 성들이 그대로 모인 곳! 매일 밤 하늘을 보석처럼 수놓는 마법 불꽃놀이를 감상해.", link: "올랜도 디즈니월드" },
+        { name: "일본 오사카 유니버설 스튜디오", tempType: "mild", desc: "해리포터의 웅장한 마법 성부터 슈퍼 마리오 카트 레이싱까지! 영화 속 환상이 온몸으로 느껴지는 아드레날린 폭발 테마파크야.", link: "유니버설 스튜디오 재팬" },
+        { name: "싱가포르 센토사 유니버설", tempType: "warm", desc: "따뜻한 야자수 아래 자리 잡은 아담하고 알찬 테마파크! 트랜스포머의 실감 나는 3D 질주와 잃어버린 세계 공룡 탐험을 해봐.", link: "싱가포르 유니버설 스튜디오" },
+        { name: "프랑스 파리 디즈니랜드", tempType: "mild", desc: "유럽 특유의 분홍빛 아기자기한 잠자는 숲속의 미녀 성이 있는 곳! 클래식하고 아름다운 퍼레이드가 눈앞에서 둥실둥실 펼쳐져.", link: "파리 디즈니랜드" },
+        { name: "독일 유로파 파크", tempType: "mild", desc: "유럽 각국의 문화를 짜릿한 롤러코스터와 아기자기한 테마 구역으로 재현한 곳! 전 세계 놀이기구 마니아들이 꿈꾸는 숨은 낙원이야.", link: "유로파 파크" },
+        { name: "미국 LA 식스 플래그", tempType: "warm", desc: "스릴 넘치고 무중력을 느낄 수 있는 세계 최강 수준의 거대한 롤러코스터들이 산 전체에 깔려 있어! 짜릿한 전율을 사랑한다면 필수 코스.", link: "식스플래그 매직마운틴" },
+        { name: "덴마크 빌룬 레고랜드", tempType: "cold", desc: "모든 세상이 조그만 레고 블록으로 정교하게 세워진 동화 같은 장소! 어른아이 할 것 없이 레고 속 캐릭터가 되어 흥미진진하게 탐험해.", link: "빌룬 레고랜드" },
+        { name: "미국 올랜도 유니버설", tempType: "warm", desc: "실제 영화 세트장 같은 웅장한 다이애건 앨리 골목과 불을 뿜는 거대한 용! 상상조차 불가능했던 환상이 리얼하게 구현된 테마파크지.", link: "올랜도 유니버설 스튜디오" },
+        { name: "대한민국 용인 에버랜드", tempType: "mild", desc: "세계 최고의 경사도를 자랑하는 나무 롤러코스터 T-익스프레스와 귀여운 판다 가족들이 뒹구는 판다월드가 있는 우리나라 넘버원 테마파크!", link: "용인 에버랜드" },
+        { name: "스웨덴 고텐버그 리세베리", tempType: "cold", desc: "유럽에서 가장 아름다운 정원과 함께 어우러진 클래식 테마파크! 밤이 되면 수만 개의 노란 전구들이 반짝이는 환상적인 야경이 연출돼.", link: "리세베리" }
+      ],
+      shopping: [
+        { name: "프랑스 파리 샹젤리제", tempType: "mild", desc: "세련된 백화점과 명문 베이커리 숍이 멋지게 늘어선 곳! 아름다운 개선문 아래서 세계 트렌드의 정점을 구경할 수 있어.", link: "샹젤리제 거리" },
+        { name: "태국 방콕 짜뚜짝 시장", tempType: "warm", desc: "주말마다 열리는 세계 최대 규모의 거대 플리마켓! 알록달록 수공예품, 예쁜 옷과 간식이 끝도 없이 펼쳐져 구경하는 재미가 가득해.", link: "짜뚜짝 주말시장" },
+        { name: "일본 도쿄 하라주쿠", tempType: "mild", desc: "개성 넘치는 팬시 소품샵과 알록달록 생과일 크레페 매장이 가득한 거리! 청소년 트렌드 패션의 발상지로 매일 축제 같은 느낌이야.", link: "하라주쿠 다케시타 스트리트" },
+        { name: "미국 괌 아웃렛", tempType: "warm", desc: "푸른 바다 옆에서 면세 혜택으로 다양한 의류와 예쁜 가방, 학용품을 신나게 득템할 수 있는 쇼핑의 오아시스 같은 곳이야.", link: "괌 프리미어 아울렛" },
+        { name: "홍콩 몽콕 레이디스 마켓", tempType: "warm", desc: "활기찬 홍콩 도심 한복판에 자리 잡은 명물 야시장! 장난감, 귀여운 모형, 수제 기념품들이 가득해서 지갑을 조심해야 해.", link: "레이디스 마켓" },
+        { name: "영국 런던 포토벨로 마켓", tempType: "mild", desc: "영화 노팅힐 속에 나온 예쁜 파스텔톤 가옥들이 쭉 늘어선 골목길! 고풍스러운 수제 망원경, 빈티지 뱃지 등 특별한 수집품들이 가득해.", link: "포토벨로 로드 마켓" },
+        { name: "이탈리아 밀라노 갤러리아", tempType: "mild", desc: "하늘이 다 보이는 거대한 역사적 유리 돔 지붕 아래, 세계 최고 장인들의 화려한 명품 상점이 가득 모여있는 웅장하고 예술적인 쇼핑몰이야.", link: "비토리오 에마누엘레 2세 갤러리아" },
+        { name: "싱가포르 오차드 로드", tempType: "warm", desc: "수많은 대형 몰들이 지하 도로로 시원하게 이어지는 미래도시형 쇼핑가! 멋진 가로수와 야간 레이저 조명이 어우러져 매혹적이야.", link: "오차드 로드" },
+        { name: "미국 뉴욕 5번가", tempType: "mild", desc: "장난감들의 궁전인 거대 인형 매장 FAO 슈바르츠와 첨단 애플스토어가 조화롭게 공존하는, 전 세계에서 가장 활기 넘치는 대변혁의 쇼핑 거리야.", link: "뉴욕 5번가" },
+        { name: "대만 타이베이 시먼딩", tempType: "warm", desc: "타이베이의 명동이라 불리는 화려한 젊음의 거리! 유명 캐릭터 컬래버 숍과 즉석 버블티 가게들이 끝도 없이 펼쳐지는 신나는 장소야.", link: "시먼딩" }
+      ],
+      art: [
+        { name: "프랑스 파리 루브르 박물관", tempType: "mild", desc: "신비롭게 미소 짓는 모나리자와 눈부신 밀로의 비너스 조각상! 유리 피라미드 내부에서 찬란하게 빛나는 인류 최고의 예술 역사를 만나봐.", link: "루브르 박물관" },
+        { name: "미국 뉴욕 현대미술관 MoMA", tempType: "mild", desc: "빈센트 반 고흐의 원작 '별이 빛나는 밤'의 환상적인 붓 터치를 정면에서 감상하고, 상상력이 가득 차오르는 독특한 미디어 아트를 즐겨봐.", link: "뉴욕 현대미술관" },
+        { name: "네덜란드 반고흐 미술관", tempType: "mild", desc: "평생 불꽃같은 예술 열정을 불태웠던 거장 고흐의 아름다운 '해바라기'와 아몬드 나무 그림들이 가득 모여있는 아름답고 뭉클한 전시장이야.", link: "반 고흐 미술관" },
+        { name: "영국 런던 대영박물관", tempType: "mild", desc: "인류 역사 문명의 출발점을 보여주는 이집트 미라와 미스터리한 로제타스톤이 전시된 곳! 거대한 유리 천장이 아름다운 세계 최고 전시관이야.", link: "대영박물관" },
+        { name: "일본 도쿄 지브리 미술관", tempType: "mild", desc: "이웃집 토토로가 거대한 인형으로 마중을 나오고, 센과 치히로의 비밀 설계도를 엿볼 수 있는 동화 속에서 튀어나온 마법 미술관이야.", link: "미타카의 숲 지브리 미술관" },
+        { name: "이탈리아 피렌체 우피치 미술관", tempType: "mild", desc: "교과서에서나 보았던 보티첼리의 대작 '비너스의 탄생'이 거대한 벽면을 수놓은 곳! 중세 르네상스 예술의 깊은 매력에 푹 빠져보자.", link: "우피치 미술관" },
+        { name: "스페인 마드리드 프라도 미술관", tempType: "mild", desc: "스페인 황실이 수백 년간 수집해온 위대한 벨라스케스와 엘 그레코의 걸작들이 한자리에서 숨 쉬는, 고풍스럽고 장엄한 궁전 같은 전시장이야.", link: "프라도 미술관" },
+        { name: "오스트리아 빈 벨베데레 궁전", tempType: "mild", desc: "눈이 부시게 화려한 진짜 순금 가루를 발라 만든 구스타프 클림트의 '키스' 진품을 감상하고, 아름다운 바로크식 정원을 우아하게 산책해봐.", link: "벨베데레 궁전" },
+        { name: "러시아 에르미타주 미술관", tempType: "cold", desc: "실제 러시아 황제가 머물렀던 눈부신 에메랄드빛 겨울 궁전 안에 수백만 점의 거대 명화와 보석들이 가득 찬 세계에서 가장 화려한 소장처야.", link: "에르미타주 미술관" },
+        { name: "대한민국 서울 리움미술관", tempType: "mild", desc: "도심 속 멋진 건축 예술! 국보급 청자, 백자부터 백남준 작가의 전위적인 비디오 아트까지 전통과 미래가 공존하는 고급 미술 공간이야.", link: "리움미술관" }
+      ],
+      relax: [
+        { name: "일본 유후인 온천마을", tempType: "mild", desc: "김이 모락모락 피어오르는 긴린코 호수를 한 바퀴 돌고, 따끈한 노천탕 료칸에서 머리는 시원하고 몸은 뜨겁게 온천을 만끽하는 치유 명소야.", link: "유후인 온천" },
+        { name: "아이슬란드 블루라군", tempType: "cold", desc: "온통 하얀 눈으로 뒤덮인 화산 절벽 아래에서 뽀얗고 연한 에메랄드빛 온천물에 몸을 녹이는 환상적인 야외 힐링 천연 화산 온천탕이야.", link: "블루라군" },
+        { name: "헝가리 세체니 온천", tempType: "mild", desc: "유럽에서 가장 웅장한 바로크식 오궁전 마당에 들어선 거대 야외 온천 수영장! 현지인들과 물속에서 체스를 두며 우아하게 쉬어봐.", link: "세체니 온천" },
+        { name: "대만 베이투 유황온천", tempType: "warm", desc: "지하철역을 내리자마자 퍼지는 건강한 유황 향기와 펄펄 끓는 지열곡의 푸른 연기! 합리적인 가격에 피로를 풀 수 있는 정겨운 온천지야.", link: "베이투 지열곡" },
+        { name: "베트남 나트랑 머드 스파", tempType: "warm", desc: "자연이 준 선물! 따뜻하고 보들보들한 천연 머드가 한가득 채워진 욕조 안에 들어가 피부를 매끄럽게 가꾸고 스파를 즐길 수 있어.", link: "탑바 머드스파" },
+        { name: "일본 규슈 벳푸 지옥순례", tempType: "mild", desc: "마치 지옥처럼 붉고 푸른 기이한 온천 호수 8곳을 구경하고, 뜨거운 김으로 즉석에서 쪄낸 옥수수와 온천 달걀을 먹는 먹방 겸 힐링 온천 코스!", link: "벳푸 지옥순례" },
+        { name: "터키 파묵칼레 석회 온천", tempType: "mild", desc: "고대 로마 황제들이 찾던 하얀 요새 모양의 석회 테라스! 맑은 에메랄드빛 온천수가 흘러내리는 웅장한 천연 온천 계단에서 휴식을 즐겨봐.", link: "파묵칼레" },
+        { name: "인도네시아 우붓 정글 요가", tempType: "warm", desc: "맑게 지저귀는 정글 새소리와 시원한 계곡물 소리를 들으며 온몸을 스트레칭하는 평화롭고 건강한 친환경 자연 속 치유 여행지야.", link: "우붓 정글요가" },
+        { name: "뉴질랜드 로토루아 폴리네시안 스파", tempType: "cold", desc: "미네랄이 가득 든 미끈한 천연 온천수 탕에 앉아, 구름이 유유히 떠가는 평화로운 로토루아 호수를 수평선 너머로 바라보는 호사스런 휴식 스팟!", link: "폴리네시안 스파" },
+        { name: "태국 푸켓 해변 마사지 웰니스", tempType: "warm", desc: "찰싹거리는 파도 소리가 바로 귓가에 들리는 모래사장 위 야자수 그늘 아래서 향긋한 타이 아로마 스파를 받으며 꿀맛 같은 낮잠에 빠져봐.", link: "푸켓 웰니스스파" }
+      ],
+      space: [
+        { name: "미국 올랜도 케네디 우주센터", tempType: "warm", desc: "인류를 달로 보낸 실제 아폴로 11호 로켓의 엄청난 크기를 마주하고, 실제 우주왕복선 내부를 터치해보며 은하수 너머의 꿈을 설계해보자.", link: "케네디 우주센터" },
+        { name: "스위스 제른(CERN) 물리연구소", tempType: "cold", desc: "우주 빅뱅 직후의 물질을 찾기 위해 유럽 과학자들이 모인 지하 100m 거대 가속기 기지! 우주와 과학 발전의 심장을 관람해보자.", link: "유럽 입자 물리 연구소" },
+        { name: "영국 그리니치 천문대", tempType: "mild", desc: "지구 시각의 출발선인 세계 경도 0도 자오선 위에 두 발을 올려보고, 오랜 천문학 발전사를 보여주는 멋진 클래식 망원경들을 조우해봐.", link: "그리니치 천문대" },
+        { name: "미국 시카고 아들러 천문관", tempType: "mild", desc: "미국 최초의 역사적인 천문관으로 거대 돔 스크린을 통해 내 머리 위로 실감 나게 떨어지는 밤하늘의 오로라와 태양계를 리얼하게 관측해봐.", link: "아들러 천문관" },
+        { name: "일본 도쿄 미래과학관", tempType: "mild", desc: "축구공을 차는 인공지능 로봇 아시모와 인사를 나누고, 실시간 우주정거장에서 송출되는 아름다운 지구 모형 LED 돔을 직접 감상하자.", link: "일본 과학 미래관" },
+        { name: "독일 뮌헨 독일박물관", tempType: "mild", desc: "진짜 초기형 항공기, 증기기관차부터 실제 잠수함과 거대 인공위성 실물까지 과학 기술 발전사의 모든 발명품이 집약된 최대 과학 궁전이야.", link: "독일박물관" },
+        { name: "미국 휴스턴 스페이스 센터", tempType: "warm", desc: "실제 나사(NASA)의 통제 본부에 들어가 관제소 직원들의 의자를 만져보고, 우주에서 직접 가져온 반짝이는 월석(달의 돌)을 만지는 평생 이색 체험!", link: "휴스턴 우주센터" },
+        { name: "프랑스 툴루즈 우주 박물관", tempType: "mild", desc: "실제 크기의 55m 거대 아리안 5호 로켓 발사체가 야외 정원에 서 있는 곳! 우주 정거장 미르 내부로 직접 들어가 무중력 침대를 체험해보자.", link: "테마파크 시테 드 레스파스" },
+        { name: "캐나다 몬트리올 바이오돔", tempType: "cold", desc: "거대한 돔 형태의 미래형 생태 박물관 내부에서, 열대우림부터 남극 빙하 지역까지 지구의 사계절 기후와 생태 기술을 최첨단으로 경험해봐.", link: "몬트리올 바이오돔" },
+        { name: "대한민국 대전 국립중앙과학관", tempType: "mild", desc: "우리가 개발한 자기부상열차를 타고 공중에 붕 떠보고, 무한 상상실에서 첨단 IT 과학 원리를 재미있게 오감으로 놀며 배우는 국내 최고 과학 성지!", link: "국립중앙과학관" }
+      ]
+    };
+
+    // --- 초기 실행 코드 (DOM이 준비되면 실행) ---
+    window.onload = function() {
+      lucide.createIcons();
+      
+      const today = new Date();
+      const formattedDate = today.getFullYear() + ". " + 
+                            String(today.getMonth() + 1).padStart(2, '0') + ". " + 
+                            String(today.getDate()).padStart(2, '0');
+      document.getElementById('currentDate').innerText = formattedDate;
+
+      updateTime();
+      setInterval(updateTime, 60000);
+
+      fetchLiveWeatherAndLocation();
+    };
+
+    function updateTime() {
+      const now = new Date();
+      let hours = String(now.getHours()).padStart(2, '0');
+      let minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('statusBarTime').innerText = hours + ":" + minutes;
+    }
+
+    // --- 위치 획득 및 Open-Meteo API 실시간 날씨 조회 ---
+    function fetchLiveWeatherAndLocation() {
+      const locationText = document.getElementById('statusBarLocation');
+      const weatherText = document.getElementById('statusBarWeather');
+      const mainWeatherText = document.getElementById('weatherText');
+      const mainWeatherRec = document.getElementById('weatherRecommendText');
+      const weatherIconBig = document.getElementById('weatherIconBig');
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            try {
+              const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`);
+              const geoData = await geoResponse.json();
+              let myCity = geoData.address.city || geoData.address.province || geoData.address.county || "한국 어딘가";
+              myCity = myCity.replace("City", "").replace("Province", "").trim();
+              
+              const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`);
+              const weatherDataJson = await weatherResponse.json();
+              const currentTemp = Math.round(weatherDataJson.current_weather.temperature);
+              const weatherCode = weatherDataJson.current_weather.weathercode;
+              
+              let weatherEmoji = "☀️";
+              let weatherConditionDesc = "맑음";
+              let isCold = false;
+
+              if (currentTemp <= 10) {
+                isCold = true;
+              }
+
+              if ([1, 2, 3].includes(weatherCode)) {
+                weatherEmoji = "☁️";
+                weatherConditionDesc = "구름 조금";
+              } else if ([45, 48].includes(weatherCode)) {
+                weatherEmoji = "🌫️";
+                weatherConditionDesc = "안개";
+              } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weatherCode)) {
+                weatherEmoji = "🌧️";
+                weatherConditionDesc = "비";
+              } else if ([71, 73, 75, 77, 85, 86].includes(weatherCode)) {
+                weatherEmoji = "❄️";
+                weatherConditionDesc = "눈";
+                isCold = true;
+              } else if ([95, 96, 99].includes(weatherCode)) {
+                weatherEmoji = "⚡";
+                weatherConditionDesc = "천둥번개";
+              }
+
+              weatherData = {
+                locationName: myCity,
+                temp: currentTemp,
+                condition: weatherConditionDesc,
+                isColdSeason: isCold,
+                emoji: weatherEmoji
+              };
+
+              locationText.innerText = "📍 " + myCity;
+              weatherText.innerText = `${weatherEmoji} ${currentTemp}°C`;
+              
+              mainWeatherText.innerText = `현재 ${myCity}은(는) ${weatherConditionDesc}! (${currentTemp}°C)`;
+              weatherIconBig.innerText = weatherEmoji;
+
+              if (isCold) {
+                mainWeatherRec.innerText = "❄️ 지금 꽤 쌀쌀하네! 미니 플레인이 따뜻한 남쪽 휴양지를 우선 배치해둘게.";
+              } else {
+                mainWeatherRec.innerText = "☘️ 여행 떠나기 완벽한 날씨야! 가고 싶은 스타일을 정해봐!";
+              }
+
+            } catch (err) {
+              console.error("날씨 정보 갱신 실패", err);
+              fallbackWeather("연결 끊김");
+            }
+          },
+          function(error) {
+            console.warn("위치 권한 차단됨 / 감지 불가. 기본 설정 적용", error);
+            fallbackWeather("날씨 정보 없음");
+          }
+        );
+      } else {
+        fallbackWeather("날씨 정보 없음");
+      }
+    }
+
+    function fallbackWeather(msg) {
+      document.getElementById('statusBarLocation').innerText = "📍 위치 차단됨";
+      document.getElementById('statusBarWeather').innerText = "🌡️ --°C";
+      document.getElementById('weatherText').innerText = "날씨 연동이 차단되어 있습니다.";
+      document.getElementById('weatherRecommendText').innerText = "내비게이션 설정에서 위치 정보 획득을 허용하면 정확한 날씨 맞춤 큐레이션이 가동돼!";
+      document.getElementById('weatherIconBig').innerText = "🗺️";
+      
+      weatherData = {
+        locationName: "미지",
+        temp: 15,
+        condition: "정보 없음",
+        isColdSeason: false,
+        emoji: "🗺️"
+      };
+    }
+
+    // --- 사용자의 취향 버튼 선택 로직 ---
+    function selectPref(pref) {
+      selectedPreference = pref;
+      
+      const buttons = document.querySelectorAll('.pref-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('border-sky-400', 'bg-white', 'ring-4', 'ring-sky-200/50');
+        btn.classList.add('border-transparent', 'bg-white/80');
+      });
+
+      const selectedBtn = document.getElementById('btn-pref-' + pref);
+      if (selectedBtn) {
+        selectedBtn.classList.remove('border-transparent', 'bg-white/80');
+        selectedBtn.classList.add('border-sky-400', 'bg-white', 'ring-4', 'ring-sky-200/50');
+      }
+    }
+
+    // 동반자 버튼 선택 로직
+    function selectCompanion(comp) {
+      selectedCompanion = comp;
+
+      const buttons = document.querySelectorAll('.comp-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('border-sky-400', 'bg-white', 'text-sky-600', 'ring-4', 'ring-sky-200/50');
+        btn.classList.add('border-transparent', 'bg-white/80', 'text-slate-700');
+      });
+
+      const selectedBtn = document.getElementById('btn-comp-' + comp);
+      if (selectedBtn) {
+        selectedBtn.classList.remove('border-transparent', 'bg-white/80', 'text-slate-700');
+        selectedBtn.classList.add('border-sky-400', 'bg-white', 'text-sky-600', 'ring-4', 'ring-sky-200/50');
+      }
+    }
+
+    // --- STAGE 2 로딩 과정 시뮬레이션 및 데이터 매칭 ---
+    function startAnalysis() {
+      if (!selectedPreference) {
+        showCustomAlert("앗! 여행지 분위기(Q1)를 먼저 하나 골라줘! ✈️");
+        return;
+      }
+      if (!selectedCompanion) {
+        showCustomAlert("누구와 함께 갈지(Q2)도 정해줄래? 👥");
+        return;
+      }
+
+      switchStage(2);
+
+      setTimeout(() => {
+        document.getElementById('logLine2').classList.remove('opacity-0');
+        document.getElementById('logLine2').classList.add('animate-pulse');
+      }, 700);
+
+      setTimeout(() => {
+        document.getElementById('logLine3').classList.remove('opacity-0');
+      }, 1500);
+
+      setTimeout(() => {
+        document.getElementById('logLine4').classList.remove('opacity-0');
+      }, 2300);
+
+      setTimeout(() => {
+        generateRecommendations();
+        switchStage(3);
+      }, 3000);
+    }
+
+    // --- 핵심 로직: 조건별 랜덤 큐레이션 알고리즘 ---
+    function generateRecommendations() {
+      let rawPool = [...travelDatabase[selectedPreference]];
+      
+      if (weatherData.isColdSeason) {
+        document.getElementById('resultWeatherEmoji').innerText = "❄️";
+        document.getElementById('resultWeatherDesc').innerText = `내 위치 기온 (${weatherData.temp}°C) 기준`;
+        document.getElementById('weatherTip').innerText = "따뜻한 도피처 추천 가동!";
+
+        const warmPlaces = rawPool.filter(p => p.tempType === 'warm');
+        if (warmPlaces.length >= 3) {
+          rawPool = warmPlaces;
+        }
+      } else {
+        document.getElementById('resultWeatherEmoji').innerText = weatherData.emoji;
+        document.getElementById('resultWeatherDesc').innerText = `현재 ${weatherData.locationName} 날씨 연동 중`;
+        document.getElementById('weatherTip').innerText = "최적의 밸런스 추천 완료!";
+      }
+
+      // 자바스크립트 랜덤 함수(Math.random())로 매번 무작위 셔플링하여 중복 절대 없이 매번 3개 추출
+      const shuffled = rawPool.sort(() => 0.5 - Math.random());
+      const finalSelection = shuffled.slice(0, 3);
+
+      const resultListContainer = document.getElementById('resultList');
+      resultListContainer.innerHTML = '';
+
+      finalSelection.forEach((place, index) => {
+        const companionWord = getCompanionWord(selectedCompanion);
+        
+        const recommendationReason = `네가 고른 아주 세련된 분위기에 딱 맞는 곳이야! ${companionWord} 함께 훌쩍 비행기 타고 떠나 멋진 추억을 만들기 가장 핫한 장소지. 지금 날씨와 매칭도 최고야! ✨`;
+
+        const card = document.createElement('div');
+        card.className = "bg-white/95 backdrop-blur-md rounded-3xl p-5 border border-sky-100 shadow-md flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-black uppercase tracking-widest text-sky-600 bg-sky-100 px-2.5 py-1 rounded-full">
+                추천 매칭 #${index + 1}
+              </span>
+              <span class="text-[10px] text-slate-400 flex items-center gap-1 font-bold">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> 안전성 검증
+              </span>
+            </div>
+            
+            <h3 class="text-lg font-black text-slate-800 flex items-center gap-1.5">
+              <span>${place.name}</span>
+              <span class="text-xs text-sky-600 font-bold">행 비행기</span>
+            </h3>
+            
+            <p class="text-xs text-slate-600 mt-2 line-clamp-3 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-100 font-medium">
+              ${place.desc}
+            </p>
+
+            <div class="mt-3 text-[11px] text-indigo-600 flex items-start gap-1 font-medium">
+              <span class="text-xs">💡</span>
+              <p class="italic leading-normal text-slate-500">${recommendationReason}</p>
+            </div>
+          </div>
+
+          <!-- 연결 버튼 영역 -->
+          <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100">
+            <!-- 지도 찾기 버튼 -->
+            <a href="https://map.naver.com/v5/search/${encodeURIComponent(place.link)}" target="_blank" rel="noopener noreferrer" 
+               class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-center py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-500"></i>
+              <span>네이버 지도</span>
+            </a>
+            <!-- 항공권 예약 버튼 -->
+            <a href="https://search.shopping.naver.com/search/all?query=${encodeURIComponent(place.name + ' 항공권')}" target="_blank" rel="noopener noreferrer"
+               class="bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white text-center py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition shadow-sm">
+              <i data-lucide="ticket" class="w-3.5 h-3.5"></i>
+              <span>항공권 검색</span>
+            </a>
+          </div>
+        `;
+        resultListContainer.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function getCompanionWord(comp) {
+      if (comp === 'solo') return '오롯이 혼자만의 자유를 즐기며';
+      if (comp === 'friends') return '소중한 친구들과 신나는 웃음소리를 나누며';
+      if (comp === 'family') return '사랑하는 가족들과 따뜻하고 든든하게';
+      if (comp === 'partner') return '소중하고 특별한 연인과 함께 가슴 설레고 로맨틱한 눈빛을 나누며';
+      return '사랑하는 동반자와';
+    }
+
+    // --- 스테이지 전환 매니저 ---
+    function switchStage(stageNum) {
+      currentStage = stageNum;
+      document.getElementById('stage1').style.display = (stageNum === 1) ? 'block' : 'none';
+      document.getElementById('stage2').style.display = (stageNum === 2) ? 'block' : 'none';
+      document.getElementById('stage3').style.display = (stageNum === 3) ? 'block' : 'none';
+    }
+
+    function resetApp() {
+      selectedPreference = '';
+      selectedCompanion = '';
+
+      const prefButtons = document.querySelectorAll('.pref-btn');
+      prefButtons.forEach(btn => btn.classList.remove('border-sky-400', 'bg-white', 'ring-4', 'ring-sky-200/50'));
+      const compButtons = document.querySelectorAll('.comp-btn');
+      compButtons.forEach(btn => btn.classList.remove('border-sky-400', 'bg-white', 'text-sky-600', 'ring-4', 'ring-sky-200/50'));
+
+      document.getElementById('logLine2').classList.add('opacity-0');
+      document.getElementById('logLine2').classList.remove('animate-pulse');
+      document.getElementById('logLine3').classList.add('opacity-0');
+      document.getElementById('logLine4').classList.add('opacity-0');
+
+      switchStage(1);
+    }
+
+    // --- 스마트폰 하단 네비게이션 기능 작동 ---
+    function goToHome() {
+      resetApp();
+    }
+
+    function handleBackBtn() {
+      if (currentStage === 3) {
+        switchStage(1);
+      } else if (currentStage === 2) {
+        switchStage(1);
+      } else {
+        showCustomAlert("현재 첫 화면입니다. 멋진 조건들을 골라 보세요! 🥰");
+      }
+    }
+
+    function toggleMenu() {
+      const modal = document.getElementById('menuModal');
+      if (modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function showCustomAlert(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = "fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[200] flex items-center justify-center p-6";
+      alertDiv.innerHTML = `
+        <div class="bg-white border border-sky-100 rounded-3xl p-5 w-full max-w-[280px] text-center shadow-2xl">
+          <p class="text-sm font-bold text-slate-800 mb-4 whitespace-pre-line">${message}</p>
+          <button id="closeAlertBtn" class="bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white font-black py-2.5 px-6 rounded-xl text-xs transition shadow-md shadow-sky-400/20">
+            확인
+          </button>
+        </div>
+      `;
+      document.body.appendChild(alertDiv);
+      
+      alertDiv.querySelector('#closeAlertBtn').onclick = function() {
+        document.body.removeChild(alertDiv);
+      };
+    }
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 하라온" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 하라온</div>
+</body>
+</html>

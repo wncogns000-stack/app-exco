@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta name="robots" content="noindex">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>spotsky - 날씨 맞춤 코디 앱</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;600;800&display=swap');
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f0fdf4;
+    }
+    .phone-container {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 10px solid #1e293b;
+      border-radius: 40px;
+    }
+    .sky-gradient {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
+    }
+    /* 커스텀 로딩 애니메이션 */
+    .pulse-sun {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15); opacity: 0.85; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4 bg-slate-900">
+
+  <!-- 스마트폰 Frame Container -->
+  <div class="phone-container w-full max-w-[390px] h-[780px] bg-slate-50 flex flex-col justify-between overflow-hidden relative shadow-2xl">
+    
+    <!-- 상단 상태바 (Status Bar) -->
+    <div class="bg-sky-500 text-white px-6 pt-3 pb-1 flex justify-between items-center text-xs z-20 font-medium">
+      <span id="current-time">12:00</span>
+      <div class="w-16 h-4 bg-slate-900 rounded-full mx-auto -mt-2 mb-1"></div> <!-- 노치 바 -->
+      <div class="flex items-center space-x-1.5">
+        <i class="fa-solid font-bold fa-wifi"></i>
+        <i class="fa-solid fa-battery-full"></i>
+      </div>
+    </div>
+
+    <!-- 앱 헤더 (스폿스카이 심볼 로고) -->
+    <header class="bg-sky-500 text-white px-4 py-3 flex items-center justify-between shadow-md z-10">
+      <div class="flex items-center space-x-2">
+        <!-- 아이의 아이디어 반영: 네모 상자 안의 반팔 옷 & 태양 로고 -->
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-inner relative overflow-hidden border-2 border-sky-200">
+          <i class="fa-solid fa-sun text-amber-400 text-sm absolute top-1 right-1 pulse-sun"></i>
+          <i class="fa-solid fa-shirt text-sky-500 text-xl mt-1"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-wider font-['Gowun_Dodum']">spotsky</h1>
+          <p class="text-[10px] text-sky-100">오늘 날씨엔 무슨 옷을 입을까?</p>
+        </div>
+      </div>
+      <button onclick="showMenuModal()" class="text-white hover:bg-sky-600 p-2 rounded-full transition">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+    </header>
+
+    <!-- 앱 메인 컨텐츠 영역 (화면 전환) -->
+    <main class="flex-1 overflow-y-auto sky-gradient p-4 relative" id="app-content">
+
+      <!-- ================= 1단계: 시작 및 정보 수집 화면 ================= -->
+      <div id="screen-1" class="flex flex-col h-full justify-between py-2">
+        
+        <!-- 중앙 대형 비주얼 상자 -->
+        <div class="bg-white/90 backdrop-blur rounded-2xl p-5 shadow-lg border border-sky-100 text-center">
+          <div class="mx-auto w-24 h-24 bg-sky-100 rounded-2xl border-4 border-sky-300 flex items-center justify-center relative mb-3 shadow-md">
+            <i class="fa-solid fa-sun text-amber-400 text-3xl absolute -top-2 -right-2 animate-bounce"></i>
+            <i class="fa-solid fa-shirt text-sky-600 text-5xl"></i>
+          </div>
+          <h2 class="text-xl font-bold text-slate-800 mb-1">spotsky 코디 가이드</h2>
+          <p class="text-xs text-slate-600">위치와 날씨를 바탕으로<br>딱 맞는 오늘의 옷을 찾아드려요!</p>
+        </div>
+
+        <!-- 실시간 위치 및 날씨 위젯 카드 -->
+        <div class="bg-white/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-sky-100">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold text-sky-700 flex items-center">
+              <i class="fa-solid fa-location-dot mr-1"></i> 실시간 날씨 정보
+            </span>
+            <button onclick="fetchWeatherData()" class="text-[11px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full hover:bg-sky-200 transition">
+              <i class="fa-solid fa-rotate-right mr-0.5"></i> 새로고침
+            </button>
+          </div>
+          
+          <div id="weather-box" class="flex items-center justify-between bg-sky-50 rounded-xl p-3 border border-sky-100">
+            <div class="text-left">
+              <p id="location-name" class="text-sm font-bold text-slate-700">위치 확인 중...</p>
+              <p id="weather-desc" class="text-xs text-slate-500">날씨 데이터를 가져오는 중입니다</p>
+            </div>
+            <div id="weather-temp" class="text-2xl font-extrabold text-sky-600">
+              --°C
+            </div>
+          </div>
+        </div>
+
+        <!-- 코디 취향 선택 및 시작 버튼 -->
+        <div class="space-y-3">
+          <div class="bg-white/80 backdrop-blur rounded-xl p-3 shadow-sm">
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-1"></i> 오늘 원하는 코디 스타일
+            </label>
+            <select id="style-select" class="w-full text-xs p-2 bg-white rounded-lg border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-400">
+              <option value="daily">편안한 데일리룩</option>
+              <option value="active">활동적인 캐주얼룩</option>
+              <option value="neat">깔끔하고 단정한 룩</option>
+            </select>
+          </div>
+
+          <button onclick="goToScreen2()" class="w-full bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 text-sm transition-all">
+            <span>오늘의 옷 추천받기</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ================= 2단계: AI 분석 중 로딩 화면 ================= -->
+      <div id="screen-2" class="hidden flex flex-col items-center justify-center h-full text-center py-8 space-y-6">
+        <div class="relative w-28 h-28 flex items-center justify-center">
+          <div class="absolute inset-0 border-4 border-sky-200 border-t-sky-500 rounded-full animate-spin"></div>
+          <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md">
+            <i class="fa-solid fa-shirt text-sky-500 text-3xl pulse-sun"></i>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-slate-800 mb-1">spotsky가 분석 중이에요!</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            현재 날씨와 선택하신 스타일을 조합해<br>
+            가장 어울리는 옷을 찾고 있습니다. ☀️👕
+          </p>
+        </div>
+      </div>
+
+      <!-- ================= 3단계: 결과 추천 화면 ================= -->
+      <div id="screen-3" class="hidden flex flex-col h-full justify-between py-1 space-y-3">
+        
+        <!-- 날씨 요약 헤더 카드 -->
+        <div class="bg-white/90 backdrop-blur rounded-xl p-3 shadow-md border border-sky-100 flex items-center justify-between">
+          <div class="text-left">
+            <span class="text-[10px] font-bold uppercase bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full">맞춤 큐레이션</span>
+            <h3 id="result-weather-summary" class="text-xs font-bold text-slate-800 mt-1">오늘 날씨에 딱 맞춘 코디!</h3>
+          </div>
+          <div id="result-weather-icon" class="text-2xl">☀️</div>
+        </div>
+
+        <!-- 추천 결과 카드 리스트 (자바스크립트 생성) -->
+        <div class="flex-1 overflow-y-auto space-y-2.5 pr-0.5" id="recommendation-list">
+          <!-- 옷 카드들이 동적으로 여기에 들어갑니다 -->
+        </div>
+
+        <!-- 다시 추천받기 및 하단 버튼 -->
+        <div class="pt-1 space-y-2">
+          <button onclick="goToScreen2()" class="w-full bg-amber-400 hover:bg-amber-500 text-slate-800 font-bold py-2.5 rounded-xl shadow transition text-xs flex items-center justify-center space-x-1">
+            <i class="fa-solid fa-shuffle"></i>
+            <span>다른 코디 조합 다시보기</span>
+          </button>
+          <button onclick="goToScreen1()" class="w-full bg-white hover:bg-slate-50 text-slate-600 font-bold py-2 rounded-xl border border-slate-200 transition text-xs">
+            처음 화면으로 돌아가기
+          </button>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- 하단 스마트폰 네비게이션 바 (실제 작동) -->
+    <nav class="bg-slate-900 text-slate-400 py-3 px-8 flex justify-around items-center border-t border-slate-800 z-20">
+      <button onclick="showMenuModal()" class="hover:text-white transition active:scale-90" title="메뉴">
+        <i class="fa-solid fa-bars text-lg"></i>
+      </button>
+      <button onclick="goToScreen1()" class="hover:text-white transition active:scale-90" title="홈">
+        <i class="fa-solid fa-house text-lg"></i>
+      </button>
+      <button onclick="goBack()" class="hover:text-white transition active:scale-90" title="뒤로가기">
+        <i class="fa-solid fa-chevron-left text-lg"></i>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- 모달 창: 메뉴 및 설명 -->
+  <div id="menu-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-2xl text-center space-y-4">
+      <div class="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center mx-auto text-sky-500 text-2xl">
+        <i class="fa-solid fa-circle-info"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-800">spotsky 앱 정보</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        'spotsky'는 당신의 현재 위치와 날씨를 실시간으로 분석해 최고의 옷차림을 네이버 쇼핑과 함께 추천해 주는 똑똑한 앱입니다! 👕☀️
+      </p>
+      <button onclick="closeMenuModal()" class="w-full bg-sky-500 text-white font-bold py-2 rounded-xl text-xs hover:bg-sky-600 transition">
+        확인
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript 애플리케이션 로직 -->
+  <script>
+    // 현재 앱 상태 및 날씨 데이터
+    let currentScreen = 1;
+    let previousScreen = 1;
+    let currentTemp = 22; // 기본 온도 (섭씨)
+    let currentWeatherText = "맑음";
+    let currentLocationName = "위치 미확인";
+
+    // 넉넉한 6학년 눈높이 옷 데이터베이스 (미성년자 유해 품목 배제, 실용성 최우선)
+    const clothesDatabase = {
+      hot: [ // 28도 이상 무더움
+        { name: "냉감 쿨 반팔 티셔츠", icon: "fa-shirt", reason: "땀을 빠르게 흡수하고 시원함을 주는 반팔티예요!", category: "반팔티" },
+        { name: "린넨 숏 팬츠 (반바지)", icon: "fa-child-reaching", reason: "바람이 잘 통해 더운 날씨에 최고예요.", category: "반바지" },
+        { name: "오버핏 박시 반팔티", icon: "fa-shirt", reason: "통풍이 잘 되고 스타일리시하게 입을 수 있어요.", category: "반팔티" },
+        { name: "캐주얼 민소매 탑", icon: "fa-vest", reason: "시원하고 활동성이 매우 뛰어난 의상이에요.", category: "민소매" },
+        { name: "가벼운 린넨 반팔 셔츠", icon: "fa-shirt", reason: "단정하면서도 더위를 싹 날려주는 셔츠예요.", category: "반팔셔츠" },
+        { name: "스포티 쿨링 칠부 바지", icon: "fa-user-nurse", reason: "야외 활동 시 햇빛도 막고 시원해요.", category: "바지" },
+        { name: "스트라이프 린넨 원피스", icon: "fa-person-dress", reason: "하나만 입어도 시원하고 완성도 높은 코디!", category: "원피스" },
+        { name: "크롭 스타일 반팔티", icon: "fa-shirt", reason: "요즘 유행하는 트렌디하고 시원한 반팔입니다.", category: "반팔티" },
+        { name: "메쉬 스포티 반팔 티셔츠", icon: "fa-shirt", reason: "바람이 슝슝 통해 운동할 때도 좋아요.", category: "스포츠" },
+        { name: "냉감 와이드 밴딩 바지", icon: "fa-child-reaching", reason: "찰랑거리는 소재로 매우 편안하고 시원해요.", category: "바지" }
+      ],
+      warm: [ // 20도 ~ 27도 적당하고 선선함
+        { name: "순면 베이직 반팔 티셔츠", icon: "fa-shirt", reason: "오늘 같은 날씨에 가장 기본적이고 편한 의상이에요!", category: "반팔티" },
+        { name: "베이직 카라 반팔 셔츠", icon: "fa-shirt", reason: "깔끔한 느낌을 주고 단정한 스타일 연출이 가능해요.", category: "카라티" },
+        { name: "데님 팬츠 (청바지)", icon: "fa-child-reaching", reason: "어떤 상의와도 잘 어울리는 만능 청바지입니다.", category: "청바지" },
+        { name: "가벼운 칠부 소매 티셔츠", icon: "fa-shirt", reason: "너무 덥지도 춥지도 않은 딱 알맞은 소매 길이예요.", category: "칠부티" },
+        { name: "면 스판 카고 바지", icon: "fa-child-reaching", reason: "주머니가 많아 편하고 수납성도 뛰어난 주말룩!", category: "바지" },
+        { name: "루즈핏 얇은 긴팔 티셔츠", icon: "fa-shirt", reason: "햇빛을 가려주면서도 선선한 바람이 잘 통해요.", category: "긴팔티" },
+        { name: "캐주얼 슬랙스 바지", icon: "fa-child-reaching", reason: "핏이 돋보이고 댄디한 스타일을 만들어줍니다.", category: "슬랙스" },
+        { name: "반팔 체크 로브 셔츠", icon: "fa-shirt", reason: "티셔츠 위에 살짝 걸쳐 입기 좋은 셔츠예요.", category: "셔츠" },
+        { name: "스트리트 조거 팬츠", icon: "fa-child-reaching", reason: "편안함과 활동성을 동시에 챙긴 트레이닝 바지예요.", category: "바지" },
+        { name: "린넨 혼방 레이어드 원피스", icon: "fa-person-dress", reason: "화사한 느낌을 가득 전해주는 코디입니다.", category: "원피스" }
+      ],
+      cool: [ // 12도 ~ 19도 쌀쌀함
+        { name: "편안한 로고 맨투맨", icon: "fa-shirt", reason: "약간 쌀쌀한 날씨에 따뜻하게 체온을 유지해줘요.", category: "맨투맨" },
+        { name: "오버핏 후드 티셔츠", icon: "fa-user-ninja", reason: "모자를 쓸 수 있어 바람 불 때 유용한 귀여운 코디!", category: "후드티" },
+        { name: "데님 자켓 (청자켓)", icon: "fa-shirt", reason: "봄가을 느낌을 완벽하게 내는 멋진 아우터예요.", category: "아우터" },
+        { name: "스포티 바람막이 점퍼", icon: "fa-vest-patches", reason: "찬 바람을 효과적으로 막아주는 만능 점퍼입니다.", category: "아우터" },
+        { name: "니트 가디건", icon: "fa-shirt", reason: "부드럽고 따뜻해서 체온 조절에 아주 좋아요.", category: "가디건" },
+        { name: "트레이닝 집업 세트", icon: "fa-person-running", reason: "활동하기 좋고 간편하게 입기 편해요.", category: "집업" },
+        { name: "얇은 니트 스웨터", icon: "fa-shirt", reason: "포근하고 차분한 느낌을 전해주는 스웨터입니다.", category: "니트" },
+        { name: "스트릿 카고 팬츠", icon: "fa-child-reaching", reason: "맨투맨이나 후드티에 찰떡으로 잘 어울립니다.", category: "바지" },
+        { name: "캐주얼 체크 자켓", icon: "fa-shirt", reason: "단정해 보이고 단풍놀이나 나들이에 제격이에요.", category: "자켓" },
+        { name: "포근한 플리스 조끼", icon: "fa-vest", reason: "팔 움직임은 자유롭고 몸통은 따뜻하게 지켜줘요.", category: "조끼" }
+      ],
+      cold: [ // 11도 이하 추움
+        { name: "포근한 숏 패딩 점퍼", icon: "fa-snowflake", reason: "추운 날씨에 몸을 따뜻하게 보호해주는 패딩이에요!", category: "패딩" },
+        { name: "기모 라이닝 안감 후드티", icon: "fa-user-ninja", reason: "속에 포근한 기모가 들어있어 든든하게 따뜻합니다.", category: "후드티" },
+        { name: "울 믹스 겨울 코트", icon: "fa-shirt", reason: "추위도 막고 고급스러운 분위기를 연출해요.", category: "코트" },
+        { name: "모코모코 플리스 자켓 (양털)", icon: "fa-shirt", reason: "입는 순간 따스함이 전해지는 부드러운 자켓이에요.", category: "자켓" },
+        { name: "목폴라 터틀넥 니트", icon: "fa-shirt", reason: "목을 따뜻하게 감싸주어 감기를 예방해줍니다.", category: "니트" },
+        { name: "기모 트레이닝 바지", icon: "fa-child-reaching", reason: "하체를 따뜻하게 지켜주는 겨울 필수 아이템!", category: "바지" },
+        { name: "경량 패딩 조끼", icon: "fa-vest", reason: "코트나 점퍼 안에 겹쳐 입기 딱 좋습니다.", category: "패딩" },
+        { name: "기모 롱 원피스", icon: "fa-person-dress", reason: "따뜻하고 편안하게 겨울 스타일을 완성해줘요.", category: "원피스" },
+        { name: "헤비웨이트 기모 맨투맨", icon: "fa-shirt", reason: "두툼한 원단으로 추위를 완벽 차단해 줍니다.", category: "맨투맨" },
+        { name: "패딩 롱 점퍼", icon: "fa-snowflake", reason: "온몸을 감싸주는 가장 강력한 방한 아이템입니다.", category: "패딩" }
+      ]
+    };
+
+    // 실시간 시계 업데이트
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('current-time').innerText = `${hours}:${minutes}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 실시간 Geolocation & Open-Meteo 날씨 API 호출
+    function fetchWeatherData() {
+      const locationEl = document.getElementById('location-name');
+      const weatherDescEl = document.getElementById('weather-desc');
+      const tempEl = document.getElementById('weather-temp');
+
+      locationEl.innerText = "위치 탐색 중...";
+      weatherDescEl.innerText = "GPS 권한을 확인하고 있어요";
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            try {
+              // 1. Open-Meteo 무료 날씨 API 요청
+              const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+              const weatherData = await weatherRes.json();
+
+              // 2. 역지오코딩 API 요청 (위경도 -> 행정구역 명칭)
+              const geoRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`);
+              const geoData = await geoRes.json();
+
+              currentTemp = Math.round(weatherData.current_weather.temperature);
+              const weatherCode = weatherData.current_weather.weathercode;
+              
+              currentLocationName = geoData.city || geoData.locality || geoData.principalSubdivision || "현재 위치";
+              currentWeatherText = getWeatherDescription(weatherCode);
+
+              locationEl.innerText = currentLocationName;
+              weatherDescEl.innerText = `${currentWeatherText}`;
+              tempEl.innerText = `${currentTemp}°C`;
+
+            } catch (err) {
+              handleWeatherError("날씨 정보를 불러오지 못했어요.");
+            }
+          },
+          (error) => {
+            // 위치 권한 거부 또는 실패 시
+            handleWeatherError("날씨 정보 없음 (기본 추천 모드)");
+          },
+          { timeout: 7000 }
+        );
+      } else {
+        handleWeatherError("위치 서비스를 지원하지 않는 브라우저입니다.");
+      }
+    }
+
+    // 날씨 상태 코드 변환
+    function getWeatherDescription(code) {
+      if (code === 0) return "☀️ 맑음";
+      if (code >= 1 && code <= 3) return "⛅ 구름 조금";
+      if (code >= 45 && code <= 48) return "🌫️ 안개";
+      if (code >= 51 && code <= 67) return "🌧️ 비";
+      if (code >= 71 && code <= 77) return "❄️ 눈";
+      if (code >= 80 && code <= 82) return "🌦️ 소나기";
+      if (code >= 95) return "🌩️ 뇌우";
+      return "☀️ 쾌청함";
+    }
+
+    // 날씨 연동 실패 시 처리
+    function handleWeatherError(msg) {
+      document.getElementById('location-name').innerText = "날씨 정보 없음";
+      document.getElementById('weather-desc').innerText = msg;
+      document.getElementById('weather-temp').innerText = `${currentTemp}°C`;
+    }
+
+    // 화면 전환 함수
+    function goToScreen1() {
+      previousScreen = currentScreen;
+      currentScreen = 1;
+      document.getElementById('screen-1').classList.remove('hidden');
+      document.getElementById('screen-2').classList.add('hidden');
+      document.getElementById('screen-3').classList.add('hidden');
+    }
+
+    function goToScreen2() {
+      previousScreen = currentScreen;
+      currentScreen = 2;
+      document.getElementById('screen-1').classList.add('hidden');
+      document.getElementById('screen-2').classList.remove('hidden');
+      document.getElementById('screen-3').classList.add('hidden');
+
+      // 1.8초 로딩 분석 연출 후 3단계 결과 화면 이동
+      setTimeout(() => {
+        goToScreen3();
+      }, 1800);
+    }
+
+    function goToScreen3() {
+      previousScreen = currentScreen;
+      currentScreen = 3;
+      document.getElementById('screen-1').classList.add('hidden');
+      document.getElementById('screen-2').classList.add('hidden');
+      document.getElementById('screen-3').classList.remove('hidden');
+
+      generateRecommendations();
+    }
+
+    // 뒤로 가기 버튼 로직
+    function goBack() {
+      if (currentScreen === 3) {
+        goToScreen1();
+      } else if (currentScreen === 2) {
+        goToScreen1();
+      } else {
+        showMenuModal();
+      }
+    }
+
+    // 기온 조건에 따른 랜덤 2~3개 옷 추천 알고리즘 (Math.random)
+    function generateRecommendations() {
+      let pool = [];
+      let tempSummaryText = "";
+      let iconEmoji = "☀️";
+
+      if (currentTemp >= 28) {
+        pool = clothesDatabase.hot;
+        tempSummaryText = `${currentTemp}°C 무더운 날씨! 시원한 반팔과 통풍 옷 필수!`;
+        iconEmoji = "🔥";
+      } else if (currentTemp >= 20) {
+        pool = clothesDatabase.warm;
+        tempSummaryText = `${currentTemp}°C 딱 기분 좋은 날씨! 예쁜 반팔 코디 추천!`;
+        iconEmoji = "☀️";
+      } else if (currentTemp >= 12) {
+        pool = clothesDatabase.cool;
+        tempSummaryText = `${currentTemp}°C 선선한 바람! 가벼운 긴팔이나 가디건 추천!`;
+        iconEmoji = "🍂";
+      } else {
+        pool = clothesDatabase.cold;
+        tempSummaryText = `${currentTemp}°C 쌀쌀하고 추워요! 따뜻한 아우터 코디 추천!`;
+        iconEmoji = "❄️";
+      }
+
+      document.getElementById('result-weather-summary').innerText = tempSummaryText;
+      document.getElementById('result-weather-icon').innerText = iconEmoji;
+
+      // 배열 무작위 셔플 후 2~3개 추출
+      const shuffled = [...pool].sort(() => 0.5 - Math.random());
+      const selectedCount = Math.floor(Math.random() * 2) + 2; // 2개 또는 3개
+      const selectedItems = shuffled.slice(0, selectedCount);
+
+      const listContainer = document.getElementById('recommendation-list');
+      listContainer.innerHTML = '';
+
+      selectedItems.forEach((item, index) => {
+        // [질문 4] 학생 요청 반영: 네이버 쇼핑 연결
+        const shoppingUrl = `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(item.name)}`;
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl p-3.5 shadow-md border border-sky-100 flex flex-col justify-between space-y-2 hover:border-sky-300 transition";
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center text-lg font-bold shadow-inner">
+                <i class="fa-solid ${item.icon}"></i>
+              </div>
+              <div class="text-left">
+                <span class="text-[9px] font-bold text-sky-600 bg-sky-50 px-1.5 py-0.5 rounded">추천 코디 #${index + 1}</span>
+                <h4 class="text-xs font-bold text-slate-800 mt-0.5">${item.name}</h4>
+              </div>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg text-left leading-tight">
+            💡 <strong>추천 이유:</strong> ${item.reason}
+          </p>
+          <a href="${shoppingUrl}" target="_blank" rel="noopener noreferrer" 
+             class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1.5 px-3 rounded-lg text-[11px] flex items-center justify-center space-x-1 shadow-sm transition">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span>네이버 쇼핑에서 이 옷 검색하기</span>
+          </a>
+        `;
+
+        listContainer.appendChild(card);
+      });
+    }
+
+    // 모달 제어
+    function showMenuModal() {
+      document.getElementById('menu-modal').classList.remove('hidden');
+    }
+    function closeMenuModal() {
+      document.getElementById('menu-modal').classList.add('hidden');
+    }
+
+    // 앱 시작 시 날씨 자동 조회 실행
+    window.onload = function() {
+      fetchWeatherData();
+    };
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 이채연" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 이채연</div>
+</body>
+</html>
