@@ -1,37 +1,725 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>기분 · 준비 중</title>
-<style>
-  :root { --bg:#f6f4ef; --card:#ffffff; --ink:#1f2328; --muted:#6b6f76; --line:#e3dfd6; --accent:#e8612c; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#17181b; --card:#212327; --ink:#eceae6; --muted:#a3a39f; --line:#33363b; --accent:#ff8a57; }
-  }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); word-break:keep-all;
-         font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif; }
-  main { max-width:640px; margin:0 auto; padding:28px 16px 48px; }
-  .tag { display:inline-block; font-size:13px; font-weight:700; color:#fff; background:var(--accent);
-         padding:5px 12px; border-radius:999px; }
-  h1 { font-size:30px; margin:14px 0 6px; letter-spacing:-0.5px; }
-  p.lead { margin:0 0 22px; color:var(--muted); font-size:15px; line-height:1.55; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>기분 - 내 손안의 감정 쉼터</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 파스텔톤 부드러운 감성을 위한 커스텀 스타일 */
+    @import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f0f9ff;
+    }
+    
+    .font-gaegu {
+      font-family: 'Gaegu', cursive;
+    }
 
-  .box { margin-top:18px; padding:22px 18px; background:var(--card); border:1px solid var(--line); border-radius:16px; }
-  .box b { font-size:20px; }
-  .box p { margin:8px 0 0; color:var(--muted); line-height:1.6; }
-  a.back { display:inline-block; margin-top:18px; color:var(--accent); font-weight:700; text-decoration:none; }
-</style>
+    /* 네온이나 거친 느낌 대신 몽글몽글한 그림자 */
+    .soft-shadow {
+      box-shadow: 0 10px 25px -5px rgba(186, 230, 253, 0.5), 0 8px 10px -6px rgba(186, 230, 253, 0.5);
+    }
+    
+    /* 스크롤바 숨기기 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* 말풍선 꼬리 만들기 */
+    .bubble-left::after {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 12px;
+      border-width: 8px 8px 8px 0;
+      border-color: transparent #ffffff transparent transparent;
+      display: block;
+      width: 0;
+    }
+    
+    .bubble-right::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 12px;
+      border-width: 8px 0 8px 8px;
+      border-color: transparent transparent transparent #bae6fd;
+      display: block;
+      width: 0;
+    }
+
+    /* 구름 둥실둥실 애니메이션 */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .floating-cloud {
+      animation: float 3s ease-in-out infinite;
+    }
+  </style>
 </head>
-<body>
-<main>
-  <span class="tag">6학년 미술 · 애플리케이션 제작</span>
-  <h1>기분</h1>
-  <p class="lead">개발자 · 박지수</p>
-  <div class="box"><b>앱을 손보는 중이에요</b><p>곧 이 QR코드로 바로 열 수 있어요. 조금만 기다려 주세요!</p></div>
-  <a class="back" href="./">‹ 다른 앱 구경하기</a>
-</main>
+<body class="flex items-center justify-center min-h-screen p-0 md:p-6 select-none">
+
+  <!-- 스마트폰 기기 프레임 외관 -->
+  <div class="relative w-full max-w-[412px] h-[844px] bg-white rounded-[48px] shadow-2xl border-[10px] border-slate-800 flex flex-col overflow-hidden">
+    
+    <!-- 스마트폰 상단 스피커 & 카메라 아일랜드 -->
+    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-7 bg-slate-800 rounded-b-2xl z-50 flex items-center justify-center">
+      <div class="w-12 h-1.5 bg-slate-700 rounded-full mb-1"></div>
+      <div class="w-3 h-3 bg-slate-900 rounded-full ml-3 mb-1"></div>
+    </div>
+
+    <!-- 스마트폰 상태 표시줄 (시간, 배터리, 날씨 등) -->
+    <div class="bg-sky-100/70 pt-8 pb-2 px-6 flex justify-between items-center text-xs text-slate-600 font-medium z-40">
+      <div id="status-time">12:00</div>
+      <!-- 실시간 날씨 정보 연동 영역 -->
+      <div id="status-weather" class="flex items-center gap-1.5 bg-white/60 px-2 py-0.5 rounded-full text-[11px] font-semibold text-sky-700">
+        <i class="fa-solid var(--weather-icon, fa-spinner) animate-spin"></i> 위치 확인 중...
+      </div>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 (화면 전환용 컨테이너) -->
+    <div id="screen-container" class="flex-1 overflow-y-auto no-scrollbar bg-gradient-to-b from-sky-50 to-white relative pb-16">
+      
+      <!-- 1. 시작 화면 -->
+      <div id="screen-start" class="h-full flex flex-col justify-between p-6">
+        <div class="text-center pt-8">
+          <span class="bg-sky-200/60 text-sky-800 text-xs font-bold px-3 py-1 rounded-full">상처받은 마음에 주는 쉼표</span>
+          <h1 class="text-4xl font-gaegu font-bold text-sky-600 mt-2 tracking-wide">기분</h1>
+          <p class="text-sm text-slate-500 mt-1">오늘 너의 마음을 포근하게 안아줄게</p>
+        </div>
+
+        <!-- 중앙 버튼 구역 & 둥실둥실 구름 캐릭터 -->
+        <div class="flex flex-col items-center justify-center my-auto relative">
+          
+          <!-- 스케치를 반영한: 시작 버튼을 위에서 "잡고 있는" 귀여운 아기 구름 캐릭터 -->
+          <div class="floating-cloud mb-[-12px] z-20 flex flex-col items-center">
+            <!-- 날씨/기분에 맞춰 웃는 구름 SVG -->
+            <svg class="w-28 h-20 filter drop-shadow-md" viewBox="0 0 100 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 40c0-5.5 4.5-10 10-10 1.2 0 2.4.2 3.5.6C36.4 22.8 45.1 18 55 18c12.2 0 22.2 8.8 24 20.3 4.3.8 7.5 4.5 7.5 9.1 0 5-4 9-9 9H25c-5 0-9-4-9-9 0-.4 0-.9.1-1.3C18.3 44.2 20 42.3 20 40z" fill="#E0F2FE" />
+              <path d="M25 40c0-5.5 4.5-10 10-10 1.2 0 2.4.2 3.5.6C41.4 22.8 50.1 18 60 18c12.2 0 22.2 8.8 24 20.3 4.3.8 7.5 4.5 7.5 9.1 0 5-4 9-9 9H30c-5 0-9-4-9-9 0-.4 0-.9.1-1.3C23.3 44.2 25 42.3 25 40z" fill="#f8fafc" />
+              <!-- 눈과 붉어진 볼, 그리고 버튼을 잡으려는 앙증맞은 손 -->
+              <circle cx="43" cy="35" r="2.5" fill="#475569" />
+              <circle cx="61" cy="35" r="2.5" fill="#475569" />
+              <ellipse cx="38" cy="38" rx="4" ry="2" fill="#FDA4AF" />
+              <ellipse cx="66" cy="38" rx="4" ry="2" fill="#FDA4AF" />
+              <path d="M49 39c1 1.5 3 1.5 4 0" stroke="#475569" stroke-width="2" stroke-linecap="round" fill="none" />
+              <!-- 구름의 손이 버튼 쪽으로 뻗어있는 느낌 -->
+              <path d="M 33 46 Q 35 52 38 48" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round" fill="none" />
+              <path d="M 71 46 Q 69 52 66 48" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round" fill="none" />
+            </svg>
+            <span class="text-[11px] bg-white text-sky-500 border border-sky-100 px-2 py-0.5 rounded-md font-semibold mb-1 shadow-sm">토닥토닥 구름이</span>
+          </div>
+
+          <!-- 오늘 기분 어때 버튼 (동글동글 길쭉한 파스텔 하늘색 버튼) -->
+          <button onclick="startDialogue()" class="w-72 py-5 bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold rounded-full transition-all duration-300 transform hover:scale-105 soft-shadow text-center relative z-10 flex flex-col items-center justify-center">
+            <span class="text-lg">오늘 기분 어때?</span>
+            <span class="text-xs font-normal opacity-85 mt-0.5">시작하려면 버튼을 누르시오. ☁️</span>
+          </button>
+        </div>
+
+        <!-- 하단: 기분에 따라 장소 추천 버튼 -->
+        <div class="flex flex-col items-center gap-3 mb-4">
+          <p class="text-xs text-slate-400">바로 장소를 찾고 싶다면?</p>
+          <button onclick="openDirectSearch()" class="w-64 py-3.5 bg-white border-2 border-sky-200 hover:border-sky-300 text-sky-600 font-semibold rounded-full text-sm transition-all duration-300 hover:bg-sky-50 shadow-sm flex items-center justify-center gap-2">
+            <i class="fa-solid fa-map-location-dot"></i> 기분에 따라 장소 추천 받기
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 대화 나누기 화면 (오늘 기분 어때? 대화창) -->
+      <div id="screen-dialogue" class="hidden h-full flex flex-col justify-between p-4 bg-sky-50/50">
+        <!-- 대화 상대방 정보 (구름이) -->
+        <div class="flex items-center justify-between border-b border-sky-100 pb-3 mb-2">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+              ☁️
+            </div>
+            <div>
+              <div class="font-bold text-sm text-slate-700">다정한 구름이</div>
+              <div class="text-[10px] text-green-500"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> 내 마음에 공감하는 중</div>
+            </div>
+          </div>
+          <!-- 나가는 버튼 (스케치 반영) -->
+          <button onclick="goHome()" class="w-8 h-8 bg-white/80 hover:bg-white text-slate-500 rounded-full flex items-center justify-center shadow-sm transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- 대화 메세지 리스트 -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 px-1 py-2 no-scrollbar">
+          <!-- 대화 메시지가 자바스크립트로 동적 렌더링 됩니다. -->
+        </div>
+
+        <!-- 대화 입력창 영역 (스케치 반영: 보내기 버튼이 우측 하단에 있는 구조) -->
+        <div class="border-t border-sky-100 pt-3 bg-white/80 p-2 rounded-2xl shadow-sm mt-2">
+          <!-- 기분 선택 칩스 (아이들이 빠르게 기분을 누를 수 있게 도와줌) -->
+          <div class="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar" id="mood-quick-chips">
+            <button onclick="sendQuickMood('속상해')" class="flex-shrink-0 bg-white border border-sky-200 text-slate-600 hover:bg-sky-100 text-xs px-2.5 py-1 rounded-full">😢 속상해</button>
+            <button onclick="sendQuickMood('화가 나')" class="flex-shrink-0 bg-white border border-sky-200 text-slate-600 hover:bg-sky-100 text-xs px-2.5 py-1 rounded-full">😡 화가 나</button>
+            <button onclick="sendQuickMood('스트레스 받아')" class="flex-shrink-0 bg-white border border-sky-200 text-slate-600 hover:bg-sky-100 text-xs px-2.5 py-1 rounded-full">🤯 스트레스</button>
+            <button onclick="sendQuickMood('심심해')" class="flex-shrink-0 bg-white border border-sky-200 text-slate-600 hover:bg-sky-100 text-xs px-2.5 py-1 rounded-full">🥱 심심해</button>
+            <button onclick="sendQuickMood('행복해!')" class="flex-shrink-0 bg-white border border-sky-200 text-slate-600 hover:bg-sky-100 text-xs px-2.5 py-1 rounded-full">🥰 행복해!</button>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <input type="text" id="chat-input" placeholder="여기에 기분을 편하게 입력해봐..." class="flex-1 bg-sky-50/50 border border-sky-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-sky-400">
+            <button onclick="sendChatMessage()" class="w-10 h-10 bg-sky-400 hover:bg-sky-500 text-white rounded-full flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-paper-plane text-sm"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 바로 장소 추천을 위한 기분 직접 입력 화면 -->
+      <div id="screen-direct-search" class="hidden h-full flex flex-col justify-between p-6">
+        <div class="flex justify-between items-center mb-6">
+          <button onclick="goHome()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-chevron-left text-lg"></i> 뒤로가기</button>
+          <span class="font-bold text-slate-700">맞춤 장소 추천</span>
+          <div class="w-6"></div> <!-- 여백 맞추기 -->
+        </div>
+
+        <div class="my-auto flex flex-col items-center">
+          <div class="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center text-4xl mb-4 shadow-inner">
+            🔍
+          </div>
+          <h2 class="text-xl font-bold text-slate-700 mb-2 text-center">지금 마음이 어떤 상태인가요?</h2>
+          <p class="text-xs text-slate-400 text-center mb-6">기분을 적어주시면 편안해질 수 있는 최고의 장소를 내 주변에서 찾아드릴게요!</p>
+          
+          <!-- 기분 입력 공간 -->
+          <div class="w-full max-w-sm space-y-3">
+            <div class="relative">
+              <input type="text" id="direct-mood-input" placeholder="예: 속상함, 지루함, 신남, 우울함..." class="w-full py-4 px-5 pr-12 border-2 border-sky-200 focus:border-sky-400 rounded-full focus:outline-none shadow-sm text-sm">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sky-300 text-lg">✏️</span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 pt-2">
+              <button onclick="selectDirectMood('슬픔')" class="py-2.5 bg-sky-50 hover:bg-sky-100 rounded-2xl text-xs text-sky-700 font-semibold border border-sky-100">😢 슬퍼요</button>
+              <button onclick="selectDirectMood('스트레스')" class="py-2.5 bg-sky-50 hover:bg-sky-100 rounded-2xl text-xs text-sky-700 font-semibold border border-sky-100">🤯 스트레스</button>
+              <button onclick="selectDirectMood('심심함')" class="py-2.5 bg-sky-50 hover:bg-sky-100 rounded-2xl text-xs text-sky-700 font-semibold border border-sky-100">🥱 심심해요</button>
+              <button onclick="selectDirectMood('화남')" class="py-2.5 bg-sky-50 hover:bg-sky-100 rounded-2xl text-xs text-sky-700 font-semibold border border-sky-100">😡 짜증나요</button>
+              <button onclick="selectDirectMood('기쁨')" class="py-2.5 bg-sky-50 hover:bg-sky-100 rounded-2xl text-xs text-sky-700 font-semibold border border-sky-100">🥳 기분좋아요</button>
+              <button onclick="selectDirectMood('걱정')" class="py-2.5 bg-sky-50 hover:bg-sky-100 rounded-2xl text-xs text-sky-700 font-semibold border border-sky-100">😰 걱정돼요</button>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="recommendFromDirectInput()" class="w-full py-4 bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold rounded-full transition-all duration-300 soft-shadow text-center">
+          기분에 딱 맞는 장소 보러가기 ➔
+        </button>
+      </div>
+
+      <!-- 4. 데이터 분석 로딩 화면 -->
+      <div id="screen-loading" class="hidden h-full flex flex-col items-center justify-center p-6 text-center">
+        <div class="relative w-32 h-32 flex items-center justify-center mb-6">
+          <!-- 배경 원 회전 효과 -->
+          <div class="absolute inset-0 border-4 border-sky-100 border-t-sky-400 rounded-full animate-spin"></div>
+          <!-- 안쪽 구름 아이콘 -->
+          <span class="text-4xl animate-bounce">☁️</span>
+        </div>
+        <h3 id="loading-title" class="text-lg font-bold text-slate-700">기분 온도를 측정하는 중...</h3>
+        <p id="loading-desc" class="text-xs text-slate-400 mt-2">사용자 위치 근처의 힐링 장소를 큐레이팅하고 있어요.</p>
+        
+        <div class="w-48 bg-slate-100 h-2 rounded-full mt-6 overflow-hidden">
+          <div id="loading-bar" class="bg-sky-400 h-full w-0 transition-all duration-300"></div>
+        </div>
+      </div>
+
+      <!-- 5. 최종 결과 추천 화면 -->
+      <div id="screen-result" class="hidden h-full flex flex-col justify-between p-5">
+        <div class="flex justify-between items-center mb-3">
+          <button onclick="goHome()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-home"></i> 처음으로</button>
+          <span class="font-bold text-slate-700 text-sm">토닥토닥 장소 처방전</span>
+          <div class="w-6"></div>
+        </div>
+
+        <div class="bg-sky-100/50 rounded-2xl p-4 mb-4 border border-sky-100">
+          <div class="flex items-center gap-2 mb-2">
+            <span id="result-badge-emoji" class="text-2xl">✨</span>
+            <div>
+              <div class="text-xs text-slate-400">분석된 당신의 기분</div>
+              <div id="result-mood-text" class="text-sm font-bold text-sky-800">슬프고 위로가 필요한 상태</div>
+            </div>
+          </div>
+          <p id="result-congrats" class="text-xs text-slate-600 leading-relaxed">
+            마음이 촉촉하게 젖은 날이군요. 이런 날에는 가만히 앉아 조용한 소리에 집중하면 마음이 한결 가벼워질 거예요. 네 주변에서 가장 알맞은 안식처들을 찾아냈어요!
+          </p>
+        </div>
+
+        <!-- 추천 결과 카드 목록 (랜덤하게 2~3개 추천 노출) -->
+        <div class="flex-1 overflow-y-auto space-y-3 no-scrollbar max-h-[350px] mb-3" id="recommendation-cards">
+          <!-- 카드 리스트 동적 삽입 -->
+        </div>
+
+        <!-- 하단 문구 및 네비게이션 가이드 -->
+        <div class="text-center">
+          <p class="text-[11px] text-slate-400 mb-3"><i class="fa-solid fa-map-location-dot"></i> 카드를 누르면 네이버 지도에서 장소를 찾아볼 수 있어요</p>
+          <div class="flex gap-2">
+            <button onclick="startDialogue()" class="flex-1 py-3 bg-white border-2 border-sky-200 hover:border-sky-300 text-sky-600 font-semibold rounded-full text-xs transition-all duration-300">☁️ 구름이랑 이야기하기</button>
+            <button onclick="openDirectSearch()" class="flex-1 py-3 bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold rounded-full text-xs transition-all duration-300 soft-shadow">🔄 다른 기분 고르기</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 하단 네비게이션 바 (메뉴 · 홈 · 뒤로가기) -->
+    <div class="absolute bottom-0 inset-x-0 h-14 bg-white/90 backdrop-blur-sm border-t border-sky-100 flex justify-around items-center text-slate-500 z-40">
+      <button onclick="openMenu()" aria-label="메뉴" class="w-12 h-10 rounded-full hover:bg-sky-50 hover:text-sky-600 transition-colors"><i class="fa-solid fa-bars"></i></button>
+      <button onclick="goHome()" aria-label="홈" class="w-12 h-10 rounded-full hover:bg-sky-50 hover:text-sky-600 transition-colors"><i class="fa-solid fa-house"></i></button>
+      <button onclick="goBack()" aria-label="뒤로가기" class="w-12 h-10 rounded-full hover:bg-sky-50 hover:text-sky-600 transition-colors"><i class="fa-solid fa-chevron-left"></i></button>
+    </div>
+
+    <!-- 메뉴 (앱 안내) 창 -->
+    <div id="menu-modal" class="hidden absolute inset-0 bg-slate-900/40 z-50 flex items-end" onclick="closeMenu()">
+      <div class="w-full bg-white rounded-t-3xl p-6 pb-8" onclick="event.stopPropagation()">
+        <div class="w-10 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+        <h3 class="font-gaegu text-2xl font-bold text-sky-600 mb-3">☁️ 기분 앱 안내</h3>
+        <ul class="space-y-2 text-sm text-slate-600 leading-relaxed">
+          <li>💬 <b>구름이와 대화하기</b> · 오늘 기분을 말하면 구름이가 마음을 토닥여 줘요.</li>
+          <li>📍 <b>기분 맞춤 장소 추천</b> · 기분과 날씨에 맞는 내 주변 장소를 네이버 지도로 찾아 줘요.</li>
+          <li>🤝 속상한 마음이 오래가면 꼭 믿을 수 있는 어른에게 이야기해요. 청소년상담 1388에 전화해도 좋아요.</li>
+        </ul>
+        <button onclick="closeMenu()" class="w-full mt-5 py-3 bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold rounded-full">닫기</button>
+      </div>
+    </div>
+
+    <!-- 알림 메시지 -->
+    <div id="toast" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-800/90 text-white text-xs px-4 py-2 rounded-full shadow-lg whitespace-nowrap"></div>
+
+  </div>
+
+  <script>
+    // ==================================================
+    // ☁️ 기분 - 내 손안의 감정 쉼터 : 동작 코드
+    // ==================================================
+
+    // 1. 기분별 데이터 (구름이의 대답 + 추천 장소)
+    const MOODS = {
+      '슬픔': {
+        emoji: '😢', title: '슬프고 위로가 필요한 상태',
+        keywords: ['슬퍼', '슬프', '슬픔', '속상', '우울', '눈물', '울고', '울었', '울어', '서운', '외로', '안좋', '별로', '나빠'],
+        reply: '많이 속상했구나... 토닥토닥 🫂 슬플 땐 참지 않아도 괜찮아. 구름이가 다 들어 줄게.',
+        comfort: '마음이 촉촉하게 젖은 날이군요. 이런 날에는 가만히 앉아 조용한 소리에 집중하면 마음이 한결 가벼워질 거예요.',
+        places: [
+          { icon: '📚', name: '조용한 동네 도서관', reason: '포근한 의자에 앉아 좋아하는 책을 읽다 보면 마음이 차분해져.', query: '도서관', indoor: true },
+          { icon: '🌳', name: '햇살 드는 공원 벤치', reason: '따뜻한 햇볕 아래 앉아 바람 소리를 들으면 마음이 말랑해질 거야.', query: '공원', indoor: false },
+          { icon: '☕', name: '따뜻한 북카페', reason: '달콤한 코코아 한 잔과 그림책이면 속상한 마음이 사르르 녹아.', query: '북카페', indoor: true },
+          { icon: '🌿', name: '식물원 온실', reason: '초록 식물 사이를 천천히 걸으면 숨이 편안해져.', query: '식물원', indoor: true },
+          { icon: '🌊', name: '강변 산책로', reason: '흐르는 물을 바라보며 걸으면 슬픈 생각도 같이 흘러가.', query: '강변 산책로', indoor: false },
+          { icon: '🖼️', name: '작은 미술관', reason: '예쁜 그림을 천천히 보다 보면 마음에 위로가 돼.', query: '미술관', indoor: true }
+        ]
+      },
+      '화남': {
+        emoji: '😡', title: '화가 나서 열이 오른 상태',
+        keywords: ['화나', '화가', '화났', '화남', '짜증', '열받', '빡쳐', '분해', '억울', '싸웠'],
+        reply: '으아, 정말 화가 났구나! 😤 화날 땐 숨을 크게 세 번! 후— 하— 그래도 안 풀리면 몸을 움직여 보는 것도 좋아.',
+        comfort: '마음속에 작은 화산이 부글부글 끓고 있군요. 몸을 신나게 움직이거나 시원한 걸 먹으면 열이 금방 식을 거예요.',
+        places: [
+          { icon: '🎤', name: '코인 노래방', reason: '신나는 노래를 크게 부르면 화가 쑥 빠져나가!', query: '코인노래방', indoor: true },
+          { icon: '🤸', name: '트램폴린 파크', reason: '방방 뛰다 보면 화난 마음도 같이 튕겨 나가!', query: '트램폴린파크', indoor: true },
+          { icon: '🏃', name: '넓은 체육공원', reason: '있는 힘껏 달리면 답답한 마음이 시원하게 풀려.', query: '체육공원', indoor: false },
+          { icon: '🍦', name: '아이스크림 가게', reason: '시원한 아이스크림 한 입이면 머리끝까지 오른 열이 식어.', query: '아이스크림', indoor: true },
+          { icon: '🎳', name: '볼링장', reason: '핀을 쾅! 쓰러뜨리면 속이 다 시원해질 거야.', query: '볼링장', indoor: true },
+          { icon: '🚲', name: '자전거 길', reason: '바람을 가르며 페달을 밟으면 화가 저 멀리 날아가.', query: '자전거도로', indoor: false }
+        ]
+      },
+      '걱정': {
+        emoji: '😰', title: '걱정이 많아 마음이 불안한 상태',
+        keywords: ['걱정', '불안', '무서', '떨려', '긴장', '시험', '두려'],
+        reply: '걱정이 많았구나 😰 걱정은 말로 꺼내면 조금 작아진대. 천천히 숨 쉬고, 마음을 편하게 해 볼까?',
+        comfort: '마음이 콩닥콩닥 불안한 날이군요. 넓고 조용한 곳에서 천천히 걸으면 걱정이 한결 작아질 거예요.',
+        places: [
+          { icon: '📚', name: '조용한 도서관', reason: '차분한 공간에서 천천히 숨 쉬면 걱정이 작아져.', query: '도서관', indoor: true },
+          { icon: '🦆', name: '호수 공원', reason: '잔잔한 물결을 보고 있으면 마음도 잔잔해져.', query: '호수공원', indoor: false },
+          { icon: '🖼️', name: '미술관', reason: '예쁜 그림을 보며 걱정을 잠깐 내려놓아 봐.', query: '미술관', indoor: true },
+          { icon: '🌲', name: '수목원', reason: '키 큰 나무들이 괜찮다고 안아 주는 것 같을 거야.', query: '수목원', indoor: false },
+          { icon: '🍵', name: '아늑한 카페', reason: '따뜻한 음료를 마시며 걱정을 종이에 적어 보자.', query: '카페', indoor: true },
+          { icon: '🌙', name: '강변 산책로', reason: '천천히 걸으며 숨을 크게 쉬면 마음이 편해져.', query: '강변 산책로', indoor: false }
+        ]
+      },
+      '스트레스': {
+        emoji: '🤯', title: '지치고 쉼이 필요한 상태',
+        keywords: ['스트레스', '힘들', '지쳐', '지친', '피곤', '답답', '숙제', '귀찮', '졸려'],
+        reply: '요즘 많이 지쳤구나 😮‍💨 열심히 한 너, 정말 대단해. 오늘은 잠깐 쉬어 가도 괜찮아.',
+        comfort: '머릿속이 꽉 막힌 것처럼 답답한 날이군요. 잠깐 숙제와 걱정을 내려놓고 좋아하는 걸 하며 쉬어 가요.',
+        places: [
+          { icon: '📖', name: '만화 카페', reason: '푹신한 자리에서 웃긴 만화를 보면 스트레스가 사라져.', query: '만화카페', indoor: true },
+          { icon: '🎲', name: '보드게임 카페', reason: '친구랑 깔깔 웃으며 게임하면 머리가 개운해져.', query: '보드게임카페', indoor: true },
+          { icon: '🌱', name: '공원 잔디밭', reason: '잔디밭에 앉아 하늘을 보면 고민이 작아 보여.', query: '공원', indoor: false },
+          { icon: '🏊', name: '실내 수영장', reason: '물속에서 첨벙첨벙 놀면 몸도 마음도 가벼워져.', query: '실내수영장', indoor: true },
+          { icon: '⛰️', name: '동네 뒷산 산책길', reason: '나무 냄새를 맡으며 걸으면 머리가 맑아져.', query: '산책로', indoor: false },
+          { icon: '🎨', name: '그림 그리기 공방', reason: '색칠에 집중하다 보면 복잡한 생각이 사라져.', query: '미술 공방', indoor: true }
+        ]
+      },
+      '심심함': {
+        emoji: '🥱', title: '심심하고 새로운 게 필요한 상태',
+        keywords: ['심심', '지루', '할게없', '재미없'],
+        reply: '심심할 땐 새로운 걸 해 볼 기회야! 🤩 구름이가 재미있는 곳을 찾아볼게.',
+        comfort: '하루가 조금 느리게 흘러가는 날이군요. 새로운 걸 구경하면 시간이 순식간에 지나갈 거예요.',
+        places: [
+          { icon: '🔭', name: '과학관', reason: '신기한 실험과 체험이 가득해서 심심할 틈이 없어!', query: '과학관', indoor: true },
+          { icon: '🏛️', name: '박물관', reason: '옛날 물건들을 구경하며 시간 여행을 떠나 봐.', query: '박물관', indoor: true },
+          { icon: '🦁', name: '동물원', reason: '귀여운 동물 친구들을 만나면 하루가 금방 가.', query: '동물원', indoor: false },
+          { icon: '🎢', name: '놀이공원', reason: '신나는 놀이기구로 심심함을 날려 버리자!', query: '놀이공원', indoor: false },
+          { icon: '🧩', name: '방탈출 카페', reason: '친구랑 힘을 모아 문제를 풀면 엄청 재밌어.', query: '방탈출카페', indoor: true },
+          { icon: '🛍️', name: '전통시장 구경', reason: '맛있는 간식과 신기한 물건 구경이 끝도 없어.', query: '전통시장', indoor: false }
+        ]
+      },
+      '기쁨': {
+        emoji: '🥳', title: '행복이 가득한 상태',
+        keywords: ['행복', '기뻐', '기쁘', '기쁨', '신나', '신남', '좋아', '최고', '설레', '즐거'],
+        reply: '와, 기분이 좋다니 구름이도 덩달아 신나! 🥰 이 좋은 기분을 더 크게 만들어 줄 곳을 알려 줄게.',
+        comfort: '햇살처럼 반짝이는 기분이네요! 이 좋은 기분을 친구나 가족과 함께 나누면 두 배가 될 거예요.',
+        places: [
+          { icon: '🎡', name: '놀이공원', reason: '좋은 기분을 더 크게! 신나는 하루를 보내자.', query: '놀이공원', indoor: false },
+          { icon: '🍰', name: '디저트 카페', reason: '달콤한 케이크로 행복을 두 배로 만들어 봐.', query: '디저트카페', indoor: true },
+          { icon: '🧺', name: '공원 피크닉', reason: '가족이랑 돗자리 펴고 간식 먹으면 최고의 하루!', query: '공원', indoor: false },
+          { icon: '📸', name: '셀프 사진관', reason: '행복한 얼굴을 사진으로 남겨 두자!', query: '셀프사진관', indoor: true },
+          { icon: '🎬', name: '영화관', reason: '재밌는 영화를 보면 좋은 기분이 쭉 이어져.', query: '영화관', indoor: true },
+          { icon: '🌇', name: '전망대', reason: '높은 곳에서 동네를 내려다보면 기분이 더 날아갈 거야.', query: '전망대', indoor: false }
+        ]
+      },
+      '보통': {
+        emoji: '☁️', title: '잔잔하고 평온한 상태',
+        keywords: [],
+        reply: '그렇구나! 마음을 들려줘서 고마워 ☁️ 조금 더 자세히 말해 줘도 좋고, 아래 버튼으로 기분을 골라도 좋아.',
+        comfort: '잔잔한 호수처럼 평온한 날이네요. 가볍게 산책하며 오늘의 기분을 천천히 느껴 봐요.',
+        places: [
+          { icon: '🌳', name: '동네 공원', reason: '가볍게 산책하며 오늘 하루를 천천히 느껴 봐.', query: '공원', indoor: false },
+          { icon: '📚', name: '도서관', reason: '새로운 책 한 권이 기분을 반짝이게 해 줄 거야.', query: '도서관', indoor: true },
+          { icon: '📕', name: '서점 구경', reason: '재밌어 보이는 책을 구경하다 보면 시간 가는 줄 몰라.', query: '서점', indoor: true },
+          { icon: '🛍️', name: '전통시장', reason: '맛있는 냄새를 따라 구경하면 기분이 몽글몽글해져.', query: '전통시장', indoor: false },
+          { icon: '🥐', name: '동네 빵집', reason: '갓 구운 빵 냄새는 언제나 기분을 좋게 해 줘.', query: '빵집', indoor: true },
+          { icon: '🚶', name: '산책로', reason: '좋아하는 노래를 들으며 천천히 걸어 봐.', query: '산책로', indoor: false }
+        ]
+      }
+    };
+
+    // 마음이 아주 힘들다는 말이 나오면 장소 대신 도움받을 곳을 먼저 알려 줘요
+    const CRISIS_WORDS = ['죽고싶', '죽을래', '죽어버리', '자살', '사라지고싶', '없어지고싶', '살기싫', '자해'];
+
+    function detectMood(text) {
+      const t = (text || '').replace(/\s/g, '');
+      if (CRISIS_WORDS.some(w => t.includes(w))) return '위기';
+      for (const [mood, data] of Object.entries(MOODS)) {
+        if (data.keywords.some(k => t.includes(k))) return mood;
+      }
+      return '보통';
+    }
+
+    // 2. 시계와 날씨 (위치를 허용하면 우리 동네 날씨를 보여 줘요)
+    const weather = { ok: false, place: '', temp: null, code: null };
+
+    function weatherEmoji(code) {
+      if (code === 0) return '☀️';
+      if (code <= 3) return '⛅';
+      if (code === 45 || code === 48) return '🌫️';
+      if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return '🌧️';
+      if ((code >= 71 && code <= 77) || code === 85 || code === 86) return '❄️';
+      if (code >= 95) return '⛈️';
+      return '🌤️';
+    }
+    function isRainy() { return weather.ok && weather.code >= 51; }
+    function placeName() { return weather.place || '우리 동네'; }
+    // 받침에 따라 '은/는'을 골라 붙여요 (동천동은, 우리 동네는)
+    function withEunNeun(word) {
+      const c = word.charCodeAt(word.length - 1);
+      if (c < 0xAC00 || c > 0xD7A3) return word + '은(는)';
+      return word + (((c - 0xAC00) % 28) ? '은' : '는');
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('status-time').textContent =
+        `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function loadWeather() {
+      const el = document.getElementById('status-weather');
+      const fail = (msg) => { el.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${msg}`; };
+      if (!navigator.geolocation) { fail('날씨 정보 없음'); return; }
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        try {
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+          const data = await res.json();
+          weather.temp = Math.round(data.current_weather.temperature);
+          weather.code = data.current_weather.weathercode;
+          weather.ok = true;
+        } catch (e) { /* 날씨를 못 가져와도 앱은 그대로 작동해요 */ }
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`);
+          const geo = await res.json();
+          weather.place = geo.locality || geo.city || '';
+        } catch (e) { /* 동네 이름을 못 찾으면 '우리 동네'로 보여 줘요 */ }
+        if (weather.ok) el.textContent = `${weatherEmoji(weather.code)} ${placeName()} ${weather.temp}°C`;
+        else fail('날씨 정보 없음');
+      }, () => fail('위치 권한 없음'), { timeout: 8000, maximumAge: 600000 });
+    }
+
+    // 3. 화면 전환 (뒤로가기를 위해 지나온 화면을 기억해요)
+    const SCREENS = ['screen-start', 'screen-dialogue', 'screen-direct-search', 'screen-loading', 'screen-result'];
+    let currentScreen = 'screen-start';
+    let screenHistory = [];
+    let loadingTimer = null;
+
+    function showScreen(id, remember = true) {
+      if (remember && id !== currentScreen && currentScreen !== 'screen-loading') screenHistory.push(currentScreen);
+      SCREENS.forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
+      currentScreen = id;
+      document.getElementById('screen-container').scrollTop = 0;
+    }
+
+    function goHome() {
+      clearInterval(loadingTimer);
+      chatToken++;
+      screenHistory = [];
+      showScreen('screen-start', false);
+    }
+
+    function goBack() {
+      if (currentScreen === 'screen-loading') return;
+      if (screenHistory.length === 0) { showToast('여기가 첫 화면이에요! ☁️'); return; }
+      chatToken++;
+      showScreen(screenHistory.pop(), false);
+    }
+
+    function openMenu() { document.getElementById('menu-modal').classList.remove('hidden'); }
+    function closeMenu() { document.getElementById('menu-modal').classList.add('hidden'); }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add('hidden'), 1800);
+    }
+
+    // 4. 구름이와 대화하기
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const chatBox = () => document.getElementById('chat-messages');
+    let chatToken = 0; // 대화를 새로 시작하면 이전 대답이 끼어들지 않게 해요
+
+    function addBubble(who, text, extra) {
+      const row = document.createElement('div');
+      row.className = who === 'cloud' ? 'flex items-start gap-2' : 'flex justify-end';
+      if (who === 'cloud') {
+        const face = document.createElement('div');
+        face.className = 'w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm flex-shrink-0 text-sm';
+        face.textContent = '☁️';
+        row.appendChild(face);
+      }
+      const bubble = document.createElement('div');
+      bubble.className = who === 'cloud'
+        ? 'relative bubble-left bg-white text-slate-700 text-sm leading-relaxed px-3.5 py-2.5 rounded-2xl shadow-sm max-w-[78%] ml-1'
+        : 'relative bubble-right bg-sky-200 text-sky-900 text-sm leading-relaxed px-3.5 py-2.5 rounded-2xl shadow-sm max-w-[78%] mr-1';
+      bubble.textContent = text;
+      if (extra) bubble.appendChild(extra);
+      row.appendChild(bubble);
+      chatBox().appendChild(row);
+      chatBox().scrollTop = chatBox().scrollHeight;
+      return row;
+    }
+
+    async function cloudSay(text, extra, token) {
+      if (token !== chatToken) return false;
+      const typing = addBubble('cloud', '• • •');
+      typing.lastChild.classList.add('animate-pulse');
+      await sleep(600 + Math.min(text.length * 12, 900));
+      typing.remove();
+      if (token !== chatToken) return false;
+      addBubble('cloud', text, extra);
+      return true;
+    }
+
+    async function startDialogue() {
+      clearInterval(loadingTimer);
+      chatToken++;
+      const token = chatToken;
+      chatBox().innerHTML = '';
+      document.getElementById('chat-input').value = '';
+      showScreen('screen-dialogue');
+      if (!(await cloudSay('안녕! 나는 다정한 구름이야 ☁️', null, token))) return;
+      const weatherLine = weather.ok ? ` 지금 ${withEunNeun(placeName())} ${weatherEmoji(weather.code)} ${weather.temp}°C래.` : '';
+      await cloudSay(`오늘 기분은 어때?${weatherLine} 아래에서 골라도 되고, 편하게 글로 써 줘도 좋아.`, null, token);
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) { showToast('기분을 먼저 적어 줘! ✏️'); return; }
+      input.value = '';
+      handleUserMood(text);
+    }
+
+    function sendQuickMood(text) { handleUserMood(text); }
+
+    async function handleUserMood(text) {
+      const token = chatToken;
+      addBubble('user', text);
+      const mood = detectMood(text);
+      if (mood === '위기') { await crisisReply(token); return; }
+      const data = MOODS[mood];
+      if (!(await cloudSay(data.reply, null, token))) return;
+      const example = data.places[Math.floor(Math.random() * data.places.length)].name;
+      const btn = document.createElement('button');
+      btn.className = 'block mt-2 w-full py-2 bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold rounded-full text-xs transition-colors';
+      btn.innerHTML = '<i class="fa-solid fa-map-location-dot"></i> 내 주변 장소 추천 받기';
+      btn.onclick = () => startRecommend(mood);
+      const ask = mood === '보통'
+        ? `잔잔한 마음일 땐 '${example}' 같은 곳도 좋아. 내 주변 장소를 추천해 줄까?`
+        : `이런 기분일 땐 '${example}' 같은 곳이 도움이 될 거야. 내 주변 장소를 추천해 줄까?`;
+      await cloudSay(ask, btn, token);
+    }
+
+    async function crisisReply(token) {
+      if (!(await cloudSay('그런 마음이 들 만큼 정말 많이 힘들었구나. 말해 줘서 정말 고마워.', null, token))) return;
+      if (!(await cloudSay('이건 혼자 견디지 않아도 돼. 지금 바로 부모님이나 선생님처럼 믿을 수 있는 어른에게 꼭 이야기해 줘.', null, token))) return;
+      const box = document.createElement('div');
+      box.className = 'mt-2 flex flex-col gap-1.5';
+      box.innerHTML =
+        '<a href="tel:1388" class="block text-center py-2 bg-sky-100 hover:bg-sky-200 text-sky-700 font-bold rounded-full text-xs">📞 청소년상담 1388 전화하기</a>' +
+        '<a href="tel:109" class="block text-center py-2 bg-white border border-sky-200 text-sky-700 font-bold rounded-full text-xs">📞 자살예방상담 109 전화하기</a>';
+      await cloudSay('전화로 이야기하고 싶으면 언제든 걸 수 있어. 구름이도 네 곁에 있을게.', box, token);
+    }
+
+    // 5. 기분을 바로 적어서 장소 추천 받기
+    function clearMoodChips() {
+      document.querySelectorAll('#screen-direct-search .grid button').forEach(b => {
+        b.classList.remove('ring-2', 'ring-sky-300', 'bg-sky-100');
+      });
+    }
+
+    function openDirectSearch() {
+      document.getElementById('direct-mood-input').value = '';
+      clearMoodChips();
+      showScreen('screen-direct-search');
+    }
+
+    function selectDirectMood(mood) {
+      document.getElementById('direct-mood-input').value = mood;
+      clearMoodChips();
+      document.querySelectorAll('#screen-direct-search .grid button').forEach(b => {
+        if ((b.getAttribute('onclick') || '').includes(`'${mood}'`)) b.classList.add('ring-2', 'ring-sky-300', 'bg-sky-100');
+      });
+    }
+
+    async function recommendFromDirectInput() {
+      const text = document.getElementById('direct-mood-input').value.trim();
+      if (!text) { showToast('기분을 적거나 아래에서 골라 줘! ✏️'); return; }
+      const mood = detectMood(text);
+      if (mood === '위기') {
+        chatToken++;
+        const token = chatToken;
+        chatBox().innerHTML = '';
+        showScreen('screen-dialogue');
+        addBubble('user', text);
+        await crisisReply(token);
+        return;
+      }
+      startRecommend(mood);
+    }
+
+    // 6. 분석 화면 → 토닥토닥 장소 처방전
+    function startRecommend(mood) {
+      showScreen('screen-loading');
+      const steps = [
+        ['기분 온도를 측정하는 중...', '사용자 위치 근처의 힐링 장소를 큐레이팅하고 있어요.'],
+        ['날씨와 시간을 살펴보는 중...', weather.ok
+          ? `${placeName()}의 지금 날씨는 ${weatherEmoji(weather.code)} ${weather.temp}°C예요.`
+          : '날씨 정보 없이 기본 추천으로 준비할게요.'],
+        ['토닥토닥 처방전을 쓰는 중...', '거의 다 됐어요! ☁️']
+      ];
+      const bar = document.getElementById('loading-bar');
+      let step = 0;
+      const render = () => {
+        document.getElementById('loading-title').textContent = steps[step][0];
+        document.getElementById('loading-desc').textContent = steps[step][1];
+        bar.style.width = `${Math.round(((step + 1) / steps.length) * 100)}%`;
+      };
+      bar.style.width = '0%';
+      clearInterval(loadingTimer);
+      setTimeout(render, 50);
+      loadingTimer = setInterval(() => {
+        step++;
+        if (step < steps.length) { render(); return; }
+        clearInterval(loadingTimer);
+        showResult(mood);
+        showScreen('screen-result');
+      }, 900);
+    }
+
+    function shuffle(arr) {
+      return arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+    }
+
+    function showResult(mood) {
+      const data = MOODS[mood];
+      document.getElementById('result-badge-emoji').textContent = data.emoji;
+      document.getElementById('result-mood-text').textContent = data.title;
+      let weatherText = '';
+      if (weather.ok) {
+        weatherText = isRainy()
+          ? ` 지금 ${placeName()}에는 ${weatherEmoji(weather.code)} 비나 눈이 와서 실내 장소를 먼저 골랐어요.`
+          : ` 지금 ${withEunNeun(placeName())} ${weatherEmoji(weather.code)} ${weather.temp}°C예요.`;
+      }
+      document.getElementById('result-congrats').textContent =
+        `${data.comfort}${weatherText} 네 주변에서 가장 알맞은 안식처들을 찾아냈어요!`;
+
+      let picks = shuffle(data.places);
+      if (isRainy()) picks.sort((a, b) => Number(b.indoor) - Number(a.indoor));
+      picks = picks.slice(0, 3);
+
+      const list = document.getElementById('recommendation-cards');
+      list.innerHTML = '';
+      picks.forEach(p => {
+        const q = (weather.place ? weather.place + ' ' : '') + p.query;
+        const card = document.createElement('a');
+        card.href = `https://map.naver.com/v5/search/${encodeURIComponent(q)}`;
+        card.target = '_blank';
+        card.rel = 'noopener';
+        card.className = 'block bg-white rounded-2xl p-4 border border-sky-100 soft-shadow hover:border-sky-300 transition-all';
+        card.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-11 h-11 bg-sky-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">${p.icon}</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-sm text-slate-700">${p.name}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded-full ${p.indoor ? 'bg-sky-50 text-sky-600' : 'bg-emerald-50 text-emerald-600'}">${p.indoor ? '실내' : '야외'}</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-1 leading-relaxed">${p.reason}</p>
+              <div class="text-[11px] text-sky-500 font-semibold mt-2"><i class="fa-solid fa-map-location-dot"></i> 네이버 지도에서 찾기</div>
+            </div>
+          </div>`;
+        list.appendChild(card);
+      });
+    }
+
+    // 7. 시작!
+    document.getElementById('chat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) sendChatMessage();
+    });
+    document.getElementById('direct-mood-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) recommendFromDirectInput();
+    });
+    document.getElementById('direct-mood-input').addEventListener('input', clearMoodChips);
+    updateClock();
+    setInterval(updateClock, 10000);
+    loadWeather();
+  </script>
+<div id="expo-credit" role="note" aria-label="개발자 박지수" style="all:initial;position:fixed;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:2147483647;pointer-events:none;display:block;box-sizing:border-box;padding:4px 11px;border-radius:999px;background:rgba(17,24,39,.82);color:#fff;font:600 12px/1.35 -apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;letter-spacing:-.2px;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.25)">개발자 · 박지수</div>
 </body>
 </html>
